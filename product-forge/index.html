@@ -5,152 +5,339 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Forge – Générateur de Fiches Etsy</title>
   <style>
-    :root { --bg: #0f172a; --card: #1e293b; --accent: #6366f1; --accent2: #8b5cf6; --green: #10b981; --orange: #f59e0b; --red: #ef4444; --text: #e2e8f0; --muted: #94a3b8; --border: #334155; --claude: #d97706; }
+    /* ============================================================
+       7. DESIGN & UX — Full rebrand
+       ============================================================ */
+    :root {
+      --bg: #0a0a0f;
+      --card: #131318;
+      --card2: #1a1a22;
+      --accent: #c8a961;
+      --accent2: #b8943f;
+      --accent-glow: rgba(200,169,97,0.15);
+      --green: #4ade80;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --text: #e8e6e3;
+      --muted: #8a8a99;
+      --border: #2a2a35;
+      --border2: #3a3a48;
+      --claude: #d97706;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    ::selection { background: var(--accent); color: #000; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-    .header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--card); }
-    .header h1 { font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .header .status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-    .header .dot { width: 8px; height: 8px; border-radius: 50%; }
+    /* Header */
+    .header {
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(200,169,97,0.04) 0%, var(--bg) 100%);
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #c8a961, #e8d5a3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header .logo-area { display: flex; align-items: center; gap: 12px; }
+    .header .nav-btns { display: flex; align-items: center; gap: 10px; }
+
+    .status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
     .dot-green { background: var(--green); }
     .dot-orange { background: var(--orange); animation: blink 1s infinite; }
     .dot-red { background: var(--red); }
     @keyframes blink { 50% { opacity: 0.4; } }
 
-    .mode-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
-    .mode-badge.api { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-    .mode-badge.free { background: linear-gradient(135deg, var(--green), #059669); color: #fff; }
+    .mode-badge { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 700; letter-spacing: 0.05em; }
+    .mode-badge.api { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0a0f; }
+    .mode-badge.free { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
 
-    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 65px); }
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0a0f; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,169,97,0.25); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-green { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+    .btn-green:hover { background: rgba(74,222,128,0.25); transform: translateY(-1px); }
+    .btn-claude { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+    .btn-claude:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(217,119,6,0.3); }
+    .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+    .btn-danger { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+    /* Cards */
+    .data-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .data-card:hover { border-color: var(--border2); }
+    .data-card h3 { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+    .data-card .value { font-size: 15px; font-weight: 600; }
+    .data-card .price { color: var(--accent); font-size: 22px; font-weight: 700; }
+
+    /* Layout */
+    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 57px); }
     @media (max-width: 1024px) { .main { grid-template-columns: 1fr; } }
-
-    .panel { padding: 24px; overflow-y: auto; max-height: calc(100vh - 65px); }
+    .panel { padding: 24px; overflow-y: auto; max-height: calc(100vh - 57px); }
     .panel-left { border-right: 1px solid var(--border); }
-    .panel h2 { font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .panel h2 { font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -0.01em; }
 
-    .data-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    .data-card h3 { font-size: 14px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .data-card .value { font-size: 16px; font-weight: 600; }
-    .data-card .price { color: var(--red); font-size: 20px; font-weight: 700; }
-
-    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
-    .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; transition: border-color 0.2s; }
+    /* Images */
+    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; margin-top: 8px; }
+    .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); cursor: pointer; transition: all 0.2s; }
     .images-grid img:hover { border-color: var(--accent); }
     .images-grid img.selected { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
 
+    /* Specs */
     .specs-table { width: 100%; font-size: 13px; }
     .specs-table tr { border-bottom: 1px solid var(--border); }
     .specs-table td { padding: 8px 0; }
     .specs-table td:first-child { color: var(--muted); width: 40%; }
 
+    /* Variants */
     .variant-group { margin-bottom: 12px; }
-    .variant-group h4 { font-size: 13px; color: var(--accent); margin-bottom: 6px; }
+    .variant-group h4 { font-size: 12px; color: var(--accent); margin-bottom: 6px; font-weight: 600; }
     .variant-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .variant-tag { background: rgba(99,102,241,0.15); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 12px; }
+    .variant-tag { background: var(--accent-glow); color: var(--accent); padding: 4px 12px; border-radius: 8px; font-size: 12px; border: 1px solid rgba(200,169,97,0.2); }
 
-    .panel-right { background: rgba(15,23,42,0.5); }
-
-    .etsy-section { margin-bottom: 20px; }
-    .etsy-section label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .etsy-section textarea, .etsy-section input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; }
-    .etsy-section textarea:focus, .etsy-section input:focus { outline: none; border-color: var(--accent); }
+    /* Etsy sections */
+    .etsy-section { margin-bottom: 18px; }
+    .etsy-section label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-weight: 600; }
+    .etsy-section textarea, .etsy-section input, .etsy-section select {
+      width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .etsy-section textarea:focus, .etsy-section input:focus, .etsy-section select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,97,0.1); }
     .etsy-section textarea { min-height: 120px; }
+    .etsy-section select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a99' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 
+    /* Photo names */
     .photo-names { list-style: none; }
-    .photo-names li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-    .photo-names li img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
-    .photo-names li .name { color: var(--green); font-family: monospace; flex: 1; }
+    .photo-names li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .photo-names li img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }
+    .photo-names li .name { color: var(--accent); font-family: "SF Mono", SFMono-Regular, Menlo, monospace; flex: 1; font-size: 12px; }
 
+    /* Tags */
     .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag { background: rgba(16,185,129,0.15); color: var(--green); padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+    .tag { background: rgba(74,222,128,0.1); color: var(--green); padding: 4px 10px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(74,222,128,0.2); }
 
-    .btn { padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.3); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-green { background: var(--green); color: #fff; }
-    .btn-green:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
-    .btn-claude { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
-    .btn-claude:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(217,119,6,0.4); }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .btn-outline:hover { border-color: var(--accent); }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
-
-    /* Claude free mode card */
-    .claude-card { background: linear-gradient(135deg, rgba(217,119,6,0.1), rgba(180,83,9,0.05)); border: 1px solid rgba(217,119,6,0.3); border-radius: 16px; padding: 28px; text-align: center; }
-    .claude-card h3 { font-size: 1.05rem; margin-bottom: 6px; color: #fbbf24; }
+    /* Claude card */
+    .claude-card { background: linear-gradient(135deg, rgba(217,119,6,0.08), rgba(180,83,9,0.03)); border: 1px solid rgba(217,119,6,0.2); border-radius: 16px; padding: 28px; text-align: center; }
+    .claude-card h3 { font-size: 1rem; margin-bottom: 6px; color: #fbbf24; }
     .claude-card p { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
     .claude-steps { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
     .claude-step { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
     .claude-step .num { background: var(--claude); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
 
-    .prompt-preview { background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 12px; max-height: 250px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; color: #8b949e; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+    .prompt-preview { background: #08080d; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 12px; max-height: 250px; overflow-y: auto; font-family: "SF Mono", SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--muted); line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
 
-    /* Loading state */
-    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .loading-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 40px; text-align: center; max-width: 400px; }
-    .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    /* Loading */
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,10,15,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+    .loading-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 48px; text-align: center; max-width: 400px; }
+    .spinner { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .welcome { display: flex; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 48px; }
-    .welcome h2 { font-size: 1.5rem; margin-bottom: 12px; }
-    .welcome p { color: var(--muted); margin-bottom: 24px; max-width: 500px; }
+    /* Welcome */
+    .welcome { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 57px); text-align: center; padding: 48px 24px; }
+    .welcome h2 { font-size: 1.6rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.02em; }
+    .welcome p { color: var(--muted); margin-bottom: 20px; max-width: 480px; font-size: 14px; }
 
-    .url-input-group { display: flex; gap: 8px; max-width: 500px; margin: 0 auto; }
-    .url-input-group input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; color: var(--text); font-size: 14px; }
-    .url-input-group input:focus { outline: none; border-color: var(--accent); }
+    /* URL input */
+    .url-input-group { display: flex; gap: 8px; max-width: 520px; margin: 0 auto; }
+    .url-input-group input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 14px; font-family: inherit; }
+    .url-input-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,97,0.1); }
 
-    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 900; display: none; align-items: center; justify-content: center; }
+    /* Modal */
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 900; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     .modal-backdrop.active { display: flex; }
-    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 520px; width: 90%; }
-    .modal h2 { margin-bottom: 20px; }
-    .modal label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; margin-top: 16px; }
-    .modal input, .modal select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; }
+    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 540px; width: 92%; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { margin-bottom: 20px; font-size: 1.1rem; }
+    .modal label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; margin-top: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal input, .modal select { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: inherit; }
     .modal input:focus, .modal select:focus { outline: none; border-color: var(--accent); }
     .modal .actions { margin-top: 24px; }
     .modal .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-    /* Mode selector in settings */
+    /* Mode selector */
     .mode-selector { display: flex; gap: 8px; margin-top: 8px; }
-    .mode-option { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .mode-option { flex: 1; padding: 14px; border: 2px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
     .mode-option:hover { border-color: var(--accent); }
-    .mode-option.active { border-color: var(--green); background: rgba(16,185,129,0.1); }
+    .mode-option.active { border-color: var(--accent); background: var(--accent-glow); }
     .mode-option .mode-icon { font-size: 24px; margin-bottom: 4px; }
     .mode-option .mode-name { font-size: 13px; font-weight: 600; }
     .mode-option .mode-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 12px 24px; border-radius: 12px; font-weight: 600; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; font-size: 13px; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
     .hidden { display: none !important; }
+
+    /* ============================================================
+       3. Drafts panel
+       ============================================================ */
+    .drafts-panel {
+      position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
+      background: var(--card); border-left: 1px solid var(--border);
+      z-index: 800; transition: right 0.35s ease; overflow-y: auto;
+      padding: 24px; display: flex; flex-direction: column;
+    }
+    .drafts-panel.open { right: 0; }
+    .drafts-panel h2 { margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .draft-search { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 13px; font-family: inherit; margin-bottom: 12px; }
+    .draft-search:focus { outline: none; border-color: var(--accent); }
+    .draft-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+    }
+    .draft-item:hover { border-color: var(--accent); }
+    .draft-item img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+    .draft-item .draft-info { flex: 1; min-width: 0; }
+    .draft-item .draft-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .draft-item .draft-date { font-size: 11px; color: var(--muted); }
+    .draft-item .draft-delete { background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.5; transition: opacity 0.2s; }
+    .draft-item .draft-delete:hover { opacity: 1; }
+    .drafts-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 799; display: none; }
+    .drafts-overlay.open { display: block; }
+
+    /* ============================================================
+       4. Price calculator
+       ============================================================ */
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .calc-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .calc-field input, .calc-field select {
+      width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit;
+    }
+    .calc-field input:focus { outline: none; border-color: var(--accent); }
+    .calc-result { background: var(--accent-glow); border: 1px solid rgba(200,169,97,0.3); border-radius: 12px; padding: 16px; margin-top: 12px; text-align: center; }
+    .calc-result .big-price { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .calc-result .profit { font-size: 14px; color: var(--green); margin-top: 4px; }
+    .margin-slider { width: 100%; accent-color: var(--accent); margin-top: 4px; }
+
+    /* ============================================================
+       6. Export dropdown
+       ============================================================ */
+    .export-dropdown { position: relative; display: inline-block; }
+    .export-menu {
+      position: absolute; bottom: 100%; left: 0; margin-bottom: 8px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 6px; min-width: 220px; display: none; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    .export-menu.open { display: block; }
+    .export-menu button {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      background: none; border: none; color: var(--text); padding: 10px 14px;
+      font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 8px; transition: background 0.15s; text-align: left;
+    }
+    .export-menu button:hover { background: var(--card2); }
+    .export-menu button .icon { font-size: 16px; }
+
+    /* ============================================================
+       7. Etsy preview mockup
+       ============================================================ */
+    .etsy-preview-card {
+      background: #fff; border-radius: 14px; padding: 20px; margin-top: 20px;
+      color: #222; font-family: inherit;
+    }
+    .etsy-preview-card .ep-title { font-size: 18px; font-weight: 700; color: #222; margin-bottom: 8px; line-height: 1.3; }
+    .etsy-preview-card .ep-price { font-size: 24px; font-weight: 700; color: #222; margin-bottom: 12px; }
+    .etsy-preview-card .ep-desc { font-size: 13px; color: #555; white-space: pre-wrap; line-height: 1.6; max-height: 200px; overflow-y: auto; }
+    .etsy-preview-card .ep-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 12px; }
+    .etsy-preview-card .ep-tag { background: #f0f0f0; color: #555; padding: 3px 10px; border-radius: 20px; font-size: 11px; }
+    .etsy-preview-card .ep-img-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+    .etsy-preview-card .ep-img-row img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #e0e0e0; flex-shrink: 0; }
+    .etsy-preview-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 20px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+
+    /* Category selector */
+    .cat-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .cat-btn {
+      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: var(--card2); border: 1px solid var(--border); color: var(--muted);
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header { padding: 12px 16px; }
+      .header h1 { font-size: 1.1rem; }
+      .panel { padding: 16px; }
+      .drafts-panel { width: 100%; right: -100%; }
+      .calc-grid { grid-template-columns: 1fr; }
+      .url-input-group { flex-direction: column; }
+      .url-input-group .btn { width: 100%; justify-content: center; }
+    }
   </style>
 </head>
 <body>
 
   <!-- Header -->
   <div class="header">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <h1>Product Forge</h1>
+    <div class="logo-area">
+      <h1>⚒ Product Forge</h1>
       <span class="mode-badge free" id="modeBadge">GRATUIT</span>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div class="status" id="statusText"><div class="dot dot-green"></div> Pret</div>
-      <button class="btn btn-outline" onclick="openSettings()" style="padding:8px 16px;font-size:13px;">Settings</button>
+    <div class="nav-btns">
+      <div class="status" id="statusText"><div class="dot dot-green"></div> Prêt</div>
+      <button class="btn btn-outline btn-sm" onclick="toggleDraftsPanel()">📋 Mes fiches</button>
+      <button class="btn btn-outline btn-sm" onclick="openSettings()">⚙ Settings</button>
     </div>
   </div>
 
   <!-- Welcome -->
   <div id="welcomeView" class="welcome">
     <div>
-      <div style="font-size:64px;margin-bottom:16px;">🔗</div>
-      <h2>En attente de donnees...</h2>
-      <p>Utilisez le bookmarklet sur une page AliExpress pour envoyer les donnees ici, ou collez une URL ci-dessous.</p>
+      <div style="font-size:56px;margin-bottom:16px;">⚒</div>
+      <h2>Product Forge</h2>
+      <p>Transformez n'importe quel produit AliExpress en fiche Etsy optimisée SEO en quelques secondes.</p>
+
+      <!-- 1. Link paste field -->
       <div class="url-input-group">
-        <input type="text" id="urlInput" placeholder="https://www.aliexpress.com/item/..." />
-        <button class="btn btn-primary" onclick="scrapeFromUrl()">Scraper via Apify</button>
+        <input type="text" id="urlInput" placeholder="Collez un lien AliExpress ici..." />
+        <button class="btn btn-primary" onclick="scrapeFromUrl()">Scraper</button>
       </div>
-      <p style="margin-top:16px;font-size:13px;color:var(--muted);">Astuce: Installez le <a href="https://louisrivault1-cpu.github.io/" style="color:var(--accent);">bookmarklet</a> pour un scraping direct sans Apify</p>
+      <p style="margin-top:14px;font-size:12px;color:var(--muted);">Ou utilisez le <a href="https://louisrivault1-cpu.github.io/" style="color:var(--accent);">bookmarklet</a> directement sur AliExpress</p>
     </div>
   </div>
 
@@ -159,7 +346,16 @@
 
     <!-- Left: Source data -->
     <div class="panel panel-left">
-      <h2>Donnees AliExpress</h2>
+      <h2>📦 Données AliExpress</h2>
+
+      <!-- 1. Fallback URL field -->
+      <div class="data-card" style="padding:14px 16px;">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="urlInputMain" placeholder="Coller un lien AliExpress pour re-scraper..." style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;" />
+          <button class="btn btn-primary btn-sm" onclick="scrapeFromUrlMain()">Re-scraper</button>
+        </div>
+      </div>
+
       <div class="data-card">
         <h3>Titre</h3>
         <div class="value" id="srcTitle">—</div>
@@ -169,12 +365,41 @@
         <div class="price" id="srcPrice">—</div>
         <div style="color:var(--muted);font-size:13px;text-decoration:line-through;margin-top:4px;" id="srcOrigPrice"></div>
       </div>
+
+      <!-- 4. Price calculator -->
+      <div class="data-card" id="calcCard">
+        <h3>💰 Calculateur de marge</h3>
+        <div class="calc-grid">
+          <div class="calc-field">
+            <label>Prix AliExpress ($)</label>
+            <input type="number" id="calcAliPrice" step="0.01" value="0" oninput="recalcPrice()" />
+          </div>
+          <div class="calc-field">
+            <label>Shipping estimé ($)</label>
+            <input type="number" id="calcShipping" step="0.01" value="3" oninput="recalcPrice()" />
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label style="font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">
+            <span>Marge cible</span>
+            <span id="marginLabel" style="color:var(--accent);font-weight:600;">40%</span>
+          </label>
+          <input type="range" class="margin-slider" id="calcMargin" min="20" max="60" value="40" oninput="recalcPrice()" />
+        </div>
+        <div class="calc-result">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Prix de vente suggéré</div>
+          <div class="big-price" id="calcSellPrice">$0.00</div>
+          <div class="profit" id="calcProfit">Profit net: $0.00 par vente</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="calcBreakdown"></div>
+        </div>
+      </div>
+
       <div class="data-card">
         <h3>Images (<span id="imgCount">0</span>)</h3>
         <div class="images-grid" id="srcImages"></div>
       </div>
       <div class="data-card">
-        <h3>Specifications</h3>
+        <h3>Spécifications</h3>
         <table class="specs-table" id="srcSpecs"><tbody></tbody></table>
       </div>
       <div class="data-card">
@@ -192,91 +417,111 @@
 
     <!-- Right: Generated Etsy listing -->
     <div class="panel panel-right">
-      <h2>Fiche Etsy</h2>
+      <h2>🏷 Fiche Etsy</h2>
 
-      <!-- Generate zone: shows API or Claude-free depending on mode -->
+      <!-- 2. Category selector -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;font-weight:600;">Catégorie de produit</label>
+        <div class="cat-selector" id="catSelector"></div>
+      </div>
+
+      <!-- Generate zone -->
       <div id="generateZone">
-
-        <!-- API MODE -->
         <div id="apiModeCard" class="data-card hidden" style="text-align:center;padding:32px;">
           <div style="font-size:40px;margin-bottom:12px;">🤖</div>
-          <p style="color:var(--muted);margin-bottom:16px;">Generation automatique via l'API Claude</p>
-          <button class="btn btn-primary" id="generateBtn" onclick="generateViaAPI()">Generer la fiche Etsy</button>
+          <p style="color:var(--muted);margin-bottom:16px;">Génération automatique via l'API Claude</p>
+          <button class="btn btn-primary" id="generateBtn" onclick="generateViaAPI()">Générer la fiche Etsy</button>
           <div style="margin-top:12px;">
-            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToFreeMode()">Passer en mode gratuit (sans API)</span>
+            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToFreeMode()">Passer en mode gratuit</span>
           </div>
         </div>
 
-        <!-- FREE CLAUDE MODE -->
         <div id="freeModeCard" class="claude-card hidden">
-          <h3>Generer avec votre compte Claude</h3>
-          <p>Product Forge cree un prompt optimise. Ouvrez Claude, collez-le, et recuperez votre fiche Etsy.</p>
-
+          <h3>Générer avec votre compte Claude</h3>
+          <p>Prompt optimisé créé automatiquement. Ouvrez Claude, collez-le, récupérez votre fiche.</p>
           <div class="claude-steps">
-            <div class="claude-step"><span class="num">1</span> Prompt genere</div>
+            <div class="claude-step"><span class="num">1</span> Prompt généré</div>
             <div class="claude-step"><span class="num">2</span> Ouvrir Claude</div>
-            <div class="claude-step"><span class="num">3</span> Coller & recuperer</div>
+            <div class="claude-step"><span class="num">3</span> Coller & récupérer</div>
           </div>
-
           <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
-            <button class="btn btn-claude" onclick="openClaudeWithPrompt()" style="font-size:15px;padding:14px 28px;">
-              Ouvrir Claude avec le prompt
-            </button>
+            <button class="btn btn-claude" onclick="openClaudeWithPrompt()" style="font-size:15px;padding:14px 28px;">Ouvrir Claude avec le prompt</button>
             <div style="display:flex;gap:10px;">
               <button class="btn btn-green" onclick="copyPromptToClipboard()">Copier le prompt</button>
               <button class="btn btn-outline" onclick="togglePromptPreview()">Voir le prompt</button>
             </div>
           </div>
-
           <div id="promptPreviewZone" class="hidden">
             <div class="prompt-preview" id="promptPreviewText"></div>
           </div>
-
-          <div style="margin-top:20px;padding:12px;background:var(--card);border-radius:8px;text-align:left;">
-            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Quand Claude repond, collez le JSON ici :</div>
-            <textarea id="claudeResponseInput" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:'Courier New',monospace;font-size:12px;min-height:100px;resize:vertical;" placeholder='Collez la reponse JSON de Claude ici...'></textarea>
-            <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="parseClaudeResponse()">Importer la reponse</button>
+          <div style="margin-top:20px;padding:14px;background:var(--card);border-radius:10px;text-align:left;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Quand Claude répond, collez le JSON ici :</div>
+            <textarea id="claudeResponseInput" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:'SF Mono',SFMono-Regular,Menlo,monospace;font-size:12px;min-height:100px;resize:vertical;" placeholder='Collez la réponse JSON de Claude...'></textarea>
+            <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="parseClaudeResponse()">Importer la réponse</button>
           </div>
-
           <div style="margin-top:12px;">
-            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToApiMode()">J'ai une cle API → mode automatique</span>
+            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToApiMode()">J'ai une clé API → mode automatique</span>
           </div>
         </div>
-
       </div>
 
       <!-- Etsy output -->
       <div id="etsyOutput" class="hidden">
         <div class="etsy-section">
           <label>Titre Etsy (140 car. max)</label>
-          <input type="text" id="etsyTitle" maxlength="140" />
+          <input type="text" id="etsyTitle" maxlength="140" oninput="updateEtsyPreview()" />
         </div>
         <div class="etsy-section">
           <label>Description</label>
-          <textarea id="etsyDesc" rows="10"></textarea>
+          <textarea id="etsyDesc" rows="10" oninput="updateEtsyPreview()"></textarea>
         </div>
         <div class="etsy-section">
           <label>Tags (13 max)</label>
-          <input type="text" id="etsyTags" />
+          <input type="text" id="etsyTags" oninput="updateTagsPreview(); updateEtsyPreview();" />
           <div class="tags-list" id="etsyTagsPreview" style="margin-top:8px;"></div>
         </div>
         <div class="etsy-section">
-          <label>Categorie Etsy</label>
+          <label>Catégorie Etsy</label>
           <input type="text" id="etsyCategory" />
         </div>
         <div class="etsy-section">
-          <label>Prix de vente suggere (EUR)</label>
-          <input type="text" id="etsySellPrice" />
+          <label>Prix de vente suggéré (EUR)</label>
+          <input type="text" id="etsySellPrice" oninput="updateEtsyPreview()" />
         </div>
+
+        <!-- 5. SEO photo names -->
         <div class="etsy-section">
-          <label>Noms SEO des photos</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Noms SEO des photos
+            <button class="btn btn-outline btn-sm" onclick="copyAllPhotoNames()" style="text-transform:none;letter-spacing:0;">Copier tous les noms</button>
+          </label>
           <ul class="photo-names" id="photoNames"></ul>
         </div>
+
+        <!-- 7. Etsy preview mockup -->
+        <div class="etsy-preview-label">👁 Aperçu Etsy</div>
+        <div class="etsy-preview-card" id="etsyPreviewCard">
+          <div class="ep-img-row" id="epImages"></div>
+          <div class="ep-title" id="epTitle">—</div>
+          <div class="ep-price" id="epPrice">—</div>
+          <div class="ep-desc" id="epDesc">—</div>
+          <div class="ep-tags" id="epTags"></div>
+        </div>
+
         <div class="actions">
-          <button class="btn btn-primary" onclick="showGenerateZone()">Regenerer</button>
-          <button class="btn btn-green" onclick="copyListing()">Copier tout</button>
-          <button class="btn btn-outline" onclick="downloadListing()">Telecharger</button>
-          <button class="btn btn-outline" onclick="saveToDrafts()">Sauvegarder</button>
+          <button class="btn btn-primary" onclick="showGenerateZone()">🔄 Régénérer</button>
+
+          <!-- 6. Export multi-format -->
+          <div class="export-dropdown">
+            <button class="btn btn-green" onclick="toggleExportMenu()">📤 Exporter ▾</button>
+            <div class="export-menu" id="exportMenu">
+              <button onclick="exportForEtsy()"><span class="icon">🏷</span> Copier pour Etsy</button>
+              <button onclick="downloadJSON()"><span class="icon">📄</span> Télécharger JSON</button>
+              <button onclick="downloadCSV()"><span class="icon">📊</span> Télécharger CSV</button>
+            </div>
+          </div>
+
+          <button class="btn btn-outline" onclick="saveToDrafts()">💾 Sauvegarder</button>
         </div>
       </div>
     </div>
@@ -286,7 +531,7 @@
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loading-box">
       <div class="spinner"></div>
-      <div style="font-weight:600;margin-bottom:8px;" id="loadingTitle">Generation en cours...</div>
+      <div style="font-weight:600;margin-bottom:8px;" id="loadingTitle">Génération en cours...</div>
       <div style="color:var(--muted);font-size:14px;" id="loadingMsg">Claude AI analyse le produit</div>
     </div>
   </div>
@@ -294,9 +539,8 @@
   <!-- Settings modal -->
   <div class="modal-backdrop" id="settingsModal">
     <div class="modal">
-      <h2>Configuration</h2>
-
-      <label>Mode de generation</label>
+      <h2>⚙ Configuration</h2>
+      <label>Mode de génération</label>
       <div class="mode-selector">
         <div class="mode-option" id="modeOptFree" onclick="selectMode('free')">
           <div class="mode-icon">🆓</div>
@@ -306,27 +550,22 @@
         <div class="mode-option" id="modeOptApi" onclick="selectMode('api')">
           <div class="mode-icon">⚡</div>
           <div class="mode-name">API Anthropic</div>
-          <div class="mode-desc">Automatique, cle API requise</div>
+          <div class="mode-desc">Automatique, clé API</div>
         </div>
       </div>
-
       <div id="apiSettingsGroup">
-        <label>Cle API Claude (Anthropic)</label>
+        <label>Clé API Claude (Anthropic)</label>
         <input type="password" id="claudeKey" placeholder="sk-ant-..." />
-        <div class="hint">Necessaire uniquement en mode API</div>
-
-        <label>Modele Claude</label>
+        <div class="hint">Nécessaire uniquement en mode API</div>
+        <label>Modèle Claude</label>
         <input type="text" id="claudeModel" value="claude-sonnet-4-20250514" />
       </div>
-
       <label>Token API Apify (optionnel)</label>
       <input type="password" id="apifyToken" placeholder="apify_api_..." />
       <div class="hint">Pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
-
       <label>Actor ID Apify</label>
       <input type="text" id="apifyActorId" placeholder="painless_rachis/product-forge-scraper" />
-      <div class="hint">L'ID de l'actor Apify a utiliser pour le scraping</div>
-
+      <div class="hint">L'ID de l'actor Apify à utiliser pour le scraping</div>
       <div class="actions">
         <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
         <button class="btn btn-outline" onclick="closeSettings()">Annuler</button>
@@ -334,108 +573,109 @@
     </div>
   </div>
 
+  <!-- 3. Drafts panel -->
+  <div class="drafts-overlay" id="draftsOverlay" onclick="closeDraftsPanel()"></div>
+  <div class="drafts-panel" id="draftsPanel">
+    <h2>
+      📋 Mes fiches
+      <button class="btn btn-outline btn-sm" onclick="closeDraftsPanel()">✕</button>
+    </h2>
+    <input type="text" class="draft-search" id="draftSearch" placeholder="Rechercher par titre..." oninput="renderDrafts()" />
+    <div id="draftsList"></div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
 <script>
 /* ============================================================
-   PRODUCT FORGE – Dual Mode (API + Free Claude)
+   PRODUCT FORGE — Full featured (7 improvements)
    ============================================================ */
 
 let currentProduct = null;
 let currentListing = null;
+let selectedCategory = 'Autre';
+
+// ========== 2. CATEGORIES ==========
+const CATEGORIES = {
+  'Bijoux':  { emoji: '💎', tone: 'elegant et raffine, vocabulaire bijouterie', seoTags: ['bijoux', 'jewellery', 'handmade jewelry', 'gift for her'], descStyle: 'Mets en avant le style, les materiaux nobles et le packaging cadeau.' },
+  'Deco':    { emoji: '🏠', tone: 'chaleureux et inspirant, vocabulaire decoration interieure', seoTags: ['home decor', 'interior design', 'wall art', 'aesthetic'], descStyle: 'Decris l\'ambiance que le produit cree dans un interieur.' },
+  'Tech':    { emoji: '📱', tone: 'precis et technique, vocabulaire tech/gadget', seoTags: ['gadget', 'tech accessory', 'useful gift', 'smart'], descStyle: 'Focus sur les specs techniques et la praticite au quotidien.' },
+  'Mode':    { emoji: '👗', tone: 'tendance et stylise, vocabulaire mode/fashion', seoTags: ['fashion', 'trendy', 'outfit', 'style'], descStyle: 'Evoque le style, la tendance et les occasions de port.' },
+  'Beaute':  { emoji: '✨', tone: 'doux et glamour, vocabulaire beaute/skincare', seoTags: ['beauty', 'skincare', 'self care', 'glow'], descStyle: 'Mets en avant les bienfaits, les ingredients et la routine beaute.' },
+  'Maison':  { emoji: '🧹', tone: 'pratique et organise, vocabulaire maison/rangement', seoTags: ['home', 'organization', 'kitchen', 'storage'], descStyle: 'Focus sur le cote pratique, le gain de place et la facilite d\'utilisation.' },
+  'Jouets':  { emoji: '🧸', tone: 'fun et familial, vocabulaire enfants/jeux', seoTags: ['toy', 'kids', 'educational', 'gift for kids'], descStyle: 'Mets en avant le cote ludique, educatif et la securite.' },
+  'Autre':   { emoji: '📦', tone: 'professionnel et vendeur', seoTags: ['unique find', 'gift idea', 'trending'], descStyle: 'Description commerciale orientee benefices client.' }
+};
+
+function initCategories() {
+  const sel = document.getElementById('catSelector');
+  sel.innerHTML = '';
+  Object.entries(CATEGORIES).forEach(([name, cat]) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (name === selectedCategory ? ' active' : '');
+    btn.textContent = cat.emoji + ' ' + name;
+    btn.onclick = () => {
+      selectedCategory = name;
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    sel.appendChild(btn);
+  });
+}
 
 // ========== SETTINGS ==========
 function getSettings() {
   return {
-    mode: localStorage.getItem('pf_mode') || 'auto', // 'auto', 'api', 'free'
+    mode: localStorage.getItem('pf_mode') || 'auto',
     claudeKey: localStorage.getItem('pf_claude_key') || '',
     apifyToken: localStorage.getItem('pf_apify_token') || '',
     apifyActorId: localStorage.getItem('pf_apify_actor_id') || 'painless_rachis/product-forge-scraper',
     claudeModel: localStorage.getItem('pf_claude_model') || 'claude-sonnet-4-20250514'
   };
 }
-
 function getActiveMode() {
   const s = getSettings();
   if (s.mode === 'api') return 'api';
   if (s.mode === 'free') return 'free';
-  // Auto: use API if key exists, otherwise free
   return s.claudeKey ? 'api' : 'free';
 }
-
 function updateModeBadge() {
   const mode = getActiveMode();
   const badge = document.getElementById('modeBadge');
-  if (mode === 'api') {
-    badge.textContent = 'API';
-    badge.className = 'mode-badge api';
-  } else {
-    badge.textContent = 'GRATUIT';
-    badge.className = 'mode-badge free';
-  }
+  if (mode === 'api') { badge.textContent = 'API'; badge.className = 'mode-badge api'; }
+  else { badge.textContent = 'GRATUIT'; badge.className = 'mode-badge free'; }
 }
-
 function openSettings() {
   const s = getSettings();
   document.getElementById('claudeKey').value = s.claudeKey;
   document.getElementById('apifyToken').value = s.apifyToken;
   document.getElementById('apifyActorId').value = s.apifyActorId;
   document.getElementById('claudeModel').value = s.claudeModel;
-
-  // Select current mode
-  const mode = getActiveMode();
-  selectMode(mode === 'api' ? 'api' : 'free', true);
-
+  selectMode(getActiveMode() === 'api' ? 'api' : 'free', true);
   document.getElementById('settingsModal').classList.add('active');
 }
-function closeSettings() {
-  document.getElementById('settingsModal').classList.remove('active');
-}
-
+function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 function selectMode(mode, uiOnly) {
   document.getElementById('modeOptFree').classList.toggle('active', mode === 'free');
   document.getElementById('modeOptApi').classList.toggle('active', mode === 'api');
   document.getElementById('apiSettingsGroup').style.display = mode === 'api' ? 'block' : 'none';
-  if (!uiOnly) {
-    document.getElementById('settingsModal')._selectedMode = mode;
-  } else {
-    document.getElementById('settingsModal')._selectedMode = mode;
-  }
+  document.getElementById('settingsModal')._selectedMode = mode;
 }
-
 function saveSettings() {
-  const selectedMode = document.getElementById('settingsModal')._selectedMode || 'free';
-  localStorage.setItem('pf_mode', selectedMode);
+  const m = document.getElementById('settingsModal')._selectedMode || 'free';
+  localStorage.setItem('pf_mode', m);
   localStorage.setItem('pf_claude_key', document.getElementById('claudeKey').value.trim());
   localStorage.setItem('pf_apify_token', document.getElementById('apifyToken').value.trim());
   localStorage.setItem('pf_apify_actor_id', document.getElementById('apifyActorId').value.trim());
   localStorage.setItem('pf_claude_model', document.getElementById('claudeModel').value.trim());
-  closeSettings();
-  updateModeBadge();
-  updateGenerateZone();
-  toast('Configuration sauvegardee');
+  closeSettings(); updateModeBadge(); updateGenerateZone(); toast('Configuration sauvegardée');
 }
-
-function switchToFreeMode() {
-  localStorage.setItem('pf_mode', 'free');
-  updateModeBadge();
-  updateGenerateZone();
-}
-
+function switchToFreeMode() { localStorage.setItem('pf_mode','free'); updateModeBadge(); updateGenerateZone(); }
 function switchToApiMode() {
-  const s = getSettings();
-  if (!s.claudeKey) {
-    openSettings();
-    selectMode('api');
-    toast('Entrez votre cle API Claude');
-    return;
-  }
-  localStorage.setItem('pf_mode', 'api');
-  updateModeBadge();
-  updateGenerateZone();
+  if (!getSettings().claudeKey) { openSettings(); selectMode('api'); toast('Entrez votre clé API Claude'); return; }
+  localStorage.setItem('pf_mode','api'); updateModeBadge(); updateGenerateZone();
 }
-
 function updateGenerateZone() {
   const mode = getActiveMode();
   document.getElementById('apiModeCard').classList.toggle('hidden', mode !== 'api');
@@ -443,56 +683,57 @@ function updateGenerateZone() {
 }
 
 // ========== TOAST ==========
-function toast(msg, duration = 3000) {
+function toast(msg, dur = 3000) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
 }
 
 // ========== STATUS / LOADING ==========
-function setStatus(text, color) {
-  document.getElementById('statusText').innerHTML = '<div class="dot dot-' + color + '"></div> ' + text;
-}
+function setStatus(text, color) { document.getElementById('statusText').innerHTML = '<div class="dot dot-'+color+'"></div> '+text; }
 function showLoading(title, msg) {
-  document.getElementById('loadingTitle').textContent = title || 'Chargement...';
-  document.getElementById('loadingMsg').textContent = msg || '';
+  document.getElementById('loadingTitle').textContent = title||'Chargement...';
+  document.getElementById('loadingMsg').textContent = msg||'';
   document.getElementById('loadingOverlay').classList.remove('hidden');
 }
-function hideLoading() {
-  document.getElementById('loadingOverlay').classList.add('hidden');
-}
+function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
 
 // ============================================================
-// PROMPT BUILDER
+// 2. PROMPT BUILDER WITH CATEGORY TEMPLATES
 // ============================================================
 function buildEtsyPrompt(product) {
-  const specs = (product.specs || []).map(s => `  - ${s.name}: ${s.value}`).join('\n');
-  const variants = (product.variants || []).map(v => {
-    const opts = (v.options || []).map(o => o.name || o).join(', ');
-    return `  - ${v.name || 'Option'}: ${opts}`;
+  const cat = CATEGORIES[selectedCategory] || CATEGORIES['Autre'];
+  const specs = (product.specs||[]).map(s => `  - ${s.name}: ${s.value}`).join('\n');
+  const variants = (product.variants||[]).map(v => {
+    const opts = (v.options||[]).map(o => o.name||o).join(', ');
+    return `  - ${v.name||'Option'}: ${opts}`;
   }).join('\n');
-  const nbImages = (product.images || []).length;
+  const nbImages = (product.images||[]).length;
 
   return `Tu es un expert en e-commerce Etsy et en SEO. Analyse ce produit AliExpress et cree une fiche Etsy optimisee pour maximiser les ventes.
 
+=== CATEGORIE: ${selectedCategory} ===
+Ton a adopter: ${cat.tone}
+Style de description: ${cat.descStyle}
+Tags SEO prioritaires a inclure si pertinent: ${cat.seoTags.join(', ')}
+
 === DONNEES PRODUIT ALIEXPRESS ===
-Titre: ${product.title || 'N/A'}
-Prix AliExpress: ${product.price || 'N/A'}
-Prix original: ${product.originalPrice || 'N/A'}
+Titre: ${product.title||'N/A'}
+Prix AliExpress: ${product.price||'N/A'}
+Prix original: ${product.originalPrice||'N/A'}
 Nombre d'images: ${nbImages}
 
 Specifications:
-${specs || '  Aucune'}
+${specs||'  Aucune'}
 
 Variantes:
-${variants || '  Aucune'}
+${variants||'  Aucune'}
 
-URL source: ${product.url || 'N/A'}
+URL source: ${product.url||'N/A'}
 
 === CE QUE TU DOIS GENERER ===
 1. TITRE ETSY: max 140 caracteres, mots-cles SEO en premier, PAS de marque AliExpress/chinoise
-2. DESCRIPTION: professionnelle, focus benefices client, dimensions/materiaux si dispo, emojis subtils
+2. DESCRIPTION: professionnelle avec le ton "${cat.tone}", focus benefices client, dimensions/materiaux si dispo, emojis subtils
 3. TAGS: exactement 13 tags Etsy (max 20 car. chacun), termes recherches par les acheteurs
 4. CATEGORIE: la plus pertinente (format: Categorie > Sous-categorie)
 5. PRIX DE VENTE: en EUR, marge x2.5-x4 sur le prix AliExpress (frais Etsy 6.5% + envoi inclus)
@@ -514,218 +755,133 @@ Reponds UNIQUEMENT avec ce bloc JSON:
 }
 
 // ============================================================
-// MODE API: Generate via Anthropic API
+// API MODE
 // ============================================================
 async function generateViaAPI() {
-  if (!currentProduct) { toast('Aucun produit charge'); return; }
-
+  if (!currentProduct) { toast('Aucun produit chargé'); return; }
   const s = getSettings();
-  if (!s.claudeKey) {
-    openSettings();
-    toast('Cle API Claude requise');
-    return;
-  }
+  if (!s.claudeKey) { openSettings(); toast('Clé API Claude requise'); return; }
 
-  setStatus('Claude AI genere la fiche...', 'orange');
-  showLoading('Generation de la fiche Etsy...', 'Claude AI analyse le produit et cree titre, description, tags SEO et noms de photos');
-
-  const prompt = buildEtsyPrompt(currentProduct);
+  setStatus('Claude AI génère la fiche...','orange');
+  showLoading('Génération de la fiche Etsy...','Claude AI analyse le produit');
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': s.claudeKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: s.claudeModel,
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      method:'POST',
+      headers: { 'Content-Type':'application/json', 'x-api-key':s.claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:s.claudeModel, max_tokens:4096, messages:[{role:'user',content:buildEtsyPrompt(currentProduct)}] })
     });
-
-    if (!resp.ok) {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.error?.message || `API error ${resp.status}`);
-    }
-
+    if (!resp.ok) { const err=await resp.json().catch(()=>({})); throw new Error(err.error?.message||`API error ${resp.status}`); }
     const result = await resp.json();
     const text = result.content[0].text;
-
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*"title"[\s\S]*\}/);
     let listing;
-    if (jsonMatch) {
-      listing = JSON.parse(jsonMatch[1] || jsonMatch[0]);
-    } else {
-      listing = JSON.parse(text);
-    }
-
+    if (jsonMatch) listing = JSON.parse(jsonMatch[1]||jsonMatch[0]);
+    else listing = JSON.parse(text);
     currentListing = listing;
     displayEtsyListing(listing);
-    setStatus('Fiche generee', 'green');
-    toast('Fiche Etsy generee avec succes !');
-  } catch (err) {
-    console.error('[Product Forge] Claude API error:', err);
-    toast('Erreur API: ' + err.message);
-    setStatus('Erreur generation', 'red');
-  } finally {
-    hideLoading();
-  }
+    setStatus('Fiche générée','green');
+    toast('Fiche Etsy générée !');
+  } catch(err) {
+    console.error('[PF] API error:',err);
+    toast('Erreur API: '+err.message);
+    setStatus('Erreur','red');
+  } finally { hideLoading(); }
 }
 
 // ============================================================
-// MODE FREE: Open Claude / Copy Prompt
+// FREE MODE
 // ============================================================
 function openClaudeWithPrompt() {
-  if (!currentProduct) { toast('Aucun produit charge'); return; }
-
+  if (!currentProduct) { toast('Aucun produit chargé'); return; }
   const prompt = buildEtsyPrompt(currentProduct);
-  const encodedPrompt = encodeURIComponent(prompt);
-  const claudeUrl = `https://claude.ai/new?q=${encodedPrompt}`;
-
-  if (claudeUrl.length > 8000) {
-    navigator.clipboard.writeText(prompt).then(() => {
-      toast('Prompt copie ! Collez-le dans Claude (Ctrl+V)');
-      window.open('https://claude.ai/new', '_blank');
-    }).catch(() => {
-      window.open('https://claude.ai/new', '_blank');
-      toast('Ouvrez Claude et collez le prompt');
-    });
-  } else {
-    window.open(claudeUrl, '_blank');
-    toast('Claude ouvert avec le prompt !');
-  }
+  const url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+  if (url.length > 8000) {
+    navigator.clipboard.writeText(prompt).then(() => { toast('Prompt copié ! Collez-le dans Claude'); window.open('https://claude.ai/new','_blank'); }).catch(() => { window.open('https://claude.ai/new','_blank'); });
+  } else { window.open(url,'_blank'); toast('Claude ouvert !'); }
 }
-
 function copyPromptToClipboard() {
-  if (!currentProduct) { toast('Aucun produit charge'); return; }
-  const prompt = buildEtsyPrompt(currentProduct);
-  navigator.clipboard.writeText(prompt).then(() => {
-    toast('Prompt copie !');
-  }).catch(() => {
-    togglePromptPreview(true);
-    toast('Copiez le prompt ci-dessous');
-  });
+  if (!currentProduct) { toast('Aucun produit chargé'); return; }
+  navigator.clipboard.writeText(buildEtsyPrompt(currentProduct)).then(() => toast('Prompt copié !')).catch(() => { togglePromptPreview(true); toast('Copiez ci-dessous'); });
 }
-
 function togglePromptPreview(forceShow) {
-  const zone = document.getElementById('promptPreviewZone');
-  const text = document.getElementById('promptPreviewText');
-  if (forceShow || zone.classList.contains('hidden')) {
-    if (currentProduct) text.textContent = buildEtsyPrompt(currentProduct);
-    zone.classList.remove('hidden');
-  } else {
-    zone.classList.add('hidden');
-  }
+  const z = document.getElementById('promptPreviewZone');
+  if (forceShow || z.classList.contains('hidden')) {
+    if (currentProduct) document.getElementById('promptPreviewText').textContent = buildEtsyPrompt(currentProduct);
+    z.classList.remove('hidden');
+  } else z.classList.add('hidden');
 }
-
 function parseClaudeResponse() {
   const raw = document.getElementById('claudeResponseInput').value.trim();
-  if (!raw) { toast('Collez la reponse de Claude'); return; }
-
+  if (!raw) { toast('Collez la réponse de Claude'); return; }
   try {
-    let jsonStr = raw;
-    const jsonBlockMatch = raw.match(/```json\s*([\s\S]*?)\s*```/);
-    if (jsonBlockMatch) {
-      jsonStr = jsonBlockMatch[1];
-    } else {
-      const codeBlockMatch = raw.match(/```\s*([\s\S]*?)\s*```/);
-      if (codeBlockMatch) jsonStr = codeBlockMatch[1];
-      else {
-        const objMatch = raw.match(/\{[\s\S]*"title"[\s\S]*\}/);
-        if (objMatch) jsonStr = objMatch[0];
-      }
-    }
-
-    const listing = JSON.parse(jsonStr);
-    if (!listing.title) throw new Error('JSON invalide: pas de champ "title"');
-
+    let js = raw;
+    const m1 = raw.match(/```json\s*([\s\S]*?)\s*```/);
+    if (m1) js = m1[1];
+    else { const m2 = raw.match(/```\s*([\s\S]*?)\s*```/); if(m2) js=m2[1]; else { const m3=raw.match(/\{[\s\S]*"title"[\s\S]*\}/); if(m3) js=m3[0]; } }
+    const listing = JSON.parse(js);
+    if (!listing.title) throw new Error('JSON invalide');
     currentListing = listing;
     displayEtsyListing(listing);
-    setStatus('Fiche importee !', 'green');
-    toast('Fiche Etsy importee !');
-  } catch (err) {
-    console.error('[Product Forge] Parse error:', err);
-    toast('Erreur parsing: ' + err.message);
-  }
+    setStatus('Fiche importée !','green');
+    toast('Fiche importée !');
+  } catch(err) { toast('Erreur parsing: '+err.message); }
 }
 
 // ============================================================
-// CORE: Receive data from bookmarklet
+// RECEIVE DATA
 // ============================================================
 function forgeFromBookmarklet(data) {
-  console.log('[Product Forge] Received bookmarklet data:', data);
   currentProduct = data;
   displaySourceData(data);
-  setStatus('Donnees recues', 'green');
-  toast('Produit charge !');
+  setStatus('Données reçues','green');
+  toast('Produit chargé !');
   saveToRecent(data);
-
-  // Auto-generate if in API mode with key
-  if (getActiveMode() === 'api' && getSettings().claudeKey) {
-    setTimeout(() => generateViaAPI(), 500);
-  }
+  if (getActiveMode()==='api' && getSettings().claudeKey) setTimeout(()=>generateViaAPI(), 500);
 }
 
 // ============================================================
-// Scrape via Apify
+// SCRAPE VIA APIFY
 // ============================================================
 async function scrapeFromUrl() {
   const url = document.getElementById('urlInput').value.trim();
-  if (!url || !url.includes('aliexpress')) {
-    toast('Entrez une URL AliExpress valide');
-    return;
-  }
+  await doScrape(url);
+}
+async function scrapeFromUrlMain() {
+  const url = document.getElementById('urlInputMain').value.trim();
+  await doScrape(url);
+}
+async function doScrape(url) {
+  if (!url || !url.includes('aliexpress')) { toast('URL AliExpress invalide'); return; }
   const s = getSettings();
-  if (!s.apifyToken) {
-    openSettings();
-    toast('Token Apify requis pour le scraping distant');
-    return;
-  }
-
-  setStatus('Scraping via Apify...', 'orange');
-  showLoading('Scraping en cours...', 'Apify analyse la page AliExpress');
-
+  if (!s.apifyToken) { openSettings(); toast('Token Apify requis'); return; }
+  setStatus('Scraping via Apify...','orange');
+  showLoading('Scraping en cours...','Apify analyse la page AliExpress');
   try {
-    const actorId = s.apifyActorId || 'painless_rachis/product-forge-scraper';
-    /* Apify accepts both user/actor and user~actor format */
-    const actorPath = actorId.replace(/\//g, '~');
-    const resp = await fetch(
-      `https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startUrls: [{ url }], maxItems: 1 })
-      }
-    );
-    if (!resp.ok) throw new Error('Apify error: ' + resp.status);
+    const actorPath = (s.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
+    const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ startUrls:[{url}], maxItems:1 })
+    });
+    if (!resp.ok) throw new Error('Apify error: '+resp.status);
     const items = await resp.json();
-    if (!items || !items.length) throw new Error('Aucun resultat');
-
+    if (!items||!items.length) throw new Error('Aucun résultat');
     const item = items[0];
     const data = {
-      source: 'apify', url,
-      productId: item.id || item.productId || '',
-      title: item.title || item.name || '',
-      price: item.price || item.currentPrice || '',
-      originalPrice: item.originalPrice || '',
-      images: item.images || item.imageUrls || [],
-      specs: (item.specifications || item.attributes || []).map(s => ({ name: s.name || s.attrName || '', value: s.value || s.attrValue || '' })),
-      variants: item.variants || item.skus || [],
-      stats: {}
+      source:'apify', url,
+      productId: item.id||item.productId||'',
+      title: item.title||item.name||'',
+      price: item.price||item.currentPrice||'',
+      originalPrice: item.originalPrice||'',
+      images: item.images||item.imageUrls||[],
+      specs: (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''})),
+      variants: item.variants||item.skus||[],
+      stats:{}
     };
-    data.stats = { images: data.images.length, specs: data.specs.length, variants: data.variants.length };
+    data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
     forgeFromBookmarklet(data);
-  } catch (err) {
-    console.error('[Product Forge] Apify error:', err);
-    toast('Erreur Apify: ' + err.message);
-    setStatus('Erreur Apify', 'red');
-  } finally {
-    hideLoading();
-  }
+  } catch(err) { toast('Erreur Apify: '+err.message); setStatus('Erreur','red'); }
+  finally { hideLoading(); }
 }
 
 // ============================================================
@@ -734,27 +890,31 @@ async function scrapeFromUrl() {
 function displaySourceData(data) {
   document.getElementById('welcomeView').classList.add('hidden');
   document.getElementById('mainView').classList.remove('hidden');
+  document.getElementById('srcTitle').textContent = data.title||'Sans titre';
+  document.getElementById('srcPrice').textContent = data.price||'—';
+  document.getElementById('srcOrigPrice').textContent = data.originalPrice||'';
 
-  document.getElementById('srcTitle').textContent = data.title || 'Sans titre';
-  document.getElementById('srcPrice').textContent = data.price || '—';
-  document.getElementById('srcOrigPrice').textContent = data.originalPrice || '';
+  // Fill price calculator
+  const priceNum = parseFloat(String(data.price||'0').replace(/[^0-9.]/g,''));
+  document.getElementById('calcAliPrice').value = priceNum||0;
+  recalcPrice();
 
   const imgGrid = document.getElementById('srcImages');
   imgGrid.innerHTML = '';
-  const images = data.images || [];
+  const images = data.images||[];
   document.getElementById('imgCount').textContent = images.length;
-  images.forEach((url, i) => {
+  images.forEach((url,i) => {
     const img = document.createElement('img');
-    img.src = url.replace(/^\/\//, 'https://');
-    img.alt = 'Image ' + (i + 1);
+    img.src = url.replace(/^\/\//,'https://');
+    img.alt = 'Image '+(i+1);
     img.loading = 'lazy';
     img.onclick = () => img.classList.toggle('selected');
     imgGrid.appendChild(img);
   });
 
-  const specsBody = document.getElementById('srcSpecs').querySelector('tbody') || document.getElementById('srcSpecs');
+  const specsBody = document.getElementById('srcSpecs').querySelector('tbody')||document.getElementById('srcSpecs');
   specsBody.innerHTML = '';
-  (data.specs || []).forEach(spec => {
+  (data.specs||[]).forEach(spec => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${esc(spec.name)}</td><td>${esc(spec.value)}</td>`;
     specsBody.appendChild(tr);
@@ -762,28 +922,51 @@ function displaySourceData(data) {
 
   const varDiv = document.getElementById('srcVariants');
   varDiv.innerHTML = '';
-  (data.variants || []).forEach(group => {
-    const g = document.createElement('div');
-    g.className = 'variant-group';
-    g.innerHTML = `<h4>${esc(group.name || 'Option')}</h4>`;
-    const tags = document.createElement('div');
-    tags.className = 'variant-tags';
-    (group.options || []).forEach(opt => {
-      const tag = document.createElement('span');
-      tag.className = 'variant-tag';
-      tag.textContent = opt.name || opt;
-      tags.appendChild(tag);
-    });
-    g.appendChild(tags);
-    varDiv.appendChild(g);
+  (data.variants||[]).forEach(group => {
+    const g = document.createElement('div'); g.className='variant-group';
+    g.innerHTML = `<h4>${esc(group.name||'Option')}</h4>`;
+    const tags = document.createElement('div'); tags.className='variant-tags';
+    (group.options||[]).forEach(opt => { const t=document.createElement('span'); t.className='variant-tag'; t.textContent=opt.name||opt; tags.appendChild(t); });
+    g.appendChild(tags); varDiv.appendChild(g);
   });
 
-  document.getElementById('srcId').textContent = data.productId || 'N/A';
+  document.getElementById('srcId').textContent = data.productId||'N/A';
   const srcLink = document.getElementById('srcUrl');
-  srcLink.href = data.url || '#';
-  srcLink.textContent = data.url || '—';
+  srcLink.href = data.url||'#'; srcLink.textContent = data.url||'—';
 
+  initCategories();
   showGenerateZone();
+}
+
+// ============================================================
+// 4. PRICE CALCULATOR
+// ============================================================
+function recalcPrice() {
+  const ali = parseFloat(document.getElementById('calcAliPrice').value)||0;
+  const ship = parseFloat(document.getElementById('calcShipping').value)||0;
+  const margin = parseInt(document.getElementById('calcMargin').value)||40;
+  document.getElementById('marginLabel').textContent = margin+'%';
+
+  const cost = ali + ship;
+  // Etsy fees: $0.20 listing + 6.5% commission + 3% processing + $0.25
+  // Sell price = cost / (1 - margin/100 - 0.065 - 0.03) + 0.45 adjusted
+  const feeRate = 0.065 + 0.03; // 9.5% combined
+  const fixedFees = 0.20 + 0.25; // $0.45
+  const marginRate = margin/100;
+  const denominator = 1 - feeRate - marginRate;
+  let sellPrice = denominator > 0 ? (cost + fixedFees) / denominator : cost * 3;
+  sellPrice = Math.max(sellPrice, cost * 1.5);
+  sellPrice = Math.ceil(sellPrice * 100) / 100;
+
+  const etsyCommission = sellPrice * 0.065;
+  const processing = sellPrice * 0.03 + 0.25;
+  const listing = 0.20;
+  const totalFees = etsyCommission + processing + listing;
+  const profit = sellPrice - cost - totalFees;
+
+  document.getElementById('calcSellPrice').textContent = '$' + sellPrice.toFixed(2);
+  document.getElementById('calcProfit').textContent = 'Profit net: $' + profit.toFixed(2) + ' par vente';
+  document.getElementById('calcBreakdown').textContent = `Coût: $${cost.toFixed(2)} | Frais Etsy: $${totalFees.toFixed(2)} | Marge: ${margin}%`;
 }
 
 // ============================================================
@@ -793,122 +976,244 @@ function displayEtsyListing(listing) {
   document.getElementById('generateZone').classList.add('hidden');
   document.getElementById('etsyOutput').classList.remove('hidden');
 
-  document.getElementById('etsyTitle').value = listing.title || '';
-  document.getElementById('etsyDesc').value = listing.description || '';
-  document.getElementById('etsyTags').value = (listing.tags || []).join(', ');
-  document.getElementById('etsyCategory').value = listing.category || '';
-  document.getElementById('etsySellPrice').value = listing.sellPrice || '';
+  document.getElementById('etsyTitle').value = listing.title||'';
+  document.getElementById('etsyDesc').value = listing.description||'';
+  document.getElementById('etsyTags').value = (listing.tags||[]).join(', ');
+  document.getElementById('etsyCategory').value = listing.category||'';
+  document.getElementById('etsySellPrice').value = listing.sellPrice||'';
 
-  const tagsPreview = document.getElementById('etsyTagsPreview');
-  tagsPreview.innerHTML = '';
-  (listing.tags || []).forEach(tag => {
-    const span = document.createElement('span');
-    span.className = 'tag';
-    span.textContent = tag;
-    tagsPreview.appendChild(span);
-  });
+  updateTagsPreview();
 
+  // 5. SEO photo names
   const photoList = document.getElementById('photoNames');
   photoList.innerHTML = '';
-  const images = currentProduct ? (currentProduct.images || []) : [];
-  (listing.photoNames || []).forEach((name, i) => {
+  const images = currentProduct ? (currentProduct.images||[]) : [];
+  let photoNames = listing.photoNames||[];
+
+  // Auto-generate SEO names if missing
+  if (photoNames.length < images.length) {
+    photoNames = generateSEOPhotoNames(listing.title||'', listing.tags||[], images.length);
+  }
+  currentListing.photoNames = photoNames;
+
+  photoNames.forEach((name,i) => {
     const li = document.createElement('li');
-    if (images[i]) li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//, 'https://'))}" alt="" />`;
+    if (images[i]) li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//,'https://'))}" alt="" />`;
     li.innerHTML += `<span class="name">${esc(name)}</span>`;
     photoList.appendChild(li);
   });
 
-  document.getElementById('etsyTags').oninput = (e) => {
-    tagsPreview.innerHTML = '';
-    e.target.value.split(',').map(t => t.trim()).filter(Boolean).forEach(tag => {
-      const span = document.createElement('span');
-      span.className = 'tag';
-      span.textContent = tag;
-      tagsPreview.appendChild(span);
-    });
-  };
+  updateEtsyPreview();
+}
+
+// 5. Generate SEO photo names
+function generateSEOPhotoNames(title, tags, count) {
+  const slug = (title||'product').toLowerCase()
+    .replace(/[^a-z0-9\s-]/g,'')
+    .replace(/\s+/g,'-')
+    .replace(/-+/g,'-')
+    .substring(0,40);
+  const tagSlug = (tags||[]).slice(0,2).join('-').toLowerCase().replace(/[^a-z0-9-]/g,'').substring(0,20);
+  const base = slug + (tagSlug ? '-'+tagSlug : '');
+  const names = [];
+  for (let i=1; i<=count; i++) names.push(`${base}-${i}.jpg`);
+  return names;
+}
+
+function copyAllPhotoNames() {
+  const names = currentListing?.photoNames||[];
+  if (!names.length) { toast('Aucun nom à copier'); return; }
+  navigator.clipboard.writeText(names.join('\n')).then(()=>toast('Noms copiés !')).catch(()=>toast('Erreur'));
+}
+
+function updateTagsPreview() {
+  const tp = document.getElementById('etsyTagsPreview');
+  tp.innerHTML = '';
+  document.getElementById('etsyTags').value.split(',').map(t=>t.trim()).filter(Boolean).forEach(tag => {
+    const span = document.createElement('span'); span.className='tag'; span.textContent=tag; tp.appendChild(span);
+  });
+}
+
+// 7. Etsy preview mockup
+function updateEtsyPreview() {
+  const title = document.getElementById('etsyTitle').value||'—';
+  const desc = document.getElementById('etsyDesc').value||'—';
+  const price = document.getElementById('etsySellPrice').value||'—';
+  const tags = document.getElementById('etsyTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const images = currentProduct?(currentProduct.images||[]):[];
+
+  document.getElementById('epTitle').textContent = title;
+  document.getElementById('epPrice').textContent = price.startsWith('€')||price.startsWith('$') ? price : '€'+price;
+  document.getElementById('epDesc').textContent = desc;
+
+  const imgRow = document.getElementById('epImages');
+  imgRow.innerHTML = '';
+  images.slice(0,6).forEach(url => {
+    const img = document.createElement('img');
+    img.src = url.replace(/^\/\//,'https://');
+    imgRow.appendChild(img);
+  });
+
+  const tagsDiv = document.getElementById('epTags');
+  tagsDiv.innerHTML = '';
+  tags.forEach(tag => {
+    const span = document.createElement('span'); span.className='ep-tag'; span.textContent=tag; tagsDiv.appendChild(span);
+  });
 }
 
 function showGenerateZone() {
   document.getElementById('generateZone').classList.remove('hidden');
   document.getElementById('etsyOutput').classList.add('hidden');
   updateGenerateZone();
-  const resp = document.getElementById('claudeResponseInput');
-  if (resp) resp.value = '';
+  const r = document.getElementById('claudeResponseInput'); if(r) r.value='';
 }
 
 // ============================================================
-// ACTIONS
+// 6. EXPORT MULTI-FORMAT
 // ============================================================
-function copyListing() {
-  const listing = {
-    title: document.getElementById('etsyTitle').value,
-    description: document.getElementById('etsyDesc').value,
-    tags: document.getElementById('etsyTags').value.split(',').map(t => t.trim()),
-    category: document.getElementById('etsyCategory').value,
-    sellPrice: document.getElementById('etsySellPrice').value,
-    sourceUrl: currentProduct?.url,
-    sourcePrice: currentProduct?.price
-  };
-  navigator.clipboard.writeText(JSON.stringify(listing, null, 2))
-    .then(() => toast('Fiche copiee !'))
-    .catch(() => toast('Erreur clipboard'));
+function toggleExportMenu() {
+  document.getElementById('exportMenu').classList.toggle('open');
+}
+// Close on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.export-dropdown')) document.getElementById('exportMenu')?.classList.remove('open');
+});
+
+function exportForEtsy() {
+  const title = document.getElementById('etsyTitle').value;
+  const desc = document.getElementById('etsyDesc').value;
+  const tags = document.getElementById('etsyTags').value;
+  const text = `TITRE:\n${title}\n\nDESCRIPTION:\n${desc}\n\nTAGS:\n${tags}`;
+  navigator.clipboard.writeText(text).then(()=>toast('Copié pour Etsy !')).catch(()=>toast('Erreur'));
+  document.getElementById('exportMenu').classList.remove('open');
 }
 
-function downloadListing() {
-  const listing = {
+function downloadJSON() {
+  const data = {
     title: document.getElementById('etsyTitle').value,
     description: document.getElementById('etsyDesc').value,
-    tags: document.getElementById('etsyTags').value.split(',').map(t => t.trim()),
+    tags: document.getElementById('etsyTags').value.split(',').map(t=>t.trim()),
     category: document.getElementById('etsyCategory').value,
     sellPrice: document.getElementById('etsySellPrice').value,
-    photoNames: currentListing?.photoNames || [],
+    photoNames: currentListing?.photoNames||[],
     source: currentProduct
   };
-  const blob = new Blob([JSON.stringify(listing, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `etsy-${currentProduct?.productId || 'listing'}.json`;
-  a.click();
-  toast('Telecharge');
+  a.download = `etsy-${currentProduct?.productId||'listing'}.json`;
+  a.click(); toast('JSON téléchargé');
+  document.getElementById('exportMenu').classList.remove('open');
 }
 
+function downloadCSV() {
+  const title = document.getElementById('etsyTitle').value.replace(/"/g,'""');
+  const desc = document.getElementById('etsyDesc').value.replace(/"/g,'""');
+  const tags = document.getElementById('etsyTags').value.replace(/"/g,'""');
+  const price = document.getElementById('etsySellPrice').value;
+  const cat = document.getElementById('etsyCategory').value.replace(/"/g,'""');
+  const csv = `"Titre","Description","Tags","Prix","Categorie"\n"${title}","${desc}","${tags}","${price}","${cat}"`;
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `etsy-${currentProduct?.productId||'listing'}.csv`;
+  a.click(); toast('CSV téléchargé');
+  document.getElementById('exportMenu').classList.remove('open');
+}
+
+// ============================================================
+// 3. DRAFTS / HISTORY
+// ============================================================
 function saveToDrafts() {
-  const drafts = JSON.parse(localStorage.getItem('pf_drafts') || '[]');
+  const drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+  const img = currentProduct?.images?.[0]||'';
   drafts.unshift({
+    id: Date.now(),
     date: new Date().toISOString(),
     title: document.getElementById('etsyTitle').value,
+    thumbnail: img.replace(/^\/\//,'https://'),
     product: currentProduct,
     listing: {
       title: document.getElementById('etsyTitle').value,
       description: document.getElementById('etsyDesc').value,
-      tags: document.getElementById('etsyTags').value.split(',').map(t => t.trim()),
+      tags: document.getElementById('etsyTags').value.split(',').map(t=>t.trim()),
       category: document.getElementById('etsyCategory').value,
       sellPrice: document.getElementById('etsySellPrice').value,
-      photoNames: currentListing?.photoNames || []
+      photoNames: currentListing?.photoNames||[]
     }
   });
-  localStorage.setItem('pf_drafts', JSON.stringify(drafts.slice(0, 50)));
-  toast('Sauvegarde !');
+  localStorage.setItem('pf_drafts', JSON.stringify(drafts.slice(0,50)));
+  toast('Fiche sauvegardée !');
+}
+
+function toggleDraftsPanel() {
+  const p = document.getElementById('draftsPanel');
+  const o = document.getElementById('draftsOverlay');
+  p.classList.toggle('open'); o.classList.toggle('open');
+  if (p.classList.contains('open')) renderDrafts();
+}
+function closeDraftsPanel() {
+  document.getElementById('draftsPanel').classList.remove('open');
+  document.getElementById('draftsOverlay').classList.remove('open');
+}
+
+function renderDrafts() {
+  const q = (document.getElementById('draftSearch').value||'').toLowerCase();
+  const drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+  const filtered = q ? drafts.filter(d=>(d.title||'').toLowerCase().includes(q)) : drafts;
+  const list = document.getElementById('draftsList');
+  list.innerHTML = '';
+  if (!filtered.length) { list.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Aucune fiche sauvegardée</p>'; return; }
+  filtered.forEach((draft,idx) => {
+    const div = document.createElement('div'); div.className='draft-item';
+    div.innerHTML = `
+      ${draft.thumbnail ? `<img src="${esc(draft.thumbnail)}" alt="" />` : '<div style="width:44px;height:44px;background:var(--border);border-radius:8px;flex-shrink:0;"></div>'}
+      <div class="draft-info">
+        <div class="draft-title">${esc(draft.title||'Sans titre')}</div>
+        <div class="draft-date">${new Date(draft.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+      <button class="draft-delete" onclick="event.stopPropagation();deleteDraft(${draft.id})" title="Supprimer">✕</button>
+    `;
+    div.onclick = () => loadDraft(draft);
+    list.appendChild(div);
+  });
+}
+
+function loadDraft(draft) {
+  if (draft.product) {
+    currentProduct = draft.product;
+    displaySourceData(draft.product);
+  }
+  if (draft.listing) {
+    currentListing = draft.listing;
+    displayEtsyListing(draft.listing);
+  }
+  closeDraftsPanel();
+  toast('Fiche chargée !');
+}
+
+function deleteDraft(id) {
+  let drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+  drafts = drafts.filter(d => d.id !== id);
+  localStorage.setItem('pf_drafts', JSON.stringify(drafts));
+  renderDrafts();
+  toast('Fiche supprimée');
 }
 
 function saveToRecent(product) {
-  const recent = JSON.parse(localStorage.getItem('pf_recent') || '[]');
-  recent.unshift({ date: new Date().toISOString(), title: product.title, id: product.productId });
-  localStorage.setItem('pf_recent', JSON.stringify(recent.slice(0, 20)));
+  const recent = JSON.parse(localStorage.getItem('pf_recent')||'[]');
+  recent.unshift({date:new Date().toISOString(),title:product.title,id:product.productId});
+  localStorage.setItem('pf_recent', JSON.stringify(recent.slice(0,20)));
 }
 
-function esc(str) {
-  const div = document.createElement('div');
-  div.textContent = str || '';
-  return div.innerHTML;
-}
+function esc(str) { const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
 
 // ============================================================
 // INIT
 // ============================================================
 (function init() {
   updateModeBadge();
+  initCategories();
 
   if (window.location.hash) {
     const hash = window.location.hash.substring(1);
@@ -918,32 +1223,23 @@ function esc(str) {
       try {
         const jsonStr = decodeURIComponent(escape(atob(dataParam)));
         const data = JSON.parse(jsonStr);
-        history.replaceState(null, '', window.location.pathname);
+        history.replaceState(null,'',window.location.pathname);
         forgeFromBookmarklet(data);
         return;
-      } catch (e) {
-        console.error('[Product Forge] Failed to parse hash data:', e);
-      }
+      } catch(e) { console.error('[PF] Hash parse error:',e); }
     }
   }
 
   window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'productforge-data' && event.data.product) {
-      forgeFromBookmarklet(event.data.product);
-    }
+    if (event.data&&event.data.type==='productforge-data'&&event.data.product) forgeFromBookmarklet(event.data.product);
   });
 
   const stored = sessionStorage.getItem('pf_incoming_data');
   if (stored) {
-    try {
-      const data = JSON.parse(stored);
-      sessionStorage.removeItem('pf_incoming_data');
-      forgeFromBookmarklet(data);
-      return;
-    } catch (e) {}
+    try { const data=JSON.parse(stored); sessionStorage.removeItem('pf_incoming_data'); forgeFromBookmarklet(data); return; } catch(e) {}
   }
 
-  console.log('[Product Forge] Ready. Mode: ' + getActiveMode());
+  console.log('[Product Forge] Ready. Mode: '+getActiveMode());
 })();
 </script>
 
