@@ -1,5 +1,5 @@
 javascript:void(function(){
-  /* AliExpress Product Scraper Bookmarklet for Product Forge */
+  /* AliExpress Product Scraper → Product Forge v2 */
   try {
     var result = {source:'aliexpress',url:location.href,scrapedAt:new Date().toISOString()};
 
@@ -26,7 +26,6 @@ javascript:void(function(){
     /* --- 2. Extract Title --- */
     result.title = '';
     if (jsonData) {
-      /* Try multiple JSON paths */
       try { result.title = jsonData.props.pageProps.data.productInfoComponent.subject; } catch(e){}
       if (!result.title) try { result.title = jsonData.titleModule.subject; } catch(e){}
       if (!result.title) try { result.title = jsonData.pageModule.title; } catch(e){}
@@ -61,45 +60,28 @@ javascript:void(function(){
     var seen = {};
     function addImg(url) {
       if (!url || result.images.length >= 20) return;
-      /* Clean URL */
       url = url.replace(/^\/\//, 'https://');
       if (url.startsWith('http') && url.indexOf('alicdn.com') !== -1) {
-        /* Remove size suffix to get original */
         var clean = url.replace(/_\d+x\d+\.\w+$/, '').split('?')[0];
         if (!seen[clean]) { seen[clean] = 1; result.images.push(clean); }
       }
     }
-    /* From JSON */
     if (jsonData) {
-      try {
-        var imgs = jsonData.props.pageProps.data.imageComponent.imagePathList;
-        imgs.forEach(function(u){ addImg(u); });
-      } catch(e){}
-      try {
-        var imgs2 = jsonData.imageModule.imagePathList;
-        imgs2.forEach(function(u){ addImg(u); });
-      } catch(e){}
+      try { jsonData.props.pageProps.data.imageComponent.imagePathList.forEach(function(u){ addImg(u); }); } catch(e){}
+      try { jsonData.imageModule.imagePathList.forEach(function(u){ addImg(u); }); } catch(e){}
     }
-    /* From DOM */
     document.querySelectorAll('img[src*="alicdn.com"], img[data-src*="alicdn.com"]').forEach(function(img){
       addImg(img.getAttribute('data-src') || img.src);
     });
-    /* From gallery thumbnails */
     document.querySelectorAll('[class*="slider"] img, [class*="gallery"] img, [class*="image-view"] img').forEach(function(img){
       addImg(img.getAttribute('data-src') || img.src);
     });
 
-    /* --- 5. Extract Specs (attrName / attrValue) --- */
+    /* --- 5. Extract Specs --- */
     result.specs = [];
     if (jsonData) {
-      try {
-        var attrs = jsonData.props.pageProps.data.productPropComponent.props;
-        attrs.forEach(function(a){ result.specs.push({name:a.attrName,value:a.attrValue}); });
-      } catch(e){}
-      if (!result.specs.length) try {
-        var attrs2 = jsonData.specsModule.props;
-        attrs2.forEach(function(a){ result.specs.push({name:a.attrName,value:a.attrValue}); });
-      } catch(e){}
+      try { jsonData.props.pageProps.data.productPropComponent.props.forEach(function(a){ result.specs.push({name:a.attrName,value:a.attrValue}); }); } catch(e){}
+      if (!result.specs.length) try { jsonData.specsModule.props.forEach(function(a){ result.specs.push({name:a.attrName,value:a.attrValue}); }); } catch(e){}
     }
     if (!result.specs.length) {
       document.querySelectorAll('[class*="specification"] li, [class*="product-prop"] li, [class*="attr-list"] li').forEach(function(li){
@@ -143,7 +125,6 @@ javascript:void(function(){
         }
       } catch(e){}
     }
-    /* DOM fallback for variants */
     if (!result.variants.length) {
       document.querySelectorAll('[class*="sku-property-list"], [class*="sku-prop"]').forEach(function(list){
         var titleEl = list.closest('[class*="sku-property-item"]');
@@ -172,113 +153,46 @@ javascript:void(function(){
     /* --- 8. Stats --- */
     result.stats = {images: result.images.length, specs: result.specs.length, variants: result.variants.length};
 
-    /* --- 9. Build popup UI --- */
-    var jsonStr = JSON.stringify(result, null, 2);
-    var overlay = document.createElement('div');
-    overlay.id = 'pf-scraper-overlay';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;';
+    /* --- 9. Send to Product Forge --- */
+    var FORGE_URL = 'https://louisrivault1-cpu.github.io/product-forge/';
+    var jsonStr = JSON.stringify(result);
+    var encoded = btoa(encodeURIComponent(jsonStr));
 
-    var modal = document.createElement('div');
-    modal.style.cssText = 'background:#fff;border-radius:16px;max-width:700px;width:90%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.3);';
-
-    /* Header */
-    var header = document.createElement('div');
-    header.style.cssText = 'padding:20px 24px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;';
-    header.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">📦</span><div><div style="font-weight:700;font-size:16px;color:#111;">Product Forge Scraper</div><div style="font-size:13px;color:#6b7280;">'+result.stats.images+' images · '+result.stats.specs+' specs · '+result.stats.variants+' variant groups</div></div></div>';
-
-    var closeBtn = document.createElement('button');
-    closeBtn.textContent = '✕';
-    closeBtn.style.cssText = 'background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;padding:4px 8px;';
-    closeBtn.onclick = function(){ overlay.remove(); };
-    header.appendChild(closeBtn);
-    modal.appendChild(header);
-
-    /* Title preview */
-    var preview = document.createElement('div');
-    preview.style.cssText = 'padding:12px 24px;background:#f9fafb;border-bottom:1px solid #e5e7eb;';
-    preview.innerHTML = '<div style="font-size:13px;color:#6b7280;margin-bottom:4px;">Product</div><div style="font-size:14px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+((result.title||'No title found').replace(/</g,'&lt;'))+'</div><div style="font-size:14px;color:#ef4444;font-weight:700;margin-top:4px;">'+(result.price||'Price not found')+'</div>';
-    modal.appendChild(preview);
-
-    /* JSON area */
-    var body = document.createElement('div');
-    body.style.cssText = 'flex:1;overflow:auto;padding:16px 24px;';
-    var pre = document.createElement('pre');
-    pre.style.cssText = 'margin:0;font-size:12px;line-height:1.5;color:#374151;white-space:pre-wrap;word-break:break-all;background:#f3f4f6;padding:16px;border-radius:8px;max-height:300px;overflow:auto;';
-    pre.textContent = jsonStr;
-    body.appendChild(pre);
-    modal.appendChild(body);
-
-    /* Footer with buttons */
-    var footer = document.createElement('div');
-    footer.style.cssText = 'padding:16px 24px;border-top:1px solid #e5e7eb;display:flex;gap:10px;flex-wrap:wrap;';
-
-    function makeBtn(text, color, onClick) {
-      var b = document.createElement('button');
-      b.textContent = text;
-      b.style.cssText = 'padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:#fff;background:'+color+';flex:1;min-width:140px;';
-      b.onmouseover = function(){ b.style.opacity='0.9'; };
-      b.onmouseout = function(){ b.style.opacity='1'; };
-      b.onclick = onClick;
-      return b;
+    /* Check if data fits in URL (max ~2MB for most browsers, but be safe at 32KB) */
+    if (encoded.length < 32000) {
+      /* Method A: Open Product Forge with data in URL hash */
+      window.open(FORGE_URL + '#data=' + encoded, '_blank');
+    } else {
+      /* Method B: For large data, open first then postMessage */
+      var forgeWindow = window.open(FORGE_URL, '_blank');
+      var attempts = 0;
+      var sendInterval = setInterval(function(){
+        attempts++;
+        if (attempts > 30) { clearInterval(sendInterval); return; }
+        try {
+          forgeWindow.postMessage({type:'productforge-data', product: result}, '*');
+        } catch(e){}
+      }, 500);
+      /* Stop sending after successful handshake or timeout */
+      window.addEventListener('message', function handler(e){
+        if (e.data && e.data.type === 'productforge-ack') {
+          clearInterval(sendInterval);
+          window.removeEventListener('message', handler);
+        }
+      });
     }
 
-    /* Copy button */
-    footer.appendChild(makeBtn('📋 Copy JSON', '#2563eb', function(){
-      navigator.clipboard.writeText(jsonStr).then(function(){
-        this.textContent = '✅ Copied!';
-        var btn = this;
-        setTimeout(function(){ btn.textContent = '📋 Copy JSON'; }, 2000);
-      }.bind(this)).catch(function(){ prompt('Copy JSON:', jsonStr); });
-    }));
+    /* Quick confirmation toast on the AliExpress page */
+    var notif = document.createElement('div');
+    notif.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:16px 24px;border-radius:12px;font-family:-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(99,102,241,0.4);display:flex;align-items:center;gap:10px;animation:pfSlideIn 0.3s ease-out;';
+    notif.innerHTML = '<span style="font-size:20px;">📦</span><div><div>Product Forge</div><div style="font-size:12px;font-weight:400;opacity:0.9;">'+result.stats.images+' images · '+result.stats.specs+' specs · Envoyé !</div></div>';
+    var style = document.createElement('style');
+    style.textContent = '@keyframes pfSlideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}';
+    document.head.appendChild(style);
+    document.body.appendChild(notif);
+    setTimeout(function(){ notif.style.transition='all 0.3s'; notif.style.transform='translateX(100px)'; notif.style.opacity='0'; setTimeout(function(){ notif.remove(); style.remove(); }, 300); }, 3000);
 
-    /* Send to Apify button */
-    footer.appendChild(makeBtn('🚀 Send to Apify', '#7c3aed', function(){
-      var btn = this;
-      btn.textContent = '⏳ Sending...';
-      btn.style.opacity = '0.7';
-      var apiToken = prompt('Enter your Apify API token (find it at console.apify.com/account#/integrations):');
-      if (!apiToken) { btn.textContent = '🚀 Send to Apify'; btn.style.opacity = '1'; return; }
-      fetch('https://api.apify.com/v2/actor-tasks/painless_rachis~product-forge-scraper/runs?token=' + apiToken, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({productData: result})
-      }).then(function(r){ return r.json(); }).then(function(d){
-        btn.textContent = '✅ Sent!';
-        btn.style.background = '#059669';
-        setTimeout(function(){ btn.textContent = '🚀 Send to Apify'; btn.style.background = '#7c3aed'; }, 3000);
-      }).catch(function(e){
-        btn.textContent = '❌ Error';
-        btn.style.background = '#dc2626';
-        setTimeout(function(){ btn.textContent = '🚀 Send to Apify'; btn.style.background = '#7c3aed'; }, 3000);
-        console.error('Apify send error:', e);
-      });
-    }));
-
-    /* Download JSON */
-    footer.appendChild(makeBtn('💾 Download', '#059669', function(){
-      var blob = new Blob([jsonStr], {type:'application/json'});
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'product-'+(result.productId||'data')+'.json';
-      a.click();
-    }));
-
-    modal.appendChild(footer);
-    overlay.appendChild(modal);
-
-    /* Close on overlay click */
-    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
-
-    /* Remove previous instance */
-    var old = document.getElementById('pf-scraper-overlay');
-    if (old) old.remove();
-
-    document.body.appendChild(overlay);
-
-    /* Auto-copy */
-    navigator.clipboard.writeText(jsonStr).catch(function(){});
-
-    console.log('[Product Forge Scraper]', result);
+    console.log('[Product Forge] Scraped & sent:', result.stats);
 
   } catch(err) {
     alert('Product Forge Scraper Error: ' + err.message);
