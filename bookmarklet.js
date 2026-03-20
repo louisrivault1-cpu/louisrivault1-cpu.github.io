@@ -1,5 +1,5 @@
 javascript:void(function(){
-  /* AliExpress Product Scraper → Product Forge v2 */
+  /* AliExpress Product Scraper → Product Forge v3 */
   try {
     var result = {source:'aliexpress',url:location.href,scrapedAt:new Date().toISOString()};
 
@@ -8,30 +8,51 @@ javascript:void(function(){
     var scripts = document.querySelectorAll('script');
     for (var i = 0; i < scripts.length; i++) {
       var txt = scripts[i].textContent;
-      /* runParams pattern */
-      var m = txt.match(/data:\s*(\{.*?"actionModule".*?\})\s*[,;}\n]/s);
-      if (m) { try { jsonData = JSON.parse(m[1]); } catch(e){} }
-      if (jsonData) break;
-      /* window.runParams */
-      m = txt.match(/window\.runParams\s*=\s*(\{.*?\});/s);
-      if (m) { try { jsonData = JSON.parse(m[1]); } catch(e){} }
-      if (jsonData) break;
       /* __NEXT_DATA__ (newer AliExpress) */
       if (scripts[i].id === '__NEXT_DATA__') {
         try { jsonData = JSON.parse(txt); } catch(e){}
-        if (jsonData) break;
+        if (jsonData && Object.keys(jsonData).length > 0) break;
+        jsonData = null;
       }
+      /* runParams with data containing actionModule */
+      var m = txt.match(/data:\s*(\{.*?"actionModule".*?\})\s*[,;}\n]/s);
+      if (m) { try { var parsed = JSON.parse(m[1]); if (Object.keys(parsed).length > 2) jsonData = parsed; } catch(e){} }
+      if (jsonData) break;
+      /* window.runParams with nested data */
+      m = txt.match(/window\.runParams\s*=\s*(\{.*?\});/s);
+      if (m) {
+        try {
+          var parsed = JSON.parse(m[1]);
+          if (parsed.data && Object.keys(parsed.data).length > 2) jsonData = parsed;
+          else if (Object.keys(parsed).length > 5) jsonData = parsed;
+        } catch(e){}
+      }
+      if (jsonData) break;
     }
 
     /* --- 2. Extract Title --- */
     result.title = '';
     if (jsonData) {
       try { result.title = jsonData.props.pageProps.data.productInfoComponent.subject; } catch(e){}
+      if (!result.title) try { result.title = jsonData.data.productInfoComponent.subject; } catch(e){}
       if (!result.title) try { result.title = jsonData.titleModule.subject; } catch(e){}
       if (!result.title) try { result.title = jsonData.pageModule.title; } catch(e){}
     }
     if (!result.title) {
-      var titleEl = document.querySelector('h1[data-pl="product-title"], h1.product-title-text, h1');
+      /* Use data-pl attribute first (most specific), then class-based, then generic h1 (skip site header) */
+      var titleEl = document.querySelector('[data-pl="product-title"]')
+        || document.querySelector('h1.product-title-text')
+        || document.querySelector('[class*="product-title--text"]');
+      if (!titleEl) {
+        /* Fallback: find h1 that is NOT the site header */
+        var h1s = document.querySelectorAll('h1');
+        for (var j = 0; j < h1s.length; j++) {
+          var h1text = h1s[j].textContent.trim();
+          if (h1text.length > 10 && h1text.toLowerCase() !== 'aliexpress') {
+            titleEl = h1s[j]; break;
+          }
+        }
+      }
       if (titleEl) result.title = titleEl.textContent.trim();
     }
 
@@ -46,22 +67,32 @@ javascript:void(function(){
       } catch(e){}
       if (!result.price) try {
         var pm = jsonData.priceModule;
-        result.price = pm.formatedActivityPrice || pm.formatedPrice || pm.minAmount && (pm.minAmount.currency+' '+pm.minAmount.value) || '';
+        result.price = pm.formatedActivityPrice || pm.formatedPrice || (pm.minAmount && (pm.minAmount.currency+' '+pm.minAmount.value)) || '';
         result.originalPrice = pm.formatedPrice || '';
       } catch(e){}
     }
     if (!result.price) {
-      var priceEl = document.querySelector('[class*="product-price-current"], [class*="uniform-banner-box-price"], .product-price-value');
+      /* New AliExpress (2024+) class patterns */
+      var priceEl = document.querySelector('[class*="price-default--current"]')
+        || document.querySelector('[class*="product-price-current"]')
+        || document.querySelector('[class*="uniform-banner-box-price"]')
+        || document.querySelector('.product-price-value');
       if (priceEl) result.price = priceEl.textContent.trim();
     }
+    if (!result.originalPrice) {
+      var origEl = document.querySelector('[class*="price-default--origin"] bdi')
+        || document.querySelector('[class*="price-default--del"]')
+        || document.querySelector('[class*="product-price-original"]');
+      if (origEl) result.originalPrice = origEl.textContent.trim();
+    }
 
-    /* --- 4. Extract Images (alicdn.com CDN URLs, max 20) --- */
+    /* --- 4. Extract Images (alicdn.com + aliexpress-media.com CDN URLs, max 20) --- */
     result.images = [];
     var seen = {};
     function addImg(url) {
       if (!url || result.images.length >= 20) return;
       url = url.replace(/^\/\//, 'https://');
-      if (url.startsWith('http') && url.indexOf('alicdn.com') !== -1) {
+      if (url.startsWith('http') && (url.indexOf('alicdn.com') !== -1 || url.indexOf('aliexpress-media.com') !== -1)) {
         var clean = url.replace(/_\d+x\d+\.\w+$/, '').split('?')[0];
         if (!seen[clean]) { seen[clean] = 1; result.images.push(clean); }
       }
@@ -70,7 +101,7 @@ javascript:void(function(){
       try { jsonData.props.pageProps.data.imageComponent.imagePathList.forEach(function(u){ addImg(u); }); } catch(e){}
       try { jsonData.imageModule.imagePathList.forEach(function(u){ addImg(u); }); } catch(e){}
     }
-    document.querySelectorAll('img[src*="alicdn.com"], img[data-src*="alicdn.com"]').forEach(function(img){
+    document.querySelectorAll('img[src*="alicdn.com"], img[data-src*="alicdn.com"], img[src*="aliexpress-media.com"], img[data-src*="aliexpress-media.com"]').forEach(function(img){
       addImg(img.getAttribute('data-src') || img.src);
     });
     document.querySelectorAll('[class*="slider"] img, [class*="gallery"] img, [class*="image-view"] img').forEach(function(img){
@@ -84,6 +115,15 @@ javascript:void(function(){
       if (!result.specs.length) try { jsonData.specsModule.props.forEach(function(a){ result.specs.push({name:a.attrName,value:a.attrValue}); }); } catch(e){}
     }
     if (!result.specs.length) {
+      /* New AliExpress (2024+): specification--prop / specification--title / specification--desc */
+      document.querySelectorAll('[class*="specification--prop"]').forEach(function(prop){
+        var title = prop.querySelector('[class*="specification--title"]');
+        var desc = prop.querySelector('[class*="specification--desc"]');
+        if (title && desc) result.specs.push({name:title.textContent.trim(), value:desc.textContent.trim()});
+      });
+    }
+    if (!result.specs.length) {
+      /* Old patterns */
       document.querySelectorAll('[class*="specification"] li, [class*="product-prop"] li, [class*="attr-list"] li').forEach(function(li){
         var parts = li.textContent.split(':');
         if (parts.length >= 2) result.specs.push({name:parts[0].trim(),value:parts.slice(1).join(':').trim()});
@@ -126,6 +166,35 @@ javascript:void(function(){
       } catch(e){}
     }
     if (!result.variants.length) {
+      /* New AliExpress (2024+): sku-item--box contains title + image list */
+      document.querySelectorAll('[class*="sku-item--box"]').forEach(function(box){
+        var titleEl = box.querySelector('[class*="sku-item--title"]');
+        var rawTitle = titleEl ? titleEl.textContent.trim() : 'Option';
+        /* Extract group name: "Color: Global Black" → "Color" */
+        var colonIdx = rawTitle.indexOf(':');
+        var groupName = colonIdx > 0 ? rawTitle.substring(0, colonIdx).trim() : rawTitle;
+        var group = {name: groupName, options: []};
+        var seenOpts = {};
+        /* Get variant options from images (title or alt attribute) */
+        box.querySelectorAll('[class*="sku-item--image"] img, [class*="sku-item--selected"] img').forEach(function(img){
+          var name = img.title || img.alt || '';
+          if (name && !seenOpts[name]) {
+            seenOpts[name] = 1;
+            var opt = {name: name};
+            if (img.src) opt.image = img.src.replace(/^\/\//, 'https://');
+            group.options.push(opt);
+          }
+        });
+        /* Also check text-based SKU values */
+        box.querySelectorAll('[class*="sku-item--text"]').forEach(function(el){
+          var name = el.textContent.trim();
+          if (name && !seenOpts[name]) { seenOpts[name] = 1; group.options.push({name: name}); }
+        });
+        if (group.options.length) result.variants.push(group);
+      });
+    }
+    if (!result.variants.length) {
+      /* Legacy patterns */
       document.querySelectorAll('[class*="sku-property-list"], [class*="sku-prop"]').forEach(function(list){
         var titleEl = list.closest('[class*="sku-property-item"]');
         var groupName = '';
@@ -156,7 +225,7 @@ javascript:void(function(){
     /* --- 9. Send to Product Forge --- */
     var FORGE_URL = 'https://louisrivault1-cpu.github.io/product-forge/';
     var jsonStr = JSON.stringify(result);
-    var encoded = btoa(encodeURIComponent(jsonStr));
+    var encoded = btoa(unescape(encodeURIComponent(jsonStr)));
 
     /* Check if data fits in URL (max ~2MB for most browsers, but be safe at 32KB) */
     if (encoded.length < 32000) {

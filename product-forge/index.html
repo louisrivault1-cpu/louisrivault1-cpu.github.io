@@ -323,6 +323,10 @@
       <input type="password" id="apifyToken" placeholder="apify_api_..." />
       <div class="hint">Pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
 
+      <label>Actor ID Apify</label>
+      <input type="text" id="apifyActorId" placeholder="painless_rachis/product-forge-scraper" />
+      <div class="hint">L'ID de l'actor Apify a utiliser pour le scraping</div>
+
       <div class="actions">
         <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
         <button class="btn btn-outline" onclick="closeSettings()">Annuler</button>
@@ -347,6 +351,7 @@ function getSettings() {
     mode: localStorage.getItem('pf_mode') || 'auto', // 'auto', 'api', 'free'
     claudeKey: localStorage.getItem('pf_claude_key') || '',
     apifyToken: localStorage.getItem('pf_apify_token') || '',
+    apifyActorId: localStorage.getItem('pf_apify_actor_id') || 'painless_rachis/product-forge-scraper',
     claudeModel: localStorage.getItem('pf_claude_model') || 'claude-sonnet-4-20250514'
   };
 }
@@ -375,6 +380,7 @@ function openSettings() {
   const s = getSettings();
   document.getElementById('claudeKey').value = s.claudeKey;
   document.getElementById('apifyToken').value = s.apifyToken;
+  document.getElementById('apifyActorId').value = s.apifyActorId;
   document.getElementById('claudeModel').value = s.claudeModel;
 
   // Select current mode
@@ -403,6 +409,7 @@ function saveSettings() {
   localStorage.setItem('pf_mode', selectedMode);
   localStorage.setItem('pf_claude_key', document.getElementById('claudeKey').value.trim());
   localStorage.setItem('pf_apify_token', document.getElementById('apifyToken').value.trim());
+  localStorage.setItem('pf_apify_actor_id', document.getElementById('apifyActorId').value.trim());
   localStorage.setItem('pf_claude_model', document.getElementById('claudeModel').value.trim());
   closeSettings();
   updateModeBadge();
@@ -683,9 +690,11 @@ async function scrapeFromUrl() {
   showLoading('Scraping en cours...', 'Apify analyse la page AliExpress');
 
   try {
-    const actorId = 'epctex~aliexpress-scraper';
+    const actorId = s.apifyActorId || 'painless_rachis/product-forge-scraper';
+    /* Apify accepts both user/actor and user~actor format */
+    const actorPath = actorId.replace(/\//g, '~');
     const resp = await fetch(
-      `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${s.apifyToken}`,
+      `https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -907,7 +916,7 @@ function esc(str) {
     const dataParam = params.get('data');
     if (dataParam) {
       try {
-        const jsonStr = decodeURIComponent(atob(dataParam));
+        const jsonStr = decodeURIComponent(escape(atob(dataParam)));
         const data = JSON.parse(jsonStr);
         history.replaceState(null, '', window.location.pathname);
         forgeFromBookmarklet(data);
