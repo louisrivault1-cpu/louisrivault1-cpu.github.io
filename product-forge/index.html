@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Forge – Générateur de Fiches Etsy</title>
   <style>
-    :root { --bg: #0f172a; --card: #1e293b; --accent: #6366f1; --accent2: #8b5cf6; --green: #10b981; --orange: #f59e0b; --red: #ef4444; --text: #e2e8f0; --muted: #94a3b8; --border: #334155; }
+    :root { --bg: #0f172a; --card: #1e293b; --accent: #6366f1; --accent2: #8b5cf6; --green: #10b981; --orange: #f59e0b; --red: #ef4444; --text: #e2e8f0; --muted: #94a3b8; --border: #334155; --claude: #d97706; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
 
-    /* Header */
     .header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--card); }
     .header h1 { font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .header .status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
@@ -19,68 +18,74 @@
     .dot-red { background: var(--red); }
     @keyframes blink { 50% { opacity: 0.4; } }
 
-    /* Layout */
+    .mode-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .mode-badge.api { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+    .mode-badge.free { background: linear-gradient(135deg, var(--green), #059669); color: #fff; }
+
     .main { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 65px); }
     @media (max-width: 1024px) { .main { grid-template-columns: 1fr; } }
 
-    /* Left panel - Source data */
     .panel { padding: 24px; overflow-y: auto; max-height: calc(100vh - 65px); }
     .panel-left { border-right: 1px solid var(--border); }
     .panel h2 { font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 
-    /* Cards */
     .data-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
     .data-card h3 { font-size: 14px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     .data-card .value { font-size: 16px; font-weight: 600; }
     .data-card .price { color: var(--red); font-size: 20px; font-weight: 700; }
 
-    /* Images grid */
     .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 8px; }
     .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; transition: border-color 0.2s; }
     .images-grid img:hover { border-color: var(--accent); }
     .images-grid img.selected { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
 
-    /* Specs table */
     .specs-table { width: 100%; font-size: 13px; }
     .specs-table tr { border-bottom: 1px solid var(--border); }
     .specs-table td { padding: 8px 0; }
     .specs-table td:first-child { color: var(--muted); width: 40%; }
 
-    /* Variants */
     .variant-group { margin-bottom: 12px; }
     .variant-group h4 { font-size: 13px; color: var(--accent); margin-bottom: 6px; }
     .variant-tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .variant-tag { background: rgba(99,102,241,0.15); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 12px; }
 
-    /* Right panel - Generated listing */
     .panel-right { background: rgba(15,23,42,0.5); }
 
-    /* Etsy listing output */
     .etsy-section { margin-bottom: 20px; }
     .etsy-section label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
     .etsy-section textarea, .etsy-section input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; }
     .etsy-section textarea:focus, .etsy-section input:focus { outline: none; border-color: var(--accent); }
     .etsy-section textarea { min-height: 120px; }
 
-    /* Photo names */
     .photo-names { list-style: none; }
     .photo-names li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
     .photo-names li img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
     .photo-names li .name { color: var(--green); font-family: monospace; flex: 1; }
 
-    /* Tags */
     .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag { background: rgba(16,185,129,0.15); color: var(--green); padding: 4px 10px; border-radius: 6px; font-size: 12px; }
 
-    /* Buttons */
     .btn { padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
     .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.3); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,0.3); }
+    .btn-claude { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+    .btn-claude:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(217,119,6,0.4); }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
     .btn-outline:hover { border-color: var(--accent); }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+    /* Claude free mode card */
+    .claude-card { background: linear-gradient(135deg, rgba(217,119,6,0.1), rgba(180,83,9,0.05)); border: 1px solid rgba(217,119,6,0.3); border-radius: 16px; padding: 28px; text-align: center; }
+    .claude-card h3 { font-size: 1.05rem; margin-bottom: 6px; color: #fbbf24; }
+    .claude-card p { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+    .claude-steps { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .claude-step { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .claude-step .num { background: var(--claude); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+    .prompt-preview { background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 12px; max-height: 250px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 11px; color: #8b949e; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
 
     /* Loading state */
     .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
@@ -88,27 +93,33 @@
     .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Welcome state */
     .welcome { display: flex; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 48px; }
     .welcome h2 { font-size: 1.5rem; margin-bottom: 12px; }
     .welcome p { color: var(--muted); margin-bottom: 24px; max-width: 500px; }
 
-    /* URL input */
     .url-input-group { display: flex; gap: 8px; max-width: 500px; margin: 0 auto; }
     .url-input-group input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; color: var(--text); font-size: 14px; }
     .url-input-group input:focus { outline: none; border-color: var(--accent); }
 
-    /* Settings modal */
     .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 900; display: none; align-items: center; justify-content: center; }
     .modal-backdrop.active { display: flex; }
-    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; }
+    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 520px; width: 90%; }
     .modal h2 { margin-bottom: 20px; }
     .modal label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; margin-top: 16px; }
-    .modal input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; }
-    .modal input:focus { outline: none; border-color: var(--accent); }
+    .modal input, .modal select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; }
+    .modal input:focus, .modal select:focus { outline: none; border-color: var(--accent); }
     .modal .actions { margin-top: 24px; }
+    .modal .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-    /* Toast */
+    /* Mode selector in settings */
+    .mode-selector { display: flex; gap: 8px; margin-top: 8px; }
+    .mode-option { flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .mode-option:hover { border-color: var(--accent); }
+    .mode-option.active { border-color: var(--green); background: rgba(16,185,129,0.1); }
+    .mode-option .mode-icon { font-size: 24px; margin-bottom: 4px; }
+    .mode-option .mode-name { font-size: 13px; font-weight: 600; }
+    .mode-option .mode-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
@@ -119,60 +130,57 @@
 
   <!-- Header -->
   <div class="header">
-    <h1>📦 Product Forge</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <h1>Product Forge</h1>
+      <span class="mode-badge free" id="modeBadge">GRATUIT</span>
+    </div>
     <div style="display:flex;align-items:center;gap:16px;">
-      <div class="status" id="statusText"><div class="dot dot-green"></div> Prêt</div>
-      <button class="btn btn-outline" onclick="openSettings()" style="padding:8px 16px;font-size:13px;">⚙️ API Keys</button>
+      <div class="status" id="statusText"><div class="dot dot-green"></div> Pret</div>
+      <button class="btn btn-outline" onclick="openSettings()" style="padding:8px 16px;font-size:13px;">Settings</button>
     </div>
   </div>
 
-  <!-- Welcome state (shown when no data) -->
+  <!-- Welcome -->
   <div id="welcomeView" class="welcome">
     <div>
       <div style="font-size:64px;margin-bottom:16px;">🔗</div>
-      <h2>En attente de données...</h2>
-      <p>Utilisez le bookmarklet sur une page AliExpress pour envoyer les données ici, ou collez une URL ci-dessous.</p>
+      <h2>En attente de donnees...</h2>
+      <p>Utilisez le bookmarklet sur une page AliExpress pour envoyer les donnees ici, ou collez une URL ci-dessous.</p>
       <div class="url-input-group">
         <input type="text" id="urlInput" placeholder="https://www.aliexpress.com/item/..." />
         <button class="btn btn-primary" onclick="scrapeFromUrl()">Scraper via Apify</button>
       </div>
-      <p style="margin-top:16px;font-size:13px;color:var(--muted);">💡 Astuce: Installez le <a href="https://louisrivault1-cpu.github.io/" style="color:var(--accent);">bookmarklet</a> pour un scraping direct sans Apify</p>
+      <p style="margin-top:16px;font-size:13px;color:var(--muted);">Astuce: Installez le <a href="https://louisrivault1-cpu.github.io/" style="color:var(--accent);">bookmarklet</a> pour un scraping direct sans Apify</p>
     </div>
   </div>
 
-  <!-- Main content (shown when data is loaded) -->
+  <!-- Main content -->
   <div id="mainView" class="main hidden">
 
     <!-- Left: Source data -->
     <div class="panel panel-left">
-      <h2>📋 Données AliExpress</h2>
-
+      <h2>Donnees AliExpress</h2>
       <div class="data-card">
         <h3>Titre</h3>
         <div class="value" id="srcTitle">—</div>
       </div>
-
       <div class="data-card">
         <h3>Prix</h3>
         <div class="price" id="srcPrice">—</div>
         <div style="color:var(--muted);font-size:13px;text-decoration:line-through;margin-top:4px;" id="srcOrigPrice"></div>
       </div>
-
       <div class="data-card">
         <h3>Images (<span id="imgCount">0</span>)</h3>
         <div class="images-grid" id="srcImages"></div>
       </div>
-
       <div class="data-card">
-        <h3>Spécifications</h3>
+        <h3>Specifications</h3>
         <table class="specs-table" id="srcSpecs"><tbody></tbody></table>
       </div>
-
       <div class="data-card">
         <h3>Variantes</h3>
         <div id="srcVariants"></div>
       </div>
-
       <div class="data-card">
         <h3>Source</h3>
         <div style="font-size:13px;">
@@ -184,53 +192,91 @@
 
     <!-- Right: Generated Etsy listing -->
     <div class="panel panel-right">
-      <h2>🛒 Fiche Etsy Générée</h2>
+      <h2>Fiche Etsy</h2>
 
+      <!-- Generate zone: shows API or Claude-free depending on mode -->
       <div id="generateZone">
-        <div class="data-card" style="text-align:center;padding:32px;">
+
+        <!-- API MODE -->
+        <div id="apiModeCard" class="data-card hidden" style="text-align:center;padding:32px;">
           <div style="font-size:40px;margin-bottom:12px;">🤖</div>
-          <p style="color:var(--muted);margin-bottom:16px;">Cliquez pour générer la fiche Etsy avec Claude AI</p>
-          <button class="btn btn-primary" id="generateBtn" onclick="generateEtsyListing()">✨ Générer la fiche Etsy</button>
+          <p style="color:var(--muted);margin-bottom:16px;">Generation automatique via l'API Claude</p>
+          <button class="btn btn-primary" id="generateBtn" onclick="generateViaAPI()">Generer la fiche Etsy</button>
+          <div style="margin-top:12px;">
+            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToFreeMode()">Passer en mode gratuit (sans API)</span>
+          </div>
         </div>
+
+        <!-- FREE CLAUDE MODE -->
+        <div id="freeModeCard" class="claude-card hidden">
+          <h3>Generer avec votre compte Claude</h3>
+          <p>Product Forge cree un prompt optimise. Ouvrez Claude, collez-le, et recuperez votre fiche Etsy.</p>
+
+          <div class="claude-steps">
+            <div class="claude-step"><span class="num">1</span> Prompt genere</div>
+            <div class="claude-step"><span class="num">2</span> Ouvrir Claude</div>
+            <div class="claude-step"><span class="num">3</span> Coller & recuperer</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center;">
+            <button class="btn btn-claude" onclick="openClaudeWithPrompt()" style="font-size:15px;padding:14px 28px;">
+              Ouvrir Claude avec le prompt
+            </button>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-green" onclick="copyPromptToClipboard()">Copier le prompt</button>
+              <button class="btn btn-outline" onclick="togglePromptPreview()">Voir le prompt</button>
+            </div>
+          </div>
+
+          <div id="promptPreviewZone" class="hidden">
+            <div class="prompt-preview" id="promptPreviewText"></div>
+          </div>
+
+          <div style="margin-top:20px;padding:12px;background:var(--card);border-radius:8px;text-align:left;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Quand Claude repond, collez le JSON ici :</div>
+            <textarea id="claudeResponseInput" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-family:'Courier New',monospace;font-size:12px;min-height:100px;resize:vertical;" placeholder='Collez la reponse JSON de Claude ici...'></textarea>
+            <button class="btn btn-primary" style="margin-top:8px;width:100%;" onclick="parseClaudeResponse()">Importer la reponse</button>
+          </div>
+
+          <div style="margin-top:12px;">
+            <span style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;" onclick="switchToApiMode()">J'ai une cle API → mode automatique</span>
+          </div>
+        </div>
+
       </div>
 
+      <!-- Etsy output -->
       <div id="etsyOutput" class="hidden">
         <div class="etsy-section">
           <label>Titre Etsy (140 car. max)</label>
           <input type="text" id="etsyTitle" maxlength="140" />
         </div>
-
         <div class="etsy-section">
           <label>Description</label>
           <textarea id="etsyDesc" rows="10"></textarea>
         </div>
-
         <div class="etsy-section">
-          <label>Tags (13 max, séparés par des virgules)</label>
+          <label>Tags (13 max)</label>
           <input type="text" id="etsyTags" />
           <div class="tags-list" id="etsyTagsPreview" style="margin-top:8px;"></div>
         </div>
-
         <div class="etsy-section">
-          <label>Catégorie Etsy suggérée</label>
+          <label>Categorie Etsy</label>
           <input type="text" id="etsyCategory" />
         </div>
-
         <div class="etsy-section">
-          <label>Prix de vente suggéré (EUR)</label>
+          <label>Prix de vente suggere (EUR)</label>
           <input type="text" id="etsySellPrice" />
         </div>
-
         <div class="etsy-section">
-          <label>📸 Noms SEO des photos</label>
+          <label>Noms SEO des photos</label>
           <ul class="photo-names" id="photoNames"></ul>
         </div>
-
         <div class="actions">
-          <button class="btn btn-primary" onclick="generateEtsyListing()">🔄 Régénérer</button>
-          <button class="btn btn-green" onclick="copyListing()">📋 Copier tout</button>
-          <button class="btn btn-outline" onclick="downloadListing()">💾 Télécharger</button>
-          <button class="btn btn-outline" onclick="saveToDrafts()">📌 Sauvegarder</button>
+          <button class="btn btn-primary" onclick="showGenerateZone()">Regenerer</button>
+          <button class="btn btn-green" onclick="copyListing()">Copier tout</button>
+          <button class="btn btn-outline" onclick="downloadListing()">Telecharger</button>
+          <button class="btn btn-outline" onclick="saveToDrafts()">Sauvegarder</button>
         </div>
       </div>
     </div>
@@ -240,21 +286,43 @@
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loading-box">
       <div class="spinner"></div>
-      <div style="font-weight:600;margin-bottom:8px;" id="loadingTitle">Génération en cours...</div>
-      <div style="color:var(--muted);font-size:14px;" id="loadingMsg">Claude AI analyse le produit et crée votre fiche Etsy</div>
+      <div style="font-weight:600;margin-bottom:8px;" id="loadingTitle">Generation en cours...</div>
+      <div style="color:var(--muted);font-size:14px;" id="loadingMsg">Claude AI analyse le produit</div>
     </div>
   </div>
 
   <!-- Settings modal -->
   <div class="modal-backdrop" id="settingsModal">
     <div class="modal">
-      <h2>⚙️ Configuration API</h2>
-      <label>Clé API Claude (Anthropic)</label>
-      <input type="password" id="claudeKey" placeholder="sk-ant-..." />
+      <h2>Configuration</h2>
+
+      <label>Mode de generation</label>
+      <div class="mode-selector">
+        <div class="mode-option" id="modeOptFree" onclick="selectMode('free')">
+          <div class="mode-icon">🆓</div>
+          <div class="mode-name">Mon compte Claude</div>
+          <div class="mode-desc">Gratuit, via claude.ai</div>
+        </div>
+        <div class="mode-option" id="modeOptApi" onclick="selectMode('api')">
+          <div class="mode-icon">⚡</div>
+          <div class="mode-name">API Anthropic</div>
+          <div class="mode-desc">Automatique, cle API requise</div>
+        </div>
+      </div>
+
+      <div id="apiSettingsGroup">
+        <label>Cle API Claude (Anthropic)</label>
+        <input type="password" id="claudeKey" placeholder="sk-ant-..." />
+        <div class="hint">Necessaire uniquement en mode API</div>
+
+        <label>Modele Claude</label>
+        <input type="text" id="claudeModel" value="claude-sonnet-4-20250514" />
+      </div>
+
       <label>Token API Apify (optionnel)</label>
       <input type="password" id="apifyToken" placeholder="apify_api_..." />
-      <label>Modèle Claude</label>
-      <input type="text" id="claudeModel" value="claude-sonnet-4-20250514" />
+      <div class="hint">Pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
+
       <div class="actions">
         <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
         <button class="btn btn-outline" onclick="closeSettings()">Annuler</button>
@@ -267,37 +335,104 @@
 
 <script>
 /* ============================================================
-   PRODUCT FORGE – Main Application
+   PRODUCT FORGE – Dual Mode (API + Free Claude)
    ============================================================ */
 
-// Global state
 let currentProduct = null;
 let currentListing = null;
 
 // ========== SETTINGS ==========
 function getSettings() {
   return {
+    mode: localStorage.getItem('pf_mode') || 'auto', // 'auto', 'api', 'free'
     claudeKey: localStorage.getItem('pf_claude_key') || '',
     apifyToken: localStorage.getItem('pf_apify_token') || '',
     claudeModel: localStorage.getItem('pf_claude_model') || 'claude-sonnet-4-20250514'
   };
 }
+
+function getActiveMode() {
+  const s = getSettings();
+  if (s.mode === 'api') return 'api';
+  if (s.mode === 'free') return 'free';
+  // Auto: use API if key exists, otherwise free
+  return s.claudeKey ? 'api' : 'free';
+}
+
+function updateModeBadge() {
+  const mode = getActiveMode();
+  const badge = document.getElementById('modeBadge');
+  if (mode === 'api') {
+    badge.textContent = 'API';
+    badge.className = 'mode-badge api';
+  } else {
+    badge.textContent = 'GRATUIT';
+    badge.className = 'mode-badge free';
+  }
+}
+
 function openSettings() {
   const s = getSettings();
   document.getElementById('claudeKey').value = s.claudeKey;
   document.getElementById('apifyToken').value = s.apifyToken;
   document.getElementById('claudeModel').value = s.claudeModel;
+
+  // Select current mode
+  const mode = getActiveMode();
+  selectMode(mode === 'api' ? 'api' : 'free', true);
+
   document.getElementById('settingsModal').classList.add('active');
 }
 function closeSettings() {
   document.getElementById('settingsModal').classList.remove('active');
 }
+
+function selectMode(mode, uiOnly) {
+  document.getElementById('modeOptFree').classList.toggle('active', mode === 'free');
+  document.getElementById('modeOptApi').classList.toggle('active', mode === 'api');
+  document.getElementById('apiSettingsGroup').style.display = mode === 'api' ? 'block' : 'none';
+  if (!uiOnly) {
+    document.getElementById('settingsModal')._selectedMode = mode;
+  } else {
+    document.getElementById('settingsModal')._selectedMode = mode;
+  }
+}
+
 function saveSettings() {
+  const selectedMode = document.getElementById('settingsModal')._selectedMode || 'free';
+  localStorage.setItem('pf_mode', selectedMode);
   localStorage.setItem('pf_claude_key', document.getElementById('claudeKey').value.trim());
   localStorage.setItem('pf_apify_token', document.getElementById('apifyToken').value.trim());
   localStorage.setItem('pf_claude_model', document.getElementById('claudeModel').value.trim());
   closeSettings();
-  toast('✅ Configuration sauvegardée');
+  updateModeBadge();
+  updateGenerateZone();
+  toast('Configuration sauvegardee');
+}
+
+function switchToFreeMode() {
+  localStorage.setItem('pf_mode', 'free');
+  updateModeBadge();
+  updateGenerateZone();
+}
+
+function switchToApiMode() {
+  const s = getSettings();
+  if (!s.claudeKey) {
+    openSettings();
+    selectMode('api');
+    toast('Entrez votre cle API Claude');
+    return;
+  }
+  localStorage.setItem('pf_mode', 'api');
+  updateModeBadge();
+  updateGenerateZone();
+}
+
+function updateGenerateZone() {
+  const mode = getActiveMode();
+  document.getElementById('apiModeCard').classList.toggle('hidden', mode !== 'api');
+  document.getElementById('freeModeCard').classList.toggle('hidden', mode !== 'free');
 }
 
 // ========== TOAST ==========
@@ -308,13 +443,10 @@ function toast(msg, duration = 3000) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 
-// ========== STATUS ==========
+// ========== STATUS / LOADING ==========
 function setStatus(text, color) {
-  const el = document.getElementById('statusText');
-  el.innerHTML = '<div class="dot dot-' + color + '"></div> ' + text;
+  document.getElementById('statusText').innerHTML = '<div class="dot dot-' + color + '"></div> ' + text;
 }
-
-// ========== LOADING ==========
 function showLoading(title, msg) {
   document.getElementById('loadingTitle').textContent = title || 'Chargement...';
   document.getElementById('loadingMsg').textContent = msg || '';
@@ -325,175 +457,70 @@ function hideLoading() {
 }
 
 // ============================================================
-// CORE: Receive data from bookmarklet (via URL hash)
+// PROMPT BUILDER
 // ============================================================
-function forgeFromBookmarklet(data) {
-  console.log('[Product Forge] Received bookmarklet data:', data);
-  currentProduct = data;
-  displaySourceData(data);
-  setStatus('Données reçues du bookmarklet', 'green');
-  toast('📦 Produit chargé depuis le bookmarklet !');
+function buildEtsyPrompt(product) {
+  const specs = (product.specs || []).map(s => `  - ${s.name}: ${s.value}`).join('\n');
+  const variants = (product.variants || []).map(v => {
+    const opts = (v.options || []).map(o => o.name || o).join(', ');
+    return `  - ${v.name || 'Option'}: ${opts}`;
+  }).join('\n');
+  const nbImages = (product.images || []).length;
 
-  // Save to recent products
-  saveToRecent(data);
+  return `Tu es un expert en e-commerce Etsy et en SEO. Analyse ce produit AliExpress et cree une fiche Etsy optimisee pour maximiser les ventes.
 
-  // Auto-generate if Claude key is set
-  const s = getSettings();
-  if (s.claudeKey) {
-    setTimeout(() => generateEtsyListing(), 500);
-  }
+=== DONNEES PRODUIT ALIEXPRESS ===
+Titre: ${product.title || 'N/A'}
+Prix AliExpress: ${product.price || 'N/A'}
+Prix original: ${product.originalPrice || 'N/A'}
+Nombre d'images: ${nbImages}
+
+Specifications:
+${specs || '  Aucune'}
+
+Variantes:
+${variants || '  Aucune'}
+
+URL source: ${product.url || 'N/A'}
+
+=== CE QUE TU DOIS GENERER ===
+1. TITRE ETSY: max 140 caracteres, mots-cles SEO en premier, PAS de marque AliExpress/chinoise
+2. DESCRIPTION: professionnelle, focus benefices client, dimensions/materiaux si dispo, emojis subtils
+3. TAGS: exactement 13 tags Etsy (max 20 car. chacun), termes recherches par les acheteurs
+4. CATEGORIE: la plus pertinente (format: Categorie > Sous-categorie)
+5. PRIX DE VENTE: en EUR, marge x2.5-x4 sur le prix AliExpress (frais Etsy 6.5% + envoi inclus)
+6. NOMS SEO PHOTOS: ${nbImages} noms de fichier pour Google Images, format "mot-cle-descriptif-N.jpg"
+
+=== FORMAT DE REPONSE ===
+Reponds UNIQUEMENT avec ce bloc JSON:
+
+\`\`\`json
+{
+  "title": "Titre Etsy optimise",
+  "description": "Description complete...",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10", "tag11", "tag12", "tag13"],
+  "category": "Categorie > Sous-categorie",
+  "sellPrice": "XX.XX",
+  "photoNames": ["nom-seo-1.jpg", "nom-seo-2.jpg"]
+}
+\`\`\``;
 }
 
 // ============================================================
-// CORE: Scrape via Apify (fallback)
+// MODE API: Generate via Anthropic API
 // ============================================================
-async function scrapeFromUrl() {
-  const url = document.getElementById('urlInput').value.trim();
-  if (!url || !url.includes('aliexpress')) {
-    toast('❌ Entrez une URL AliExpress valide');
-    return;
-  }
-
-  const s = getSettings();
-  if (!s.apifyToken) {
-    openSettings();
-    toast('⚠️ Token Apify requis pour le scraping distant');
-    return;
-  }
-
-  setStatus('Scraping via Apify...', 'orange');
-  showLoading('Scraping en cours...', 'Apify analyse la page AliExpress');
-
-  try {
-    const actorId = 'epctex~aliexpress-scraper';
-    const resp = await fetch(
-      `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${s.apifyToken}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startUrls: [{ url }], maxItems: 1 })
-      }
-    );
-
-    if (!resp.ok) throw new Error('Apify error: ' + resp.status);
-    const items = await resp.json();
-    if (!items || !items.length) throw new Error('Aucun résultat Apify');
-
-    const item = items[0];
-    // Normalize Apify data to our format
-    const data = {
-      source: 'apify',
-      url: url,
-      productId: item.id || item.productId || '',
-      title: item.title || item.name || '',
-      price: item.price || item.currentPrice || '',
-      originalPrice: item.originalPrice || '',
-      images: item.images || item.imageUrls || [],
-      specs: (item.specifications || item.attributes || []).map(s => ({
-        name: s.name || s.attrName || '',
-        value: s.value || s.attrValue || ''
-      })),
-      variants: item.variants || item.skus || [],
-      stats: {}
-    };
-    data.stats = { images: data.images.length, specs: data.specs.length, variants: data.variants.length };
-
-    forgeFromBookmarklet(data);
-  } catch (err) {
-    console.error('[Product Forge] Apify error:', err);
-    toast('❌ Erreur Apify: ' + err.message);
-    setStatus('Erreur Apify', 'red');
-  } finally {
-    hideLoading();
-  }
-}
-
-// ============================================================
-// DISPLAY: Render source data in left panel
-// ============================================================
-function displaySourceData(data) {
-  // Show main view, hide welcome
-  document.getElementById('welcomeView').classList.add('hidden');
-  document.getElementById('mainView').classList.remove('hidden');
-
-  // Title
-  document.getElementById('srcTitle').textContent = data.title || 'Sans titre';
-
-  // Price
-  document.getElementById('srcPrice').textContent = data.price || '—';
-  document.getElementById('srcOrigPrice').textContent = data.originalPrice || '';
-
-  // Images
-  const imgGrid = document.getElementById('srcImages');
-  imgGrid.innerHTML = '';
-  const images = data.images || [];
-  document.getElementById('imgCount').textContent = images.length;
-  images.forEach((url, i) => {
-    const img = document.createElement('img');
-    img.src = url.replace(/^\/\//, 'https://');
-    img.alt = 'Product image ' + (i + 1);
-    img.loading = 'lazy';
-    img.onclick = () => img.classList.toggle('selected');
-    imgGrid.appendChild(img);
-  });
-
-  // Specs
-  const specsBody = document.getElementById('srcSpecs').querySelector('tbody') || document.getElementById('srcSpecs');
-  specsBody.innerHTML = '';
-  (data.specs || []).forEach(spec => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(spec.name)}</td><td>${esc(spec.value)}</td>`;
-    specsBody.appendChild(tr);
-  });
-
-  // Variants
-  const varDiv = document.getElementById('srcVariants');
-  varDiv.innerHTML = '';
-  (data.variants || []).forEach(group => {
-    const g = document.createElement('div');
-    g.className = 'variant-group';
-    g.innerHTML = `<h4>${esc(group.name || 'Option')}</h4>`;
-    const tags = document.createElement('div');
-    tags.className = 'variant-tags';
-    (group.options || []).forEach(opt => {
-      const tag = document.createElement('span');
-      tag.className = 'variant-tag';
-      tag.textContent = opt.name || opt;
-      tags.appendChild(tag);
-    });
-    g.appendChild(tags);
-    varDiv.appendChild(g);
-  });
-
-  // Source info
-  document.getElementById('srcId').textContent = data.productId || 'N/A';
-  const srcLink = document.getElementById('srcUrl');
-  srcLink.href = data.url || '#';
-  srcLink.textContent = data.url || '—';
-
-  // Show generate zone, hide output
-  document.getElementById('generateZone').classList.remove('hidden');
-  document.getElementById('etsyOutput').classList.add('hidden');
-}
-
-// ============================================================
-// GENERATE: Call Claude AI for Etsy listing
-// ============================================================
-async function generateEtsyListing() {
-  if (!currentProduct) {
-    toast('❌ Aucun produit chargé');
-    return;
-  }
+async function generateViaAPI() {
+  if (!currentProduct) { toast('Aucun produit charge'); return; }
 
   const s = getSettings();
   if (!s.claudeKey) {
     openSettings();
-    toast('⚠️ Clé API Claude requise');
+    toast('Cle API Claude requise');
     return;
   }
 
-  setStatus('Claude AI génère la fiche...', 'orange');
-  showLoading('Génération de la fiche Etsy...', 'Claude AI analyse le produit et crée titre, description, tags SEO et noms de photos');
+  setStatus('Claude AI genere la fiche...', 'orange');
+  showLoading('Generation de la fiche Etsy...', 'Claude AI analyse le produit et cree titre, description, tags SEO et noms de photos');
 
   const prompt = buildEtsyPrompt(currentProduct);
 
@@ -521,61 +548,237 @@ async function generateEtsyListing() {
     const result = await resp.json();
     const text = result.content[0].text;
 
-    // Parse the JSON response from Claude
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*"title"[\s\S]*\}/);
     let listing;
     if (jsonMatch) {
-      const jsonStr = jsonMatch[1] || jsonMatch[0];
-      listing = JSON.parse(jsonStr);
+      listing = JSON.parse(jsonMatch[1] || jsonMatch[0]);
     } else {
-      // Try parsing the whole response as JSON
       listing = JSON.parse(text);
     }
 
     currentListing = listing;
     displayEtsyListing(listing);
-    setStatus('Fiche générée ✓', 'green');
-    toast('✨ Fiche Etsy générée avec succès !');
+    setStatus('Fiche generee', 'green');
+    toast('Fiche Etsy generee avec succes !');
   } catch (err) {
-    console.error('[Product Forge] Claude error:', err);
-    toast('❌ Erreur Claude: ' + err.message);
-    setStatus('Erreur génération', 'red');
+    console.error('[Product Forge] Claude API error:', err);
+    toast('Erreur API: ' + err.message);
+    setStatus('Erreur generation', 'red');
   } finally {
     hideLoading();
   }
 }
 
-function buildEtsyPrompt(product) {
-  return `Tu es un expert en e-commerce Etsy et en SEO. Analyse ce produit AliExpress et crée une fiche Etsy optimisée.
+// ============================================================
+// MODE FREE: Open Claude / Copy Prompt
+// ============================================================
+function openClaudeWithPrompt() {
+  if (!currentProduct) { toast('Aucun produit charge'); return; }
 
-DONNÉES PRODUIT:
-- Titre: ${product.title}
-- Prix AliExpress: ${product.price}
-- Spécifications: ${JSON.stringify(product.specs || [])}
-- Variantes: ${JSON.stringify(product.variants || [])}
-- Nombre d'images: ${(product.images || []).length}
+  const prompt = buildEtsyPrompt(currentProduct);
+  const encodedPrompt = encodeURIComponent(prompt);
+  const claudeUrl = `https://claude.ai/new?q=${encodedPrompt}`;
 
-CONSIGNES:
-1. Titre Etsy: max 140 caractères, mots-clés SEO en premier, pas de marque AliExpress
-2. Description: professionnelle, focus bénéfices client, inclure dimensions/matériaux si dispo, emojis subtils
-3. Tags: exactement 13 tags Etsy (max 20 car. chacun), recherchés par les acheteurs
-4. Catégorie Etsy: la plus pertinente
-5. Prix de vente: en EUR, marge x2.5-x4 sur le prix AliExpress (considérer frais Etsy + envoi)
-6. Noms SEO pour les ${(product.images || []).length} photos: format "mot-cle-descriptif-N.jpg" (N = numéro), optimisés pour le référencement Google Images
+  if (claudeUrl.length > 8000) {
+    navigator.clipboard.writeText(prompt).then(() => {
+      toast('Prompt copie ! Collez-le dans Claude (Ctrl+V)');
+      window.open('https://claude.ai/new', '_blank');
+    }).catch(() => {
+      window.open('https://claude.ai/new', '_blank');
+      toast('Ouvrez Claude et collez le prompt');
+    });
+  } else {
+    window.open(claudeUrl, '_blank');
+    toast('Claude ouvert avec le prompt !');
+  }
+}
 
-Réponds UNIQUEMENT en JSON valide (dans un bloc \`\`\`json), avec cette structure exacte:
-{
-  "title": "Titre Etsy optimisé",
-  "description": "Description complète...",
-  "tags": ["tag1", "tag2", ...],
-  "category": "Catégorie > Sous-catégorie",
-  "sellPrice": "XX.XX",
-  "photoNames": ["nom-seo-1.jpg", "nom-seo-2.jpg", ...]
-}`;
+function copyPromptToClipboard() {
+  if (!currentProduct) { toast('Aucun produit charge'); return; }
+  const prompt = buildEtsyPrompt(currentProduct);
+  navigator.clipboard.writeText(prompt).then(() => {
+    toast('Prompt copie !');
+  }).catch(() => {
+    togglePromptPreview(true);
+    toast('Copiez le prompt ci-dessous');
+  });
+}
+
+function togglePromptPreview(forceShow) {
+  const zone = document.getElementById('promptPreviewZone');
+  const text = document.getElementById('promptPreviewText');
+  if (forceShow || zone.classList.contains('hidden')) {
+    if (currentProduct) text.textContent = buildEtsyPrompt(currentProduct);
+    zone.classList.remove('hidden');
+  } else {
+    zone.classList.add('hidden');
+  }
+}
+
+function parseClaudeResponse() {
+  const raw = document.getElementById('claudeResponseInput').value.trim();
+  if (!raw) { toast('Collez la reponse de Claude'); return; }
+
+  try {
+    let jsonStr = raw;
+    const jsonBlockMatch = raw.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonBlockMatch) {
+      jsonStr = jsonBlockMatch[1];
+    } else {
+      const codeBlockMatch = raw.match(/```\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) jsonStr = codeBlockMatch[1];
+      else {
+        const objMatch = raw.match(/\{[\s\S]*"title"[\s\S]*\}/);
+        if (objMatch) jsonStr = objMatch[0];
+      }
+    }
+
+    const listing = JSON.parse(jsonStr);
+    if (!listing.title) throw new Error('JSON invalide: pas de champ "title"');
+
+    currentListing = listing;
+    displayEtsyListing(listing);
+    setStatus('Fiche importee !', 'green');
+    toast('Fiche Etsy importee !');
+  } catch (err) {
+    console.error('[Product Forge] Parse error:', err);
+    toast('Erreur parsing: ' + err.message);
+  }
 }
 
 // ============================================================
-// DISPLAY: Render Etsy listing in right panel
+// CORE: Receive data from bookmarklet
+// ============================================================
+function forgeFromBookmarklet(data) {
+  console.log('[Product Forge] Received bookmarklet data:', data);
+  currentProduct = data;
+  displaySourceData(data);
+  setStatus('Donnees recues', 'green');
+  toast('Produit charge !');
+  saveToRecent(data);
+
+  // Auto-generate if in API mode with key
+  if (getActiveMode() === 'api' && getSettings().claudeKey) {
+    setTimeout(() => generateViaAPI(), 500);
+  }
+}
+
+// ============================================================
+// Scrape via Apify
+// ============================================================
+async function scrapeFromUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url || !url.includes('aliexpress')) {
+    toast('Entrez une URL AliExpress valide');
+    return;
+  }
+  const s = getSettings();
+  if (!s.apifyToken) {
+    openSettings();
+    toast('Token Apify requis pour le scraping distant');
+    return;
+  }
+
+  setStatus('Scraping via Apify...', 'orange');
+  showLoading('Scraping en cours...', 'Apify analyse la page AliExpress');
+
+  try {
+    const actorId = 'epctex~aliexpress-scraper';
+    const resp = await fetch(
+      `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${s.apifyToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startUrls: [{ url }], maxItems: 1 })
+      }
+    );
+    if (!resp.ok) throw new Error('Apify error: ' + resp.status);
+    const items = await resp.json();
+    if (!items || !items.length) throw new Error('Aucun resultat');
+
+    const item = items[0];
+    const data = {
+      source: 'apify', url,
+      productId: item.id || item.productId || '',
+      title: item.title || item.name || '',
+      price: item.price || item.currentPrice || '',
+      originalPrice: item.originalPrice || '',
+      images: item.images || item.imageUrls || [],
+      specs: (item.specifications || item.attributes || []).map(s => ({ name: s.name || s.attrName || '', value: s.value || s.attrValue || '' })),
+      variants: item.variants || item.skus || [],
+      stats: {}
+    };
+    data.stats = { images: data.images.length, specs: data.specs.length, variants: data.variants.length };
+    forgeFromBookmarklet(data);
+  } catch (err) {
+    console.error('[Product Forge] Apify error:', err);
+    toast('Erreur Apify: ' + err.message);
+    setStatus('Erreur Apify', 'red');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ============================================================
+// DISPLAY: Source data
+// ============================================================
+function displaySourceData(data) {
+  document.getElementById('welcomeView').classList.add('hidden');
+  document.getElementById('mainView').classList.remove('hidden');
+
+  document.getElementById('srcTitle').textContent = data.title || 'Sans titre';
+  document.getElementById('srcPrice').textContent = data.price || '—';
+  document.getElementById('srcOrigPrice').textContent = data.originalPrice || '';
+
+  const imgGrid = document.getElementById('srcImages');
+  imgGrid.innerHTML = '';
+  const images = data.images || [];
+  document.getElementById('imgCount').textContent = images.length;
+  images.forEach((url, i) => {
+    const img = document.createElement('img');
+    img.src = url.replace(/^\/\//, 'https://');
+    img.alt = 'Image ' + (i + 1);
+    img.loading = 'lazy';
+    img.onclick = () => img.classList.toggle('selected');
+    imgGrid.appendChild(img);
+  });
+
+  const specsBody = document.getElementById('srcSpecs').querySelector('tbody') || document.getElementById('srcSpecs');
+  specsBody.innerHTML = '';
+  (data.specs || []).forEach(spec => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(spec.name)}</td><td>${esc(spec.value)}</td>`;
+    specsBody.appendChild(tr);
+  });
+
+  const varDiv = document.getElementById('srcVariants');
+  varDiv.innerHTML = '';
+  (data.variants || []).forEach(group => {
+    const g = document.createElement('div');
+    g.className = 'variant-group';
+    g.innerHTML = `<h4>${esc(group.name || 'Option')}</h4>`;
+    const tags = document.createElement('div');
+    tags.className = 'variant-tags';
+    (group.options || []).forEach(opt => {
+      const tag = document.createElement('span');
+      tag.className = 'variant-tag';
+      tag.textContent = opt.name || opt;
+      tags.appendChild(tag);
+    });
+    g.appendChild(tags);
+    varDiv.appendChild(g);
+  });
+
+  document.getElementById('srcId').textContent = data.productId || 'N/A';
+  const srcLink = document.getElementById('srcUrl');
+  srcLink.href = data.url || '#';
+  srcLink.textContent = data.url || '—';
+
+  showGenerateZone();
+}
+
+// ============================================================
+// DISPLAY: Etsy listing
 // ============================================================
 function displayEtsyListing(listing) {
   document.getElementById('generateZone').classList.add('hidden');
@@ -587,7 +790,6 @@ function displayEtsyListing(listing) {
   document.getElementById('etsyCategory').value = listing.category || '';
   document.getElementById('etsySellPrice').value = listing.sellPrice || '';
 
-  // Tags preview
   const tagsPreview = document.getElementById('etsyTagsPreview');
   tagsPreview.innerHTML = '';
   (listing.tags || []).forEach(tag => {
@@ -597,21 +799,17 @@ function displayEtsyListing(listing) {
     tagsPreview.appendChild(span);
   });
 
-  // Photo names with thumbnails
   const photoList = document.getElementById('photoNames');
   photoList.innerHTML = '';
-  const images = currentProduct.images || [];
+  const images = currentProduct ? (currentProduct.images || []) : [];
   (listing.photoNames || []).forEach((name, i) => {
     const li = document.createElement('li');
-    if (images[i]) {
-      li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//, 'https://'))}" alt="" />`;
-    }
+    if (images[i]) li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//, 'https://'))}" alt="" />`;
     li.innerHTML += `<span class="name">${esc(name)}</span>`;
     photoList.appendChild(li);
   });
 
-  // Update tags preview on input change
-  document.getElementById('etsyTags').addEventListener('input', (e) => {
+  document.getElementById('etsyTags').oninput = (e) => {
     tagsPreview.innerHTML = '';
     e.target.value.split(',').map(t => t.trim()).filter(Boolean).forEach(tag => {
       const span = document.createElement('span');
@@ -619,7 +817,15 @@ function displayEtsyListing(listing) {
       span.textContent = tag;
       tagsPreview.appendChild(span);
     });
-  });
+  };
+}
+
+function showGenerateZone() {
+  document.getElementById('generateZone').classList.remove('hidden');
+  document.getElementById('etsyOutput').classList.add('hidden');
+  updateGenerateZone();
+  const resp = document.getElementById('claudeResponseInput');
+  if (resp) resp.value = '';
 }
 
 // ============================================================
@@ -636,8 +842,8 @@ function copyListing() {
     sourcePrice: currentProduct?.price
   };
   navigator.clipboard.writeText(JSON.stringify(listing, null, 2))
-    .then(() => toast('📋 Fiche copiée dans le clipboard !'))
-    .catch(() => toast('❌ Erreur clipboard'));
+    .then(() => toast('Fiche copiee !'))
+    .catch(() => toast('Erreur clipboard'));
 }
 
 function downloadListing() {
@@ -655,7 +861,7 @@ function downloadListing() {
   a.href = URL.createObjectURL(blob);
   a.download = `etsy-${currentProduct?.productId || 'listing'}.json`;
   a.click();
-  toast('💾 Fichier téléchargé');
+  toast('Telecharge');
 }
 
 function saveToDrafts() {
@@ -674,7 +880,7 @@ function saveToDrafts() {
     }
   });
   localStorage.setItem('pf_drafts', JSON.stringify(drafts.slice(0, 50)));
-  toast('📌 Sauvegardé dans les brouillons');
+  toast('Sauvegarde !');
 }
 
 function saveToRecent(product) {
@@ -683,9 +889,6 @@ function saveToRecent(product) {
   localStorage.setItem('pf_recent', JSON.stringify(recent.slice(0, 20)));
 }
 
-// ============================================================
-// UTILITY
-// ============================================================
 function esc(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
@@ -693,21 +896,19 @@ function esc(str) {
 }
 
 // ============================================================
-// INIT: Check for bookmarklet data in URL hash
+// INIT
 // ============================================================
 (function init() {
-  // Method 1: Check URL hash for base64 data
+  updateModeBadge();
+
   if (window.location.hash) {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const dataParam = params.get('data');
-
     if (dataParam) {
       try {
         const jsonStr = decodeURIComponent(atob(dataParam));
         const data = JSON.parse(jsonStr);
-        console.log('[Product Forge] Data received via URL hash');
-        // Clean the hash to avoid re-processing on refresh
         history.replaceState(null, '', window.location.pathname);
         forgeFromBookmarklet(data);
         return;
@@ -717,27 +918,23 @@ function esc(str) {
     }
   }
 
-  // Method 2: Listen for postMessage from bookmarklet
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'productforge-data' && event.data.product) {
-      console.log('[Product Forge] Data received via postMessage');
       forgeFromBookmarklet(event.data.product);
     }
   });
 
-  // Method 3: Check sessionStorage (for same-origin scenarios)
   const stored = sessionStorage.getItem('pf_incoming_data');
   if (stored) {
     try {
       const data = JSON.parse(stored);
       sessionStorage.removeItem('pf_incoming_data');
-      console.log('[Product Forge] Data received via sessionStorage');
       forgeFromBookmarklet(data);
       return;
     } catch (e) {}
   }
 
-  console.log('[Product Forge] Ready. Waiting for data...');
+  console.log('[Product Forge] Ready. Mode: ' + getActiveMode());
 })();
 </script>
 
