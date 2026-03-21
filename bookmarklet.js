@@ -1,7 +1,15 @@
 javascript:void(function(){
-  /* AliExpress Product Scraper → Product Forge v3 */
+  /* AliExpress Product Scraper → Product Forge v4 */
   try {
-    var result = {source:'aliexpress',url:location.href,scrapedAt:new Date().toISOString()};
+    /* --- 0. Verify we're on an AliExpress product page --- */
+    var host = location.hostname.toLowerCase();
+    var isAliExpress = /(^|\.)aliexpress\.(com|us|ru)$/.test(host) || /(^|\.)ali\.(com|us|ru)$/.test(host);
+    if (!isAliExpress) {
+      alert('Product Forge: Ce bookmarklet fonctionne uniquement sur AliExpress.\nDomaines supportés : aliexpress.com, fr.aliexpress.com, aliexpress.us, aliexpress.ru');
+      return;
+    }
+
+    var result = {source:'aliexpress',url:location.href,scrapedAt:new Date().toISOString(),domain:host};
 
     /* --- 1. Try embedded JSON data first (most reliable) --- */
     var jsonData = null;
@@ -252,14 +260,19 @@ javascript:void(function(){
     }
 
     /* Quick confirmation toast on the AliExpress page */
+    var hasData = result.title && result.images.length > 0;
+    var toastBg = hasData ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#d97706,#f59e0b)';
+    var toastIcon = hasData ? '✅' : '⚠️';
+    var toastTitle = hasData ? 'Product Forge — Données envoyées !' : 'Product Forge — Données partielles';
+    var toastDetail = result.stats.images+' images · '+result.stats.specs+' specs · '+result.stats.variants+' variantes';
     var notif = document.createElement('div');
-    notif.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:16px 24px;border-radius:12px;font-family:-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(99,102,241,0.4);display:flex;align-items:center;gap:10px;animation:pfSlideIn 0.3s ease-out;';
-    notif.innerHTML = '<span style="font-size:20px;">📦</span><div><div>Product Forge</div><div style="font-size:12px;font-weight:400;opacity:0.9;">'+result.stats.images+' images · '+result.stats.specs+' specs · Envoyé !</div></div>';
+    notif.style.cssText = 'position:fixed;top:20px;right:20px;z-index:999999;background:'+toastBg+';color:#fff;padding:16px 24px;border-radius:12px;font-family:-apple-system,sans-serif;font-size:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,0.3);display:flex;align-items:center;gap:10px;animation:pfSlideIn 0.3s ease-out;max-width:360px;';
+    notif.innerHTML = '<span style="font-size:22px;">'+toastIcon+'</span><div><div>'+toastTitle+'</div><div style="font-size:12px;font-weight:400;opacity:0.9;margin-top:2px;">'+toastDetail+'</div></div>';
     var style = document.createElement('style');
     style.textContent = '@keyframes pfSlideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}';
     document.head.appendChild(style);
     document.body.appendChild(notif);
-    setTimeout(function(){ notif.style.transition='all 0.3s'; notif.style.transform='translateX(100px)'; notif.style.opacity='0'; setTimeout(function(){ notif.remove(); style.remove(); }, 300); }, 3000);
+    setTimeout(function(){ notif.style.transition='all 0.3s'; notif.style.transform='translateX(100px)'; notif.style.opacity='0'; setTimeout(function(){ notif.remove(); style.remove(); }, 300); }, 4000);
 
     console.log('[Product Forge] Scraped & sent:', result.stats);
 

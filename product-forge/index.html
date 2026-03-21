@@ -1450,6 +1450,13 @@ function isValidAliExpressUrl(url) {
   return pattern.test(url.trim());
 }
 
+function isValidAliExpressProductUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  // Must contain /item/ to be an actual product page
+  const pattern = /^https?:\/\/([\w-]+\.)*(aliexpress|ali)\.(com|us|ru)\/item\/\d+/i;
+  return pattern.test(url.trim());
+}
+
 function validateUrlInput(url) {
   if (!url || !url.trim()) {
     return { valid: false, msg: 'Veuillez entrer une URL AliExpress.' };
@@ -1460,6 +1467,9 @@ function validateUrlInput(url) {
   }
   if (!isValidAliExpressUrl(url)) {
     return { valid: false, msg: 'Cette URL n\'est pas une page AliExpress valide. Collez un lien comme : https://www.aliexpress.com/item/123456.html' };
+  }
+  if (!isValidAliExpressProductUrl(url)) {
+    return { valid: false, msg: 'Cette URL AliExpress ne pointe pas vers un produit. L\'URL doit contenir "/item/" suivi d\'un numéro. Exemple : https://www.aliexpress.com/item/123456.html' };
   }
   return { valid: true, msg: '' };
 }
@@ -1782,6 +1792,47 @@ async function scrapeFromUrlMain() {
   await doScrape(url);
 }
 
+function getScrapeErrorMessage(status, rawMsg) {
+  if (status === 401) return 'Token Apify invalide — vérifie dans les Paramètres.';
+  if (status === 402) return 'Quota Apify épuisé — réessaie demain.';
+  if (status === 408 || (rawMsg && rawMsg.includes('timeout'))) return 'AliExpress est lent — réessaie ou utilise le bookmarklet.';
+  if (status === 429) return 'Trop de requêtes Apify — attends 1 minute et réessaie.';
+  return 'Erreur inattendue (HTTP ' + status + ') — utilise le bookmarklet.';
+}
+
+function showBookmarkletFallback(url) {
+  const fallbackEl = document.getElementById('scrapeBookmarkletFallback');
+  if (fallbackEl) { fallbackEl.classList.remove('hidden'); return; }
+  // Create fallback banner
+  const banner = document.createElement('div');
+  banner.id = 'scrapeBookmarkletFallback';
+  banner.style.cssText = 'background:rgba(200,169,97,0.1);border:1px solid rgba(200,169,97,0.3);border-radius:12px;padding:16px 20px;margin-top:12px;';
+  banner.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <span style="font-size:24px;">🔖</span>
+      <div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Le scraping automatique a échoué</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Utilise le bookmarklet à la place — il fonctionne directement dans ton navigateur, sans passer par Apify.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a href="https://louisrivault1-cpu.github.io/" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">Installer le bookmarklet</a>
+          <button class="btn btn-sm btn-outline" onclick="this.closest('#scrapeBookmarkletFallback').classList.add('hidden');">Fermer</button>
+        </div>
+      </div>
+    </div>`;
+  // Insert after the URL input area
+  const inputGroup = document.getElementById('singleInputGroup') || document.querySelector('.input-row');
+  if (inputGroup) inputGroup.after(banner);
+  else document.querySelector('.panel-left').appendChild(banner);
+}
+
+const PROGRESS_MESSAGES = [
+  { delay: 0, msg: 'Connexion à AliExpress...' },
+  { delay: 5000, msg: 'Chargement de la page produit...' },
+  { delay: 12000, msg: 'Extraction des données...' },
+  { delay: 20000, msg: 'Presque terminé...' },
+  { delay: 30000, msg: 'AliExpress est lent, patience...' }
+];
+
 async function doScrape(url) {
   const validation = validateUrlInput(url);
   if (!validation.valid) { toast(validation.msg, 4000, 'error'); return; }
@@ -1789,24 +1840,31 @@ async function doScrape(url) {
   const s = getSettings();
   if (!s.apifyToken) { openSettings(); toast('Token Apify requis pour le scraping par URL. Ajoutez-le dans les Settings.', 4000, 'warning'); return; }
 
-  const MAX_RETRIES = 2;
-  const TIMEOUT_MS = 30000;
+  // Hide any previous fallback banner
+  const prevFallback = document.getElementById('scrapeBookmarkletFallback');
+  if (prevFallback) prevFallback.classList.add('hidden');
+
+  const MAX_RETRIES = 3;
+  const TIMEOUTS = [30000, 45000, 60000]; // Progressive timeouts: 30s → 45s → 60s
   const actorPath = (s.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
 
   setStatus('Scraping via Apify...','orange');
-  showLoading('Scraping en cours...', 'Connexion à Apify...', [
-    'Connexion à Apify',
-    'Analyse de la page AliExpress',
+  showLoading('Scraping en cours...', 'Connexion à AliExpress...', [
+    'Connexion à AliExpress',
+    'Analyse de la page produit',
     'Extraction des données'
   ]);
 
   let lastError = null;
+  let lastErrorStatus = 0;
 
-  for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
+      const timeoutMs = TIMEOUTS[attempt - 1] || 60000;
+
       if (attempt > 1) {
-        showRetryBadge(attempt, MAX_RETRIES + 1);
-        updateLoadingMsg('Nouvelle tentative en cours...');
+        showRetryBadge(attempt, MAX_RETRIES);
+        updateLoadingMsg('Tentative ' + attempt + '/' + MAX_RETRIES + '... (délai ' + (timeoutMs/1000) + 's)');
         updateLoadingStep(0, 'active');
         updateLoadingStep(1, '');
         updateLoadingStep(2, '');
@@ -1815,12 +1873,12 @@ async function doScrape(url) {
       updateLoadingStep(0, 'active');
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      // Set up a timer that updates the message after 15s
-      const slowTimer = setTimeout(() => {
-        updateLoadingMsg('Le scraping prend plus de temps que prévu...');
-      }, 15000);
+      // Progressive status messages
+      const progressTimers = PROGRESS_MESSAGES.map(p =>
+        setTimeout(() => updateLoadingMsg(p.msg), p.delay)
+      );
 
       let resp;
       try {
@@ -1831,23 +1889,28 @@ async function doScrape(url) {
         });
       } catch(fetchErr) {
         clearTimeout(timeoutId);
-        clearTimeout(slowTimer);
+        progressTimers.forEach(t => clearTimeout(t));
         if (fetchErr.name === 'AbortError') {
-          throw new Error('Le scraping a dépassé le délai de 30 secondes. Le produit est peut-être indisponible ou Apify est surchargé.');
+          lastErrorStatus = 408;
+          throw new Error('AliExpress est lent — réessaie ou utilise le bookmarklet.');
         }
         throw fetchErr;
       }
       clearTimeout(timeoutId);
-      clearTimeout(slowTimer);
+      progressTimers.forEach(t => clearTimeout(t));
 
       updateLoadingStep(0, 'done');
       updateLoadingStep(1, 'active');
+      updateLoadingMsg('Analyse de la réponse...');
 
       if (!resp.ok) {
+        lastErrorStatus = resp.status;
         const errBody = await resp.text().catch(() => '');
-        if (resp.status === 402) throw new Error('Crédit Apify insuffisant. Vérifiez votre compte Apify.');
-        if (resp.status === 401) throw new Error('Token Apify invalide. Vérifiez-le dans les Settings.');
-        throw new Error('Erreur Apify (HTTP ' + resp.status + '). ' + (errBody.substring(0, 100) || 'Réessayez.'));
+        // Don't retry on auth/quota errors — they won't fix themselves
+        if (resp.status === 401 || resp.status === 402) {
+          throw { message: getScrapeErrorMessage(resp.status, ''), noRetry: true };
+        }
+        throw new Error(getScrapeErrorMessage(resp.status, errBody));
       }
 
       let items;
@@ -1859,6 +1922,7 @@ async function doScrape(url) {
 
       updateLoadingStep(1, 'done');
       updateLoadingStep(2, 'active');
+      updateLoadingMsg('Extraction des données...');
 
       if (!items || !items.length) {
         throw new Error('Aucune donnée trouvée. Le produit AliExpress n\'existe peut-être plus ou l\'URL est incorrecte.');
@@ -1886,23 +1950,31 @@ async function doScrape(url) {
       hideLoading();
       forgeFromBookmarklet(data);
       toast('Produit scrapé avec succès !', 3000, 'success');
+      setStatus('Prêt','green');
       return;
 
     } catch(err) {
       lastError = err;
       console.error('[PF] Scrape attempt '+attempt+' error:', err);
 
-      if (attempt <= MAX_RETRIES) {
-        toast('Tentative ' + attempt + ' échouée, nouvel essai...', 2000, 'warning');
-        await new Promise(r => setTimeout(r, 1500));
+      // Don't retry on non-retryable errors (auth, quota)
+      if (err.noRetry) break;
+
+      if (attempt < MAX_RETRIES) {
+        toast('Tentative ' + attempt + '/' + MAX_RETRIES + ' échouée, nouvel essai...', 2500, 'warning');
+        await new Promise(r => setTimeout(r, 2000));
         continue;
       }
     }
   }
 
   hideLoading();
-  toast(lastError.message || 'Erreur inconnue lors du scraping.', 5000, 'error');
+  const errorMsg = lastError.message || 'Erreur inconnue lors du scraping.';
+  toast(errorMsg, 6000, 'error');
   setStatus('Erreur scraping','red');
+
+  // After all retries failed → propose bookmarklet fallback
+  showBookmarkletFallback(url);
 }
 
 function displaySourceData(data) {
