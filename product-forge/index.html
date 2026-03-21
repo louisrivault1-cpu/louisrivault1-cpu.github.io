@@ -642,20 +642,20 @@
     <div class="onboarding-box">
       <div class="ob-logo">⚒</div>
       <h2>Bienvenue sur Product Forge !</h2>
-      <p class="ob-subtitle">Transforme n'importe quel produit AliExpress en fiche Etsy pro en 3 étapes.</p>
+      <p class="ob-subtitle">Transforme n'importe quel produit AliExpress en fiche Etsy pro en quelques étapes.</p>
       <div class="ob-steps">
         <div class="ob-step">
           <div class="ob-num">1</div>
           <div class="ob-content">
-            <strong>Installe le bookmarklet</strong>
-            <span>Glisse le bouton depuis <a href="https://louisrivault1-cpu.github.io/" target="_blank">cette page</a> dans ta barre de favoris. C'est fait en 10 secondes.</span>
+            <strong>Configure tes tokens</strong>
+            <span>Va dans <strong>⚙ Settings</strong> et ajoute ton token <a href="https://console.apify.com/account/integrations" target="_blank">Apify</a> (gratuit) pour scraper les produits par URL. Optionnel : ajoute ta clé API Claude pour le mode automatique.</span>
           </div>
         </div>
         <div class="ob-step">
           <div class="ob-num">2</div>
           <div class="ob-content">
-            <strong>Trouve un produit sur AliExpress</strong>
-            <span>Va sur la fiche d'un produit AliExpress, puis clique sur le bookmarklet. Les données arrivent ici automatiquement.</span>
+            <strong>Colle un lien AliExpress ou utilise le bookmarklet</strong>
+            <span>Colle l'URL d'un produit AliExpress dans le champ ci-dessus, ou installe le bookmarklet depuis <a href="https://louisrivault1-cpu.github.io/" target="_blank">cette page</a>.</span>
           </div>
         </div>
         <div class="ob-step">
@@ -1606,7 +1606,14 @@ async function generateViaAPI() {
       headers: { 'Content-Type':'application/json', 'x-api-key':s.claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
       body: JSON.stringify({ model:s.claudeModel, max_tokens:4096, messages:[{role:'user',content:buildEtsyPrompt(currentProduct)}] })
     });
-    if (!resp.ok) { const err=await resp.json().catch(()=>({})); throw new Error(err.error?.message||`Erreur API (HTTP ${resp.status})`); }
+    if (!resp.ok) {
+      const err=await resp.json().catch(()=>({}));
+      const msg = err.error?.message || '';
+      if (resp.status === 401) throw new Error('Clé API Claude invalide. Vérifiez-la dans Settings.');
+      if (resp.status === 429) throw new Error('Trop de requêtes. Attendez un moment et réessayez.');
+      if (resp.status === 403) throw new Error('Accès refusé. Votre clé API n\'a peut-être pas les permissions requises.');
+      throw new Error(msg || `Erreur API Claude (HTTP ${resp.status})`);
+    }
     const result = await resp.json();
     const text = result.content[0].text;
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*"title"[\s\S]*\}/);
