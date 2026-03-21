@@ -655,6 +655,72 @@
       opacity: 0; transition: opacity 0.3s;
     }
     .sync-indicator.visible { opacity: 1; }
+
+    /* === CYCLE 15: Skeleton loaders === */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, var(--card2) 25%, var(--border) 37%, var(--card2) 63%);
+      background-size: 800px 100%;
+      animation: shimmer 1.6s ease-in-out infinite;
+      border-radius: 10px;
+    }
+    .skeleton-text { height: 14px; margin-bottom: 8px; border-radius: 6px; }
+    .skeleton-text.w60 { width: 60%; }
+    .skeleton-text.w80 { width: 80%; }
+    .skeleton-text.w40 { width: 40%; }
+    .skeleton-title { height: 22px; width: 70%; margin-bottom: 12px; border-radius: 8px; }
+    .skeleton-price { height: 28px; width: 30%; margin-bottom: 16px; border-radius: 8px; }
+    .skeleton-img { width: 100%; aspect-ratio: 1; border-radius: 10px; }
+
+    /* === CYCLE 15: Fade-in / slide-up animations === */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .anim-fade-in { animation: fadeSlideUp 0.4s ease-out both; }
+    .anim-fade-in-delay { animation: fadeSlideUp 0.4s ease-out 0.1s both; }
+    .anim-fade-in-delay2 { animation: fadeSlideUp 0.4s ease-out 0.2s both; }
+    .data-card { animation: fadeSlideUp 0.35s ease-out both; }
+
+    /* === CYCLE 15: Scale on click buttons === */
+    .btn:active:not(:disabled) { transform: scale(0.96) !important; transition: transform 0.1s ease; }
+
+    /* === CYCLE 15: Toast entrance/exit animations === */
+    .toast {
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    }
+
+    /* === CYCLE 15: Progress bar for scraping/generation === */
+    .progress-bar-container {
+      width: 100%; height: 4px; background: var(--border); border-radius: 2px;
+      margin-top: 16px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; width: 0%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.5s ease;
+    }
+    .progress-bar-fill.indeterminate {
+      width: 30%; animation: progressIndeterminate 1.5s ease-in-out infinite;
+    }
+    @keyframes progressIndeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+    /* === CYCLE 15: Loading overlay uses skeleton instead of spinner === */
+    .loading-skeleton-preview {
+      display: flex; gap: 12px; margin-top: 16px; align-items: flex-start;
+    }
+    .loading-skeleton-preview .lsp-img { width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0; }
+    .loading-skeleton-preview .lsp-lines { flex: 1; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -808,11 +874,11 @@
         <div class="calc-grid">
           <div class="calc-field">
             <label>Prix AliExpress ($)</label>
-            <input type="number" id="calcAliPrice" step="0.01" value="0" oninput="recalcPrice()" />
+            <input type="number" id="calcAliPrice" step="0.01" value="0" oninput="debouncedRecalcPrice()" />
           </div>
           <div class="calc-field">
             <label>Shipping estimé ($)</label>
-            <input type="number" id="calcShipping" step="0.01" value="3" oninput="recalcPrice()" />
+            <input type="number" id="calcShipping" step="0.01" value="3" oninput="debouncedRecalcPrice()" />
           </div>
         </div>
         <div style="margin-top:10px;">
@@ -820,7 +886,7 @@
             <span>Marge cible</span>
             <span id="marginLabel" style="color:var(--accent);font-weight:600;">40%</span>
           </label>
-          <input type="range" class="margin-slider" id="calcMargin" min="20" max="60" value="40" oninput="recalcPrice()" />
+          <input type="range" class="margin-slider" id="calcMargin" min="20" max="60" value="40" oninput="debouncedRecalcPrice()" />
         </div>
         <div class="calc-result">
           <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Prix de vente suggéré</div>
@@ -1051,8 +1117,18 @@
 
   <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="loading-box">
-      <div class="spinner"></div>
-      <div style="font-weight:600;margin-bottom:8px;" id="loadingTitle">Génération en cours...</div>
+      <div class="loading-skeleton-preview">
+        <div class="skeleton lsp-img"></div>
+        <div class="lsp-lines">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-text w80"></div>
+          <div class="skeleton skeleton-text w60"></div>
+        </div>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill indeterminate" id="loadingProgressBar"></div>
+      </div>
+      <div style="font-weight:600;margin-bottom:8px;margin-top:16px;" id="loadingTitle">Génération en cours...</div>
       <div style="color:var(--muted);font-size:14px;" id="loadingMsg">Claude AI analyse le produit</div>
       <div class="loading-steps" id="loadingSteps"></div>
       <div id="loadingRetryBadge"></div>
@@ -1652,6 +1728,9 @@ function updateLoadingStep(idx, status) {
   el.className = 'loading-step ' + (status === 'done' ? 'done' : status === 'active' ? 'active' : '');
   const icon = el.querySelector('.ls-icon');
   if (icon) icon.textContent = status === 'done' ? '✓' : status === 'active' ? '⏳' : '○';
+  // Update progress bar based on steps
+  const totalSteps = document.querySelectorAll('.loading-step').length;
+  if (totalSteps > 0 && status === 'done') setLoadingProgress(((idx + 1) / totalSteps) * 90);
 }
 
 function updateLoadingMsg(msg) {
@@ -1662,7 +1741,15 @@ function showRetryBadge(attempt, max) {
   document.getElementById('loadingRetryBadge').innerHTML = '<div class="retry-badge">Tentative ' + attempt + '/' + max + '</div>';
 }
 
-function hideLoading() { document.getElementById('loadingOverlay').classList.add('hidden'); }
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.add('hidden');
+  const bar = document.getElementById('loadingProgressBar');
+  if (bar) { bar.classList.add('indeterminate'); bar.style.width = '0%'; }
+}
+function setLoadingProgress(pct) {
+  const bar = document.getElementById('loadingProgressBar');
+  if (bar) { bar.classList.remove('indeterminate'); bar.style.width = Math.min(100, pct) + '%'; }
+}
 
 // === URL VALIDATION ===
 function isValidAliExpressUrl(url) {
@@ -2200,7 +2287,9 @@ async function doScrape(url) {
 
 function displaySourceData(data) {
   document.getElementById('welcomeView').classList.add('hidden');
-  document.getElementById('mainView').classList.remove('hidden');
+  const mainView = document.getElementById('mainView');
+  mainView.classList.remove('hidden');
+  mainView.classList.add('anim-fade-in');
   document.getElementById('srcTitle').textContent = data.title||'Sans titre';
   document.getElementById('srcPrice').textContent = data.price||'—';
   document.getElementById('srcOrigPrice').textContent = data.originalPrice||'';
@@ -2969,6 +3058,7 @@ function debounce(fn, delay) {
 }
 const debouncedUpdateEtsyPreview = debounce(updateEtsyPreview, 250);
 const debouncedRenderDrafts = debounce(renderDrafts, 200);
+const debouncedRecalcPrice = debounce(recalcPrice, 150);
 
 function showOnboarding() {
   document.getElementById('onboardingGuide').style.display = 'flex';
@@ -3160,7 +3250,7 @@ function loadBatchProduct(data) {
 </script>
 
 <footer style="text-align:center;padding:24px 16px 18px;color:var(--muted);font-size:11px;letter-spacing:0.02em;border-top:1px solid var(--border);margin-top:40px;opacity:0.7;">
-  Product Forge v2.1 — Créé par Louis Rivault
+  Product Forge v3.0 — Créé par Louis Rivault
 </footer>
 
 </body>
