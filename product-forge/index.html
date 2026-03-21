@@ -2501,7 +2501,7 @@ async function doScrape(url) {
       try {
         resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`, {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ startUrls:[{url}], maxItems:1 }),
+          body: JSON.stringify({ url: url, startUrls:[{url: url}], maxItems:1 }),
           signal: controller.signal
         });
       } catch(fetchErr) {
@@ -2546,15 +2546,18 @@ async function doScrape(url) {
       }
 
       const item = items[0];
+      // Robust mapping: handle both old format (specifications/skuOptions) and new format (specs object/variants array)
+      const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k,v]) => ({name:k, value:v})) : (item.specifications||item.attributes||[]).map(sp=>({name:sp.name||sp.attrName||'',value:sp.value||sp.attrValue||''}));
       const data = {
         source:'apify', url,
-        productId: item.id||item.productId||'',
+        productId: item.id||item.productId||url.match(/\/(\d+)\.html/)?.[1]||'',
         title: item.title||item.name||'',
         price: item.price||item.currentPrice||'',
-        originalPrice: item.originalPrice||'',
+        originalPrice: item.originalPrice||item.price||'',
         images: item.images||item.imageUrls||[],
-        specs: (item.specifications||item.attributes||[]).map(sp=>({name:sp.name||sp.attrName||'',value:sp.value||sp.attrValue||''})),
+        specs: mappedSpecs,
         variants: item.variants||item.skus||[],
+        sourceUrl: item.sourceUrl||url,
         stats:{}
       };
       data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
@@ -3650,7 +3653,12 @@ function checkOnboarding() {
   }
 
   window.addEventListener('message', function(event) {
-    if (event.data&&event.data.type==='productforge-data'&&event.data.product) forgeFromBookmarklet(event.data.product);
+    if (event.data&&event.data.type==='productforge-data'&&event.data.product) {
+      if (event.source) {
+        event.source.postMessage({ type: 'productforge-ack' }, event.origin || '*');
+      }
+      forgeFromBookmarklet(event.data.product);
+    }
   });
 
   const stored = sessionStorage.getItem('pf_incoming_data');
@@ -3706,21 +3714,24 @@ async function scrapeSingleBatchItem(index, settings) {
     const actorPath = (settings.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
     const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${settings.apifyToken}`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ startUrls:[{url:r.url}], maxItems:1 })
+      body: JSON.stringify({ url: r.url, startUrls:[{url: r.url}], maxItems:1 })
     });
     if (!resp.ok) throw new Error('Erreur Apify (HTTP '+resp.status+')');
     const items = await resp.json();
     if (!items||!items.length) throw new Error('Aucun résultat Apify');
     const item = items[0];
+    // Robust mapping: handle both old format (specifications/skuOptions) and new format (specs object/variants array)
+    const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k,v]) => ({name:k, value:v})) : (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''}));
     const data = {
       source:'apify', url:r.url,
-      productId: item.id||item.productId||'',
+      productId: item.id||item.productId||r.url.match(/\/(\d+)\.html/)?.[1]||'',
       title: item.title||item.name||'',
       price: item.price||item.currentPrice||'',
-      originalPrice: item.originalPrice||'',
+      originalPrice: item.originalPrice||item.price||'',
       images: item.images||item.imageUrls||[],
-      specs: (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''})),
+      specs: mappedSpecs,
       variants: item.variants||item.skus||[],
+      sourceUrl: item.sourceUrl||r.url,
       stats:{}
     };
     data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
