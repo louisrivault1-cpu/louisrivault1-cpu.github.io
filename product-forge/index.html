@@ -2234,10 +2234,23 @@ async function generateViaAPI() {
 function openClaudeWithPrompt() {
   if (!currentProduct) { toast('Aucun produit chargé. Scrapez un produit d\'abord.', 3000, 'warning'); return; }
   const prompt = buildEtsyPrompt(currentProduct);
-  const url = `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
-  if (url.length > 8000) {
-    navigator.clipboard.writeText(prompt).then(() => { toast('Prompt copié ! Collez-le dans Claude'); window.open('https://claude.ai/new','_blank'); }).catch(() => { window.open('https://claude.ai/new','_blank'); });
-  } else { window.open(url,'_blank'); toast('Claude ouvert !'); }
+  const encoded = encodeURIComponent(prompt);
+  const url = `https://claude.ai/new?q=${encoded}`;
+  // If URL is short enough for browser limits (~8000 chars), use it directly
+  if (url.length <= 8000) {
+    window.open(url, '_blank');
+    toast('Claude ouvert avec le prompt !', 3000, 'success');
+  } else {
+    // Prompt too long for URL — copy to clipboard then open Claude
+    navigator.clipboard.writeText(prompt).then(() => {
+      toast('Prompt copié dans le presse-papier ! Collez-le dans Claude (Ctrl+V).', 5000, 'success');
+      window.open('https://claude.ai/new', '_blank');
+    }).catch(() => {
+      // Clipboard failed — show preview for manual copy
+      togglePromptPreview(true);
+      toast('Impossible de copier automatiquement. Copiez le prompt ci-dessous puis ouvrez Claude.', 5000, 'warning');
+    });
+  }
 }
 
 function copyPromptToClipboard() {
@@ -2266,23 +2279,31 @@ function parseClaudeResponse() {
   try {
     let js = raw;
 
-    // Try multiple extraction strategies
+    // Strategy 1: Extract from ```json ... ``` block
     const m1 = raw.match(/```json\s*([\s\S]*?)\s*```/);
     if (m1) {
       js = m1[1];
     } else {
+      // Strategy 2: Extract from ``` ... ``` block
       const m2 = raw.match(/```\s*([\s\S]*?)\s*```/);
-      if (m2) {
+      if (m2 && m2[1].includes('"title"')) {
         js = m2[1];
       } else {
-        // Try to find JSON object containing "title"
-        const m3 = raw.match(/\{[\s\S]*?"title"\s*:\s*"[\s\S]*?\}/);
-        if (m3) {
-          // Find the matching closing brace
-          let depth = 0, start = raw.indexOf(m3[0]);
-          for (let i = start; i < raw.length; i++) {
-            if (raw[i] === '{') depth++;
-            if (raw[i] === '}') { depth--; if (depth === 0) { js = raw.substring(start, i + 1); break; } }
+        // Strategy 3: Find the outermost JSON object containing "title"
+        const titleIdx = raw.indexOf('"title"');
+        if (titleIdx !== -1) {
+          // Walk backwards to find the opening brace
+          let start = -1;
+          for (let i = titleIdx; i >= 0; i--) {
+            if (raw[i] === '{') { start = i; break; }
+          }
+          if (start !== -1) {
+            // Walk forward to find the matching closing brace
+            let depth = 0;
+            for (let i = start; i < raw.length; i++) {
+              if (raw[i] === '{') depth++;
+              if (raw[i] === '}') { depth--; if (depth === 0) { js = raw.substring(start, i + 1); break; } }
+            }
           }
         }
       }
@@ -2299,14 +2320,23 @@ function parseClaudeResponse() {
     } catch(parseErr) {
       // Last resort: try to fix common JSON issues
       const fixed = js
-        .replace(/[\u201C\u201D]/g, '"')  // smart quotes
+        .replace(/[\u201C\u201D]/g, '"')  // smart quotes → straight quotes
         .replace(/[\u2018\u2019]/g, "'")   // smart apostrophes
-        .replace(/\n/g, '\\n')             // unescaped newlines in strings - risky but try
-        .replace(/\t/g, '\\t');
+        .replace(/\r\n/g, '\n')            // normalize line endings
+        .replace(/\t/g, '  ');             // tabs to spaces (safe)
       try {
         listing = JSON.parse(fixed);
-      } catch(e) {
-        throw new Error('Le JSON est malformé. Essayez de recopier la réponse complète de Claude.');
+      } catch(e2) {
+        // Try even harder: extract value strings more carefully
+        // Sometimes Claude adds newlines inside string values
+        const fixed2 = fixed.replace(/"([^"]*)\n([^"]*?)"/g, (match, p1, p2) => {
+          return '"' + p1 + '\\n' + p2 + '"';
+        });
+        try {
+          listing = JSON.parse(fixed2);
+        } catch(e3) {
+          throw new Error('Le JSON est malformé. Essayez de recopier la réponse complète de Claude.');
+        }
       }
     }
 
@@ -2319,11 +2349,21 @@ function parseClaudeResponse() {
       alt_texts: [],
       category: '',
       sellPrice: '',
-      photoNames: []
+      photoNames: [],
+      materials: [],
+      occasions: [],
+      holidays: [],
+      meta_description: '',
+      price_eur: 0
     };
 
     // Merge with defaults
     const safeListing = Object.assign({}, defaults, listing);
+
+    // Map price_eur to sellPrice if present
+    if (safeListing.price_eur && !safeListing.sellPrice) {
+      safeListing.sellPrice = safeListing.price_eur;
+    }
 
     // Check if at least title or description is present
     if (!safeListing.title && !safeListing.description) {
@@ -2343,7 +2383,10 @@ function parseClaudeResponse() {
     }
 
     // Ensure arrays are arrays
-    ['key_features', 'alt_texts', 'photoNames', 'tags'].forEach(field => {
+    ['key_features', 'alt_texts', 'photoNames', 'tags', 'materials', 'occasions', 'holidays'].forEach(field => {
+      if (typeof safeListing[field] === 'string') {
+        safeListing[field] = safeListing[field].split(',').map(t => t.trim()).filter(Boolean);
+      }
       if (!Array.isArray(safeListing[field])) safeListing[field] = [];
     });
 
@@ -2368,7 +2411,16 @@ function forgeFromBookmarklet(data) {
   setStatus('Données reçues','green');
   toast('Produit chargé !', 3000, 'success');
   saveToRecent(data);
-  if (getActiveMode()==='api' && getSettings().claudeKey) setTimeout(()=>generateViaAPI(), 500);
+  if (getActiveMode()==='api' && getSettings().claudeKey) {
+    setTimeout(()=>generateViaAPI(), 500);
+  } else {
+    // Free mode: show generate zone with free mode card visible
+    showGenerateZone();
+    setTimeout(() => {
+      const el = document.getElementById('freeModeCard');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }
 }
 
 async function scrapeFromUrl() {
