@@ -117,8 +117,12 @@
     .images-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); cursor: pointer; transition: all 0.2s; }
     .images-grid img:hover { border-color: var(--accent); }
     .images-grid img.selected { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
-    .image-download { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.7); color: var(--text); border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; opacity: 0; transition: opacity 0.2s; }
-    .image-wrapper:hover .image-download { opacity: 1; }
+    .image-overlay-btns { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: flex-end; padding: 4px; gap: 3px; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+    .image-wrapper:hover .image-overlay-btns { opacity: 1; pointer-events: auto; }
+    .image-overlay-btn { background: rgba(0,0,0,0.75); color: var(--text); border: none; border-radius: 6px; padding: 3px 7px; font-size: 10px; cursor: pointer; transition: background 0.15s; white-space: nowrap; backdrop-filter: blur(4px); }
+    .image-overlay-btn:hover { background: rgba(200,169,97,0.8); color: #0a0a0f; }
+    .image-placeholder { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 2px dashed var(--border2); background: var(--card2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--muted); font-size: 11px; }
+    .image-placeholder svg { width: 24px; height: 24px; opacity: 0.4; }
 
     .specs-table { width: 100%; font-size: 13px; }
     .specs-table tr { border-bottom: 1px solid var(--border); }
@@ -564,7 +568,10 @@
       </div>
 
       <div class="data-card">
-        <h3>Images (<span id="imgCount">0</span>)</h3>
+        <h3 style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Images (<span id="imgCount">0</span>)</span>
+          <button class="btn btn-outline btn-sm" onclick="copyAllImageSEONames()" style="text-transform:none;letter-spacing:0;font-size:11px;padding:4px 10px;">📋 Tout copier noms SEO</button>
+        </h3>
         <div class="images-grid" id="srcImages"></div>
       </div>
       <div class="data-card">
@@ -672,12 +679,14 @@
         </div>
 
         <div class="etsy-section">
-          <label>Pixa Workflows</label>
+          <label>🎨 Pixa Workflows — Retouche d'images</label>
           <div class="pixa-buttons">
-            <button class="btn btn-outline" onclick="window.open('https://remove.bg','_blank')" data-tooltip="Supprimer les arrière-plans">🖼 Remove BG</button>
-            <button class="btn btn-outline" onclick="window.open('https://www.photoroom.com','_blank')" data-tooltip="Générer des fonds IA">✨ AI Backgrounds</button>
-            <button class="btn btn-outline" onclick="window.open('https://upscale.media','_blank')" data-tooltip="Agrandir en haute définition">🔍 Upscale HD</button>
-            <button class="btn btn-outline" onclick="openPixaTools()" data-tooltip="Ouvrir tous les outils Pixa">🔗 Ouvrir les 3</button>
+            <button class="btn btn-green" onclick="window.open('https://www.remove.bg/','_blank')" data-tooltip="Supprimer l'arrière-plan de vos images" style="font-size:13px;padding:10px 14px;">🖼 Détourage</button>
+            <button class="btn btn-claude" onclick="window.open('https://www.photoroom.com/backgrounds','_blank')" data-tooltip="Ajouter un fond IA professionnel" style="font-size:13px;padding:10px 14px;">✨ Fond IA</button>
+            <button class="btn btn-primary" onclick="window.open('https://www.iloveimg.com/upscale-image','_blank')" data-tooltip="Agrandir en haute définition" style="font-size:13px;padding:10px 14px;">🔍 Upscale HD</button>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-outline" onclick="openPixaTools()" style="width:100%;justify-content:center;font-size:13px;padding:10px;" data-tooltip="Ouvre les 3 outils en séquence (100ms, 500ms, 900ms)">🚀 Ouvrir les 3 outils</button>
           </div>
         </div>
 
@@ -1096,20 +1105,51 @@ function displaySourceData(data) {
   imgGrid.innerHTML = '';
   const images = data.images||[];
   document.getElementById('imgCount').textContent = images.length;
+
+  // Generate SEO names early for image grid
+  const titleForSEO = data.title || 'product';
+  const gridSEONames = generateSEOPhotoNames(titleForSEO, [], images.length);
+  // Store on data for later use
+  data._seoImageNames = gridSEONames;
+
   images.forEach((url,i) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'image-wrapper';
+    const seoName = gridSEONames[i] || `product-photo-${i+1}.jpg`;
+    const seoAlt = generateImageAltText(titleForSEO, i, images.length);
+
     const img = document.createElement('img');
-    img.src = url.replace(/^\/\//,'https://');
-    img.alt = 'Image '+(i+1);
+    const imgSrc = url.replace(/^\/\//,'https://');
+    img.src = imgSrc;
+    img.alt = seoAlt;
     img.loading = 'lazy';
     img.onclick = () => img.classList.toggle('selected');
+    img.onerror = function() {
+      // Fallback placeholder
+      const ph = document.createElement('div');
+      ph.className = 'image-placeholder';
+      ph.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg><span>Image '+(i+1)+'</span>';
+      this.replaceWith(ph);
+    };
+
+    // Overlay buttons
+    const overlay = document.createElement('div');
+    overlay.className = 'image-overlay-btns';
+
     const dlBtn = document.createElement('button');
-    dlBtn.className = 'image-download';
-    dlBtn.textContent = '⬇';
-    dlBtn.onclick = (e) => { e.stopPropagation(); downloadImage(img.src, 'image-'+(i+1)+'.jpg'); };
+    dlBtn.className = 'image-overlay-btn';
+    dlBtn.textContent = '⬇ Ouvrir';
+    dlBtn.onclick = (e) => { e.stopPropagation(); window.open(imgSrc, '_blank'); };
+
+    const copyNameBtn = document.createElement('button');
+    copyNameBtn.className = 'image-overlay-btn';
+    copyNameBtn.textContent = '📋 Nom SEO';
+    copyNameBtn.onclick = (e) => { e.stopPropagation(); navigator.clipboard.writeText(seoName).then(()=>toast('Nom copié: '+seoName)).catch(()=>toast('Erreur')); };
+
+    overlay.appendChild(dlBtn);
+    overlay.appendChild(copyNameBtn);
     wrapper.appendChild(img);
-    wrapper.appendChild(dlBtn);
+    wrapper.appendChild(overlay);
     imgGrid.appendChild(wrapper);
   });
 
@@ -1140,10 +1180,7 @@ function displaySourceData(data) {
 }
 
 function downloadImage(src, name) {
-  const a = document.createElement('a');
-  a.href = src;
-  a.download = name;
-  a.click();
+  window.open(src, '_blank');
 }
 
 function recalcPrice() {
@@ -1262,8 +1299,9 @@ function displayEtsyListing(listing) {
 
   photoNames.forEach((name,i) => {
     const li = document.createElement('li');
-    if (images[i]) li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//,'https://'))}" alt="" />`;
+    if (images[i]) li.innerHTML = `<img src="${esc(images[i].replace(/^\/\//,'https://'))}" alt="${esc(generateImageAltText(listing.title||'', i, images.length))}" loading="lazy" />`;
     li.innerHTML += `<span class="name">${esc(name)}</span>`;
+    li.innerHTML += `<button class="copy-btn" onclick="navigator.clipboard.writeText('${esc(name).replace(/'/g,"\\'")}').then(()=>toast('Copié: ${esc(name).replace(/'/g,"\\'")}'))" style="background:none;border:1px solid var(--border);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:10px;cursor:pointer;flex-shrink:0;">📋</button>`;
     photoList.appendChild(li);
   });
 
@@ -1279,14 +1317,45 @@ function generateSEOPhotoNames(title, tags, count) {
   const tagSlug = (tags||[]).slice(0,2).join('-').toLowerCase().replace(/[^a-z0-9-]/g,'').substring(0,20);
   const base = slug + (tagSlug ? '-'+tagSlug : '');
   const names = [];
-  for (let i=1; i<=count; i++) names.push(`${base}-${i}.jpg`);
+  const suffixes = ['main','detail','lifestyle','closeup','angle','scale','packaging','studio','context','flat-lay'];
+  for (let i=1; i<=count; i++) {
+    const suffix = suffixes[(i-1) % suffixes.length];
+    names.push(`${base}-${suffix}-${i}.jpg`);
+  }
   return names;
+}
+
+function generateImageAltText(title, index, total) {
+  const cleanTitle = (title||'product').replace(/[^\w\s-]/g,'').trim();
+  const words = cleanTitle.split(/\s+/).slice(0, 6).join(' ');
+  const views = [
+    'front view product photo',
+    'detailed close-up shot',
+    'lifestyle setting photo',
+    'high quality detail view',
+    'angle perspective shot',
+    'size and scale reference',
+    'packaging and presentation',
+    'studio white background',
+    'in context usage photo',
+    'flat lay overhead view'
+  ];
+  const view = views[index % views.length];
+  return `${words} - ${view} ${index+1} of ${total}`;
 }
 
 function copyAllPhotoNames() {
   const names = currentListing?.photoNames||[];
   if (!names.length) { toast('Aucun nom à copier'); return; }
-  navigator.clipboard.writeText(names.join('\n')).then(()=>toast('Noms copiés !')).catch(()=>toast('Erreur'));
+  navigator.clipboard.writeText(names.join('\n')).then(()=>toast(names.length+' noms copiés !')).catch(()=>toast('Erreur'));
+}
+
+function copyAllImageSEONames() {
+  const images = currentProduct?(currentProduct.images||[]):[];
+  if (!images.length) { toast('Aucune image'); return; }
+  const title = currentProduct?.title || 'product';
+  const names = currentProduct?._seoImageNames || generateSEOPhotoNames(title, [], images.length);
+  navigator.clipboard.writeText(names.join('\n')).then(()=>toast(names.length+' noms SEO copiés !')).catch(()=>toast('Erreur'));
 }
 
 function copyToClipboard(text) {
@@ -1327,10 +1396,10 @@ function showGenerateZone() {
 }
 
 function openPixaTools() {
-  window.open('https://remove.bg','_blank');
-  window.open('https://www.photoroom.com','_blank');
-  window.open('https://upscale.media','_blank');
-  toast('Outils Pixa ouverts');
+  setTimeout(() => window.open('https://www.remove.bg/', '_blank'), 100);
+  setTimeout(() => window.open('https://www.photoroom.com/backgrounds', '_blank'), 500);
+  setTimeout(() => window.open('https://www.iloveimg.com/upscale-image', '_blank'), 900);
+  toast('3 outils Pixa ouverts en séquence');
 }
 
 function toggleExportMenu() {
