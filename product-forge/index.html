@@ -333,6 +333,77 @@
     }
     .help-trigger:hover { border-color: var(--accent); transform: scale(1.1); }
 
+    /* Profile system */
+    .profile-login-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5,5,10,0.95); z-index: 3000;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(16px);
+    }
+    .profile-login-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 44px 36px; max-width: 440px; width: 92%;
+      text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    }
+    .profile-login-box .pl-logo { font-size: 52px; margin-bottom: 12px; }
+    .profile-login-box h2 { font-size: 1.4rem; margin-bottom: 6px; font-weight: 700; }
+    .profile-login-box .pl-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .profile-login-box input {
+      width: 100%; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 18px; color: var(--text); font-size: 16px;
+      font-family: inherit; text-align: center; margin-bottom: 16px;
+    }
+    .profile-login-box input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,97,0.15); }
+    .profile-login-box .pl-profiles { margin-bottom: 20px; }
+    .profile-login-box .pl-profile-btn {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 16px; color: var(--text); font-size: 14px; font-family: inherit;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 8px; text-align: left;
+    }
+    .profile-login-box .pl-profile-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+    .profile-login-box .pl-profile-btn .pl-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0a0a0f; font-size: 16px; flex-shrink: 0;
+    }
+    .profile-login-box .pl-or { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: 12px; }
+    .profile-login-box .pl-or::before, .profile-login-box .pl-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .profile-badge {
+      display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 20px;
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .profile-badge:hover { border-color: var(--accent); }
+    .profile-badge .pb-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #0a0a0f; font-size: 11px;
+    }
+
+    /* Token status indicators */
+    .token-row { display: flex; gap: 8px; align-items: center; }
+    .token-row input { flex: 1; }
+    .token-test-btn {
+      background: var(--card2); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 8px; padding: 8px 12px; font-size: 12px; font-family: inherit;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .token-test-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .token-test-btn.testing { color: var(--orange); border-color: var(--orange); cursor: wait; }
+    .token-test-btn.ok { color: var(--green); border-color: var(--green); }
+    .token-test-btn.fail { color: var(--red); border-color: var(--red); }
+    .token-status { display: flex; align-items: center; gap: 6px; font-size: 11px; margin-top: 4px; }
+    .token-status .ts-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .token-status.configured .ts-dot { background: var(--green); }
+    .token-status.configured { color: var(--green); }
+    .token-status.missing .ts-dot { background: var(--red); }
+    .token-status.missing { color: var(--red); }
+    .token-status.untested .ts-dot { background: var(--orange); }
+    .token-status.untested { color: var(--orange); }
+    .token-masked { font-family: "SF Mono", monospace; font-size: 13px; color: var(--muted); letter-spacing: 0.05em; }
+
     .drafts-panel {
       position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
       background: var(--card); border-left: 1px solid var(--border);
@@ -554,6 +625,19 @@
 </head>
 <body>
 
+  <!-- Profile Login Modal -->
+  <div class="profile-login-overlay" id="profileLoginOverlay" style="display:none;">
+    <div class="profile-login-box">
+      <div class="pl-logo">⚒</div>
+      <h2>Product Forge</h2>
+      <p class="pl-sub">Identifie-toi pour sauvegarder tes tokens et settings.</p>
+      <div class="pl-profiles" id="profilesList"></div>
+      <div class="pl-or" id="profilesOr" style="display:none;">ou crée un nouveau profil</div>
+      <input type="text" id="profileNameInput" placeholder="Ton prénom ou pseudo..." maxlength="30" />
+      <button class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;" onclick="createOrLoginProfile()">Continuer</button>
+    </div>
+  </div>
+
   <div class="onboarding-overlay" id="onboardingGuide" style="display:none;">
     <div class="onboarding-box">
       <div class="ob-logo">⚒</div>
@@ -596,6 +680,10 @@
     </div>
     <div class="nav-btns">
       <div class="status" id="statusText"><div class="dot dot-green"></div> Prêt</div>
+      <div class="profile-badge" id="profileBadge" onclick="openProfileMenu()" style="display:none;">
+        <div class="pb-avatar" id="profileAvatar">?</div>
+        <span id="profileName">—</span>
+      </div>
       <button class="btn btn-outline btn-sm" onclick="toggleDraftsPanel()" data-tooltip="Voir les fiches sauvegardées" style="position:relative;">📋 Mes fiches <span id="draftsBadge" class="drafts-badge" style="display:none;"></span></button>
       <button class="btn btn-outline btn-sm" onclick="openSettings()" data-tooltip="Configuration API et préférences">⚙ Settings</button>
     </div>
@@ -939,20 +1027,29 @@
       </div>
       <div id="apiSettingsGroup">
         <label>Clé API Claude (Anthropic)</label>
-        <input type="password" id="claudeKey" placeholder="sk-ant-..." />
+        <div class="token-row">
+          <input type="password" id="claudeKey" placeholder="sk-ant-..." />
+          <button class="token-test-btn" id="testClaudeBtn" onclick="testClaudeToken()">Tester</button>
+        </div>
+        <div class="token-status" id="claudeStatus"><span class="ts-dot"></span> <span class="ts-text">—</span></div>
         <div class="hint">Nécessaire uniquement en mode API</div>
         <label>Modèle Claude</label>
         <input type="text" id="claudeModel" value="claude-sonnet-4-20250514" />
       </div>
-      <label>Token API Apify (optionnel)</label>
-      <input type="password" id="apifyToken" placeholder="apify_api_..." />
-      <div class="hint">Pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
+      <label>Token API Apify</label>
+      <div class="token-row">
+        <input type="password" id="apifyToken" placeholder="apify_api_..." />
+        <button class="token-test-btn" id="testApifyBtn" onclick="testApifyToken()">Tester</button>
+      </div>
+      <div class="token-status" id="apifyStatus"><span class="ts-dot"></span> <span class="ts-text">—</span></div>
+      <div class="hint">Nécessaire pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
       <label>Actor ID Apify</label>
       <input type="text" id="apifyActorId" placeholder="painless_rachis/product-forge-scraper" />
       <div class="hint">L'ID de l'actor Apify à utiliser pour le scraping</div>
       <div class="actions">
         <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
         <button class="btn btn-outline" onclick="closeSettings()">Annuler</button>
+        <button class="btn btn-danger btn-sm" onclick="logoutProfile()" style="margin-left:auto;">Déconnexion</button>
       </div>
     </div>
   </div>
@@ -991,6 +1088,199 @@
 let currentProduct = null;
 let currentListing = null;
 let selectedCategory = 'Autre';
+let currentProfile = null;
+
+// ===== PROFILE SYSTEM =====
+function getAllProfiles() {
+  try { return JSON.parse(localStorage.getItem('pf_profiles') || '[]'); } catch(e) { return []; }
+}
+
+function getActiveProfileName() {
+  return sessionStorage.getItem('pf_active_profile') || localStorage.getItem('pf_last_profile') || null;
+}
+
+function profileKey(name, key) {
+  return 'pf_prof_' + name.toLowerCase().trim() + '_' + key;
+}
+
+function showProfileLogin() {
+  const profiles = getAllProfiles();
+  const listEl = document.getElementById('profilesList');
+  const orEl = document.getElementById('profilesOr');
+  listEl.innerHTML = '';
+
+  if (profiles.length > 0) {
+    orEl.style.display = 'flex';
+    profiles.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'pl-profile-btn';
+      btn.innerHTML = '<div class="pl-avatar">' + p.charAt(0).toUpperCase() + '</div><div><strong>' + esc(p) + '</strong><div style="font-size:11px;color:var(--muted);">Cliquer pour se connecter</div></div>';
+      btn.onclick = () => loginProfile(p);
+      listEl.appendChild(btn);
+    });
+  } else {
+    orEl.style.display = 'none';
+  }
+
+  document.getElementById('profileLoginOverlay').style.display = 'flex';
+  document.getElementById('profileNameInput').value = '';
+  setTimeout(() => document.getElementById('profileNameInput').focus(), 100);
+}
+
+function createOrLoginProfile() {
+  const name = document.getElementById('profileNameInput').value.trim();
+  if (!name) { toast('Entre un nom ou pseudo pour continuer.', 3000, 'warning'); return; }
+
+  let profiles = getAllProfiles();
+  const existing = profiles.find(p => p.toLowerCase() === name.toLowerCase());
+
+  if (existing) {
+    loginProfile(existing);
+  } else {
+    profiles.push(name);
+    localStorage.setItem('pf_profiles', JSON.stringify(profiles));
+    // Migrate existing settings to this profile
+    migrateSettingsToProfile(name);
+    loginProfile(name);
+  }
+}
+
+function migrateSettingsToProfile(name) {
+  const keys = ['mode', 'claude_key', 'apify_token', 'apify_actor_id', 'claude_model'];
+  keys.forEach(k => {
+    const val = localStorage.getItem('pf_' + k);
+    if (val) localStorage.setItem(profileKey(name, k), val);
+  });
+}
+
+function loginProfile(name) {
+  currentProfile = name;
+  sessionStorage.setItem('pf_active_profile', name);
+  localStorage.setItem('pf_last_profile', name);
+  document.getElementById('profileLoginOverlay').style.display = 'none';
+  updateProfileBadge();
+  updateModeBadge();
+  updateTokenStatuses();
+  toast('Connecté : ' + name, 2000, 'success');
+}
+
+function logoutProfile() {
+  currentProfile = null;
+  sessionStorage.removeItem('pf_active_profile');
+  closeSettings();
+  updateProfileBadge();
+  showProfileLogin();
+}
+
+function updateProfileBadge() {
+  const badge = document.getElementById('profileBadge');
+  if (currentProfile) {
+    badge.style.display = 'flex';
+    document.getElementById('profileAvatar').textContent = currentProfile.charAt(0).toUpperCase();
+    document.getElementById('profileName').textContent = currentProfile;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function openProfileMenu() {
+  openSettings();
+}
+
+function updateTokenStatuses() {
+  const s = getSettings();
+  updateSingleTokenStatus('apifyStatus', s.apifyToken);
+  updateSingleTokenStatus('claudeStatus', s.claudeKey);
+}
+
+function updateSingleTokenStatus(elId, value) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const dot = el.querySelector('.ts-dot');
+  const text = el.querySelector('.ts-text');
+  if (value && value.length > 5) {
+    el.className = 'token-status configured';
+    text.textContent = 'Configuré (' + maskToken(value) + ')';
+  } else {
+    el.className = 'token-status missing';
+    text.textContent = 'Non configuré';
+  }
+}
+
+function maskToken(token) {
+  if (!token || token.length < 8) return '****';
+  return '****' + token.slice(-6);
+}
+
+async function testApifyToken() {
+  const btn = document.getElementById('testApifyBtn');
+  const token = document.getElementById('apifyToken').value.trim();
+  if (!token) { toast('Entre un token Apify pour le tester.', 3000, 'warning'); return; }
+
+  btn.className = 'token-test-btn testing';
+  btn.textContent = '...';
+
+  try {
+    const resp = await fetch('https://api.apify.com/v2/users/me?token=' + encodeURIComponent(token));
+    if (resp.ok) {
+      const data = await resp.json();
+      btn.className = 'token-test-btn ok';
+      btn.textContent = '✓ OK';
+      const statusEl = document.getElementById('apifyStatus');
+      statusEl.className = 'token-status configured';
+      statusEl.querySelector('.ts-text').textContent = 'Valide — compte : ' + (data.data?.username || data.username || 'OK');
+      toast('Token Apify valide !', 3000, 'success');
+    } else {
+      throw new Error('HTTP ' + resp.status);
+    }
+  } catch(err) {
+    btn.className = 'token-test-btn fail';
+    btn.textContent = '✗ Erreur';
+    const statusEl = document.getElementById('apifyStatus');
+    statusEl.className = 'token-status missing';
+    statusEl.querySelector('.ts-text').textContent = 'Token invalide — vérifiez-le sur console.apify.com';
+    toast('Token Apify invalide : ' + err.message, 4000, 'error');
+  }
+
+  setTimeout(() => { btn.className = 'token-test-btn'; btn.textContent = 'Tester'; }, 5000);
+}
+
+async function testClaudeToken() {
+  const btn = document.getElementById('testClaudeBtn');
+  const key = document.getElementById('claudeKey').value.trim();
+  if (!key) { toast('Entre une clé API Claude pour la tester.', 3000, 'warning'); return; }
+
+  btn.className = 'token-test-btn testing';
+  btn.textContent = '...';
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'Dis juste "OK"' }] })
+    });
+    if (resp.ok) {
+      btn.className = 'token-test-btn ok';
+      btn.textContent = '✓ OK';
+      const statusEl = document.getElementById('claudeStatus');
+      statusEl.className = 'token-status configured';
+      statusEl.querySelector('.ts-text').textContent = 'Clé API valide et fonctionnelle';
+      toast('Clé API Claude valide !', 3000, 'success');
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'HTTP ' + resp.status);
+    }
+  } catch(err) {
+    btn.className = 'token-test-btn fail';
+    btn.textContent = '✗ Erreur';
+    const statusEl = document.getElementById('claudeStatus');
+    statusEl.className = 'token-status missing';
+    statusEl.querySelector('.ts-text').textContent = 'Clé invalide — ' + err.message;
+    toast('Clé Claude invalide : ' + err.message, 4000, 'error');
+  }
+
+  setTimeout(() => { btn.className = 'token-test-btn'; btn.textContent = 'Tester'; }, 5000);
+}
 
 const CATEGORIES = {
   'Bijoux':  { emoji: '💎', tone: 'elegant et raffine, vocabulaire bijouterie', seoTags: ['bijoux', 'jewellery', 'handmade jewelry', 'gift for her'], descStyle: 'Mets en avant le style, les materiaux nobles et le packaging cadeau.' },
@@ -1020,12 +1310,20 @@ function initCategories() {
 }
 
 function getSettings() {
+  const p = currentProfile;
+  function get(key, fallback) {
+    if (p) {
+      const v = localStorage.getItem(profileKey(p, key));
+      if (v !== null) return v;
+    }
+    return localStorage.getItem('pf_' + key) || fallback;
+  }
   return {
-    mode: localStorage.getItem('pf_mode') || 'free',
-    claudeKey: localStorage.getItem('pf_claude_key') || '',
-    apifyToken: localStorage.getItem('pf_apify_token') || '',
-    apifyActorId: localStorage.getItem('pf_apify_actor_id') || 'painless_rachis/product-forge-scraper',
-    claudeModel: localStorage.getItem('pf_claude_model') || 'claude-sonnet-4-20250514'
+    mode: get('mode', 'free'),
+    claudeKey: get('claude_key', ''),
+    apifyToken: get('apify_token', ''),
+    apifyActorId: get('apify_actor_id', 'painless_rachis/product-forge-scraper'),
+    claudeModel: get('claude_model', 'claude-sonnet-4-20250514')
   };
 }
 
@@ -1050,6 +1348,7 @@ function openSettings() {
   document.getElementById('apifyActorId').value = s.apifyActorId;
   document.getElementById('claudeModel').value = s.claudeModel;
   selectMode(getActiveMode() === 'api' ? 'api' : 'free', true);
+  updateTokenStatuses();
   document.getElementById('settingsModal').classList.add('active');
 }
 
@@ -1064,17 +1363,29 @@ function selectMode(mode, uiOnly) {
 
 function saveSettings() {
   const m = document.getElementById('settingsModal')._selectedMode || 'free';
-  localStorage.setItem('pf_mode', m);
-  localStorage.setItem('pf_claude_key', document.getElementById('claudeKey').value.trim());
-  localStorage.setItem('pf_apify_token', document.getElementById('apifyToken').value.trim());
-  localStorage.setItem('pf_apify_actor_id', document.getElementById('apifyActorId').value.trim());
-  localStorage.setItem('pf_claude_model', document.getElementById('claudeModel').value.trim());
-  closeSettings(); updateModeBadge(); updateGenerateZone(); toast('Configuration sauvegardée', 3000, 'success');
+  const vals = {
+    mode: m,
+    claude_key: document.getElementById('claudeKey').value.trim(),
+    apify_token: document.getElementById('apifyToken').value.trim(),
+    apify_actor_id: document.getElementById('apifyActorId').value.trim(),
+    claude_model: document.getElementById('claudeModel').value.trim()
+  };
+  // Save to profile-scoped keys
+  Object.entries(vals).forEach(([k, v]) => {
+    if (currentProfile) localStorage.setItem(profileKey(currentProfile, k), v);
+    localStorage.setItem('pf_' + k, v); // also save globally for fallback
+  });
+  closeSettings(); updateModeBadge(); updateGenerateZone(); updateTokenStatuses();
+  toast('Configuration sauvegardée', 3000, 'success');
 }
 
-function switchToFreeMode() { localStorage.setItem('pf_mode','free'); updateModeBadge(); updateGenerateZone(); }
+function switchToFreeMode() {
+  if (currentProfile) localStorage.setItem(profileKey(currentProfile, 'mode'), 'free');
+  localStorage.setItem('pf_mode','free'); updateModeBadge(); updateGenerateZone();
+}
 function switchToApiMode() {
   if (!getSettings().claudeKey) { openSettings(); selectMode('api'); toast('Entrez votre clé API Claude'); return; }
+  if (currentProfile) localStorage.setItem(profileKey(currentProfile, 'mode'), 'api');
   localStorage.setItem('pf_mode','api'); updateModeBadge(); updateGenerateZone();
 }
 
@@ -2373,10 +2684,25 @@ function checkOnboarding() {
 }
 
 (function init() {
+  // Check profile
+  const savedProfile = getActiveProfileName();
+  if (savedProfile) {
+    currentProfile = savedProfile;
+    updateProfileBadge();
+  } else {
+    showProfileLogin();
+  }
+
   updateModeBadge();
   initCategories();
-  checkOnboarding();
+  if (currentProfile) checkOnboarding();
   updateDraftsBadge();
+  updateTokenStatuses();
+
+  // Handle Enter key on profile input
+  document.getElementById('profileNameInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') createOrLoginProfile();
+  });
 
   if (window.location.hash) {
     const hash = window.location.hash.substring(1);
@@ -2531,7 +2857,7 @@ function loadBatchProduct(data) {
 </script>
 
 <footer style="text-align:center;padding:24px 16px 18px;color:var(--muted);font-size:11px;letter-spacing:0.02em;border-top:1px solid var(--border);margin-top:40px;opacity:0.7;">
-  Product Forge v2.0 — Créé par Louis Rivault
+  Product Forge v2.1 — Créé par Louis Rivault
 </footer>
 
 </body>
