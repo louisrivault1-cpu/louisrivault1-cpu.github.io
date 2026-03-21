@@ -803,6 +803,60 @@
     }
     .loading-skeleton-preview .lsp-img { width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0; }
     .loading-skeleton-preview .lsp-lines { flex: 1; }
+
+    /* === CYCLE 11: Style Selector === */
+    .style-selector { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .style-btn {
+      padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: var(--card2); border: 1px solid var(--border); color: var(--muted);
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+    }
+    .style-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .style-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+    /* === Enhanced Tags with Remove/Add === */
+    .tag-badge-interactive { position: relative; padding-right: 20px; }
+    .tag-badge-interactive .remove-tag { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 0 4px; opacity: 0; transition: opacity 0.2s; }
+    .tag-badge-interactive:hover .remove-tag { opacity: 1; }
+    .add-tag-btn { background: rgba(74,222,128,0.1); color: var(--green); border: 1px dashed rgba(74,222,128,0.3); padding: 4px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; transition: all 0.2s; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; }
+    .add-tag-btn:hover { border-style: solid; border-color: rgba(74,222,128,0.5); }
+
+    /* === Regenerate Buttons === */
+    .regen-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 3px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-left: 6px; transition: all 0.2s; }
+    .regen-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* === Lightbox === */
+    .lightbox { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .lightbox.active { display: flex; }
+    .lightbox-content { position: relative; max-width: 90vw; max-height: 90vh; }
+    .lightbox-image { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .lightbox-close { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.2); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .lightbox-close:hover { background: rgba(255,255,255,0.4); }
+    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.4); }
+    .lightbox-prev { left: 10px; }
+    .lightbox-next { right: 10px; }
+
+    /* === Enhanced Gallery === */
+    .gallery-main { position: relative; width: 100%; aspect-ratio: 1; background: var(--card2); border-radius: 12px; overflow: hidden; margin-bottom: 12px; cursor: pointer; }
+    .gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-thumbnails { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 6px; }
+    .gallery-thumb { position: relative; aspect-ratio: 1; border-radius: 8px; border: 2px solid var(--border); cursor: pointer; overflow: hidden; transition: all 0.2s; }
+    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-thumb:hover { border-color: var(--accent); }
+    .gallery-thumb.active { border-color: var(--green); box-shadow: 0 0 0 2px var(--green); }
+    .gallery-thumb-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .gallery-thumb:hover .gallery-thumb-overlay { opacity: 1; }
+    .gallery-thumb-overlay button { background: rgba(255,255,255,0.8); border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+
+    /* === Skeleton Loader === */
+    .skeleton-loader { background: linear-gradient(90deg, var(--card2) 25%, var(--border) 50%, var(--card2) 75%); background-size: 200% 100%; animation: skeleton-shimmer 2s infinite; border-radius: 12px; }
+    @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* === Pixa Checkboxes === */
+    .pixa-option { display: flex; align-items: center; gap: 8px; margin-right: 12px; }
+    .pixa-option input[type="checkbox"] { cursor: pointer; }
+    .pixa-option label { cursor: pointer; font-size: 12px; margin: 0; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -956,6 +1010,15 @@
     </div>
   </div>
 
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content" id="lightboxContent">
+      <img id="lightboxImage" src="" alt="" class="lightbox-image" />
+    </div>
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <button class="lightbox-nav lightbox-prev" onclick="prevImageLightbox()">❮</button>
+    <button class="lightbox-nav lightbox-next" onclick="nextImageLightbox()">❯</button>
+  </div>
+
   <div id="mainView" class="main hidden">
 
     <div class="panel panel-left">
@@ -1008,8 +1071,13 @@
       <div class="data-card">
         <h3 style="display:flex;justify-content:space-between;align-items:center;">
           <span>Images (<span id="imgCount">0</span>)</span>
-          <button class="btn btn-outline btn-sm" onclick="copyAllImageSEONames()" style="text-transform:none;letter-spacing:0;font-size:11px;padding:4px 10px;">📋 Tout copier noms SEO</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadAllImages()" style="text-transform:none;letter-spacing:0;font-size:11px;padding:4px 10px;">⬇ Tout télécharger</button>
         </h3>
+        <div id="galleryMain" class="gallery-main" style="display:none;">
+          <div class="skeleton-loader" id="mainImageSkeleton" style="width:100%;height:100%;"></div>
+          <img id="mainGalleryImage" src="" alt="" style="display:none;" />
+        </div>
+        <div id="galleryThumbnails" class="gallery-thumbnails" style="display:none;"></div>
         <div class="images-grid" id="srcImages"></div>
       </div>
       <div class="data-card">
@@ -1035,6 +1103,11 @@
       <div style="margin-bottom:16px;">
         <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;font-weight:600;">Catégorie de produit</label>
         <div class="cat-selector" id="catSelector"></div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:block;font-weight:600;">Style de description</label>
+        <div class="style-selector" id="styleSelector"></div>
       </div>
 
       <div id="generateZone">
@@ -1090,7 +1163,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Titre Etsy (140 car. max)
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTitle')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTitle')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('title')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <input type="text" id="etsyTitle" maxlength="140" oninput="updateTitleCounter(); debouncedUpdateEtsyPreview()" />
           <div class="char-counter" id="titleCounter">0/140</div>
@@ -1099,7 +1175,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Description
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('description')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <textarea id="etsyDesc" rows="10" oninput="updateDescCounter(); debouncedUpdateEtsyPreview()"></textarea>
           <div class="char-counter" id="descCounter">0 mots</div>
@@ -1108,7 +1187,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Tags Etsy (exactement 13)
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTags')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTags')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('tags')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <input type="text" id="etsyTags" placeholder="tag1, tag2, tag3, ..." oninput="updateTagsDisplay(); debouncedUpdateEtsyPreview();" />
           <div id="tagsDisplay"></div>
@@ -1117,7 +1199,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Catégorie Etsy
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyCategory')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyCategory')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('category')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <input type="text" id="etsyCategory" />
         </div>
@@ -1125,7 +1210,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Caractéristiques clés
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('keyFeaturesList')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('keyFeaturesList')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('key_features')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <ul class="key-features-list" id="keyFeaturesList"></ul>
         </div>
@@ -1157,7 +1245,10 @@
         <div class="etsy-section">
           <label style="display:flex;justify-content:space-between;align-items:center;">
             Meta Description SEO (155 car. max)
-            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyMetaDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyMetaDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+              <button class="regen-btn" onclick="regenerateField('meta_description')" title="Régénérer ce champ">🔄</button>
+            </div>
           </label>
           <input type="text" id="etsyMetaDesc" maxlength="160" oninput="updateMetaDescCounter()" placeholder="Meta description pour Google..." />
           <div class="char-counter" id="metaDescCounter">0/155</div>
@@ -1173,6 +1264,20 @@
 
         <div class="etsy-section">
           <label>🎨 Pixa Workflows — Retouche d'images</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;font-size:12px;">
+            <label class="pixa-option">
+              <input type="checkbox" id="pixaCheckDetourage" onchange="savePixaCheckboxes()" />
+              <span>Détourage</span>
+            </label>
+            <label class="pixa-option">
+              <input type="checkbox" id="pixaCheckFond" onchange="savePixaCheckboxes()" />
+              <span>Fond IA</span>
+            </label>
+            <label class="pixa-option">
+              <input type="checkbox" id="pixaCheckUpscale" onchange="savePixaCheckboxes()" />
+              <span>Upscale</span>
+            </label>
+          </div>
           <div class="pixa-buttons">
             <button class="btn btn-green" onclick="window.open('https://www.remove.bg/','_blank')" data-tooltip="Supprimer l'arrière-plan de vos images" style="font-size:13px;padding:10px 14px;">🖼 Détourage</button>
             <button class="btn btn-claude" onclick="window.open('https://www.photoroom.com/backgrounds','_blank')" data-tooltip="Ajouter un fond IA professionnel" style="font-size:13px;padding:10px 14px;">✨ Fond IA</button>
@@ -1514,6 +1619,9 @@ async function deleteProductFromFirestore(id) {
 let currentProduct = null;
 let currentListing = null;
 let selectedCategory = 'Autre';
+let selectedStyle = 'professional'; // Cycle 11: Style selector
+let currentLightboxIndex = 0;
+let lightboxImages = [];
 let currentProfile = null;
 
 // ===== PROFILE SYSTEM =====
@@ -1737,6 +1845,27 @@ function initCategories() {
     };
     sel.appendChild(btn);
   });
+
+  // Initialize style selector (Cycle 11)
+  const styleSel = document.getElementById('styleSelector');
+  styleSel.innerHTML = '';
+  const styles = [
+    { id: 'professional', label: '💼 Professionnel' },
+    { id: 'fun', label: '🎨 Fun & Coloré' },
+    { id: 'luxury', label: '✨ Luxe & Premium' },
+    { id: 'minimalist', label: '⬜ Minimaliste' }
+  ];
+  styles.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (s.id === selectedStyle ? ' active' : '');
+    btn.textContent = s.label;
+    btn.onclick = () => {
+      selectedStyle = s.id;
+      document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    styleSel.appendChild(btn);
+  });
 }
 
 function getSettings() {
@@ -1926,13 +2055,25 @@ function buildEtsyPrompt(product) {
   const nbImages = (product.images||[]).length;
   const aliPriceRaw = String(product.price||'0').replace(/[^0-9.]/g,'');
   const aliPrice = parseFloat(aliPriceRaw)||0;
-  const suggestedPrice = (aliPrice * 3.5).toFixed(2);
+  // Cycle 11: Convert USD→EUR using ×0.92 before the ×3.5 multiplier
+  const aliPriceEUR = aliPrice * 0.92;
+  const suggestedPrice = (aliPriceEUR * 3.5).toFixed(2);
+
+  // Style tone mapping (Cycle 11)
+  const styleTones = {
+    professional: 'professionnel et raffiné',
+    fun: 'fun et coloré, qui attire l\'attention',
+    luxury: 'haut de gamme et luxueux',
+    minimalist: 'épuré et minimaliste'
+  };
+  const styleTone = styleTones[selectedStyle] || styleTones['professional'];
 
   return `You are a top-tier Etsy SEO copywriter and e-commerce optimization expert. Your job is to transform an AliExpress product into a high-converting Etsy listing that ranks well in Etsy search and Google Shopping.
 
 === PRODUCT CATEGORY: ${selectedCategory} ===
 Tone: ${cat.tone}
 Description style: ${cat.descStyle}
+Selected tone override: ${styleTone}
 Priority SEO tags to include if relevant: ${cat.seoTags.join(', ')}
 
 === ALIEXPRESS SOURCE DATA ===
@@ -2004,12 +2145,13 @@ Source URL: ${product.url||'N/A'}
 
 9. alt_texts (1 per image = ${nbImages} total)
    - Each alt text: 8-15 words
+   - Each MUST be UNIQUE and DIFFERENT from others
    - Include product keywords naturally for SEO
-   - Describe what the image shows
+   - Describe what the image shows (different angles, details, context for each)
    - Example: "Minimalist gold pendant necklace on white background close-up detail shot"
 
 10. price_eur (number)
-    - Calculate: AliExpress price (${aliPrice} EUR) x 3.5 = ${suggestedPrice} EUR
+    - Calculate: AliExpress price (${aliPrice} USD) → EUR (×0.92) = ${aliPriceEUR.toFixed(2)} EUR → ×3.5 = ${suggestedPrice} EUR
     - Round to nearest .99 for psychological pricing
     - This must be a number, not a string
 
@@ -2443,6 +2585,73 @@ function displaySourceData(data) {
   // Store on data for later use
   data._seoImageNames = gridSEONames;
 
+  // Cycle 12: Enhanced gallery display
+  if (images.length > 0) {
+    const galleryMain = document.getElementById('galleryMain');
+    const galleryThumbnails = document.getElementById('galleryThumbnails');
+    galleryMain.style.display = 'block';
+    galleryThumbnails.style.display = 'grid';
+    galleryMain.innerHTML = '<div class="skeleton-loader" id="mainImageSkeleton" style="width:100%;height:100%;"></div>';
+    galleryThumbnails.innerHTML = '';
+
+    lightboxImages = images; // Store for lightbox
+    currentLightboxIndex = 0;
+
+    // Load main image
+    const mainImg = document.createElement('img');
+    mainImg.id = 'mainGalleryImage';
+    const mainSrc = images[0].replace(/^\/\//,'https://');
+    mainImg.src = mainSrc;
+    mainImg.alt = generateImageAltText(titleForSEO, 0, images.length);
+    mainImg.style.display = 'none';
+    mainImg.onload = () => {
+      document.getElementById('mainImageSkeleton').style.display = 'none';
+      mainImg.style.display = 'block';
+    };
+    mainImg.onerror = () => {
+      document.getElementById('mainImageSkeleton').innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;">Image non disponible</div>';
+    };
+    mainImg.style.cursor = 'pointer';
+    mainImg.onclick = () => openLightbox(0);
+    galleryMain.appendChild(mainImg);
+
+    // Create thumbnails
+    images.forEach((url, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'gallery-thumb' + (i === 0 ? ' active' : '');
+      thumb.onclick = () => {
+        currentLightboxIndex = i;
+        const thumbImg = new Image();
+        const thumbSrc = url.replace(/^\/\//,'https://');
+        thumbImg.src = thumbSrc;
+        thumbImg.onload = () => {
+          mainImg.src = thumbSrc;
+          mainImg.alt = generateImageAltText(titleForSEO, i, images.length);
+          document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+        };
+      };
+
+      const thumbImg = document.createElement('img');
+      const thumbSrc = url.replace(/^\/\//,'https://');
+      thumbImg.src = thumbSrc;
+      thumbImg.alt = `Thumbnail ${i+1}`;
+      thumbImg.loading = 'lazy';
+
+      const overlay = document.createElement('div');
+      overlay.className = 'gallery-thumb-overlay';
+      const dlBtn = document.createElement('button');
+      dlBtn.textContent = '⬇';
+      dlBtn.onclick = (e) => { e.stopPropagation(); window.open(thumbSrc, '_blank'); };
+      overlay.appendChild(dlBtn);
+
+      thumb.appendChild(thumbImg);
+      thumb.appendChild(overlay);
+      galleryThumbnails.appendChild(thumb);
+    });
+  }
+
+  // Keep backward-compatible grid for reference
   images.forEach((url,i) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'image-wrapper';
@@ -2563,22 +2772,56 @@ function updateTagsDisplay() {
 
   const container = document.createElement('div');
   container.className = 'tags-display';
-  tags.forEach(tag => {
+  tags.forEach((tag, idx) => {
     const badge = document.createElement('div');
-    badge.className = 'tag-badge';
+    badge.className = 'tag-badge tag-badge-interactive';
     badge.style.cursor = 'pointer';
-    badge.title = 'Cliquer pour copier';
+    badge.title = 'Cliquer pour copier, X pour supprimer';
     const chars = tag.length;
     const charSpan = document.createElement('span');
     charSpan.className = 'tag-count' + (chars > 20 ? ' warning' : '');
     charSpan.textContent = chars;
     if (chars > 20) charSpan.style.color = 'var(--red)';
-    badge.textContent = tag + ' ';
+
+    // Main badge content (clickable to copy)
+    const tagContent = document.createElement('span');
+    tagContent.textContent = tag + ' ';
+    tagContent.style.cursor = 'pointer';
+    tagContent.onclick = () => { navigator.clipboard.writeText(tag).then(()=>toast('Tag copié: '+tag)); };
+
+    // Remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-tag';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = (e) => {
+      e.stopPropagation();
+      const newTags = tags.filter((_, i) => i !== idx);
+      document.getElementById('etsyTags').value = newTags.join(', ');
+      updateTagsDisplay();
+      debouncedUpdateEtsyPreview();
+    };
+
+    badge.appendChild(tagContent);
     badge.appendChild(charSpan);
-    badge.onclick = () => { navigator.clipboard.writeText(tag).then(()=>toast('Tag copié: '+tag)); };
+    badge.appendChild(removeBtn);
     container.appendChild(badge);
   });
   display.appendChild(container);
+
+  // Add button for new tags
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-tag-btn';
+  addBtn.textContent = '+ Ajouter un tag';
+  addBtn.onclick = () => {
+    const newTag = prompt('Entrer le nouveau tag:');
+    if (newTag && newTag.trim()) {
+      tags.push(newTag.trim());
+      document.getElementById('etsyTags').value = tags.join(', ');
+      updateTagsDisplay();
+      debouncedUpdateEtsyPreview();
+    }
+  };
+  display.appendChild(addBtn);
 
   if (tags.some(t => t.length > 20)) {
     const warn = document.createElement('div');
@@ -3754,6 +3997,112 @@ function refreshDashboard() {
   if (storageText) storageText.textContent = `${drafts.length} fiche${drafts.length>1?'s':''} — ${sizeBytes > 1024*1024 ? sizeMB+' MB' : sizeKB+' KB'}`;
   if (storageFill) storageFill.style.width = pct + '%';
 }
+
+// Cycle 12: Lightbox functions
+function openLightbox(index) {
+  currentLightboxIndex = index;
+  const lightbox = document.getElementById('lightbox');
+  if (lightbox && lightboxImages.length > 0) {
+    const imgEl = document.getElementById('lightboxImage');
+    imgEl.src = lightboxImages[index];
+    lightbox.style.display = 'flex';
+    updateLightboxNav();
+  }
+}
+
+function closeLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  if (lightbox) lightbox.style.display = 'none';
+}
+
+function nextImageLightbox() {
+  if (lightboxImages.length === 0) return;
+  currentLightboxIndex = (currentLightboxIndex + 1) % lightboxImages.length;
+  openLightbox(currentLightboxIndex);
+}
+
+function prevImageLightbox() {
+  if (lightboxImages.length === 0) return;
+  currentLightboxIndex = (currentLightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
+  openLightbox(currentLightboxIndex);
+}
+
+function updateLightboxNav() {
+  const counter = document.getElementById('lightboxCounter');
+  if (counter) counter.textContent = (currentLightboxIndex + 1) + ' / ' + lightboxImages.length;
+}
+
+// Lightbox event listeners (attach once on DOM ready)
+document.addEventListener('DOMContentLoaded', function() {
+  const lightbox = document.getElementById('lightbox');
+  if (lightbox) {
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.style.display === 'flex') {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') prevImageLightbox();
+        if (e.key === 'ArrowRight') nextImageLightbox();
+      }
+    });
+  }
+});
+
+// Cycle 11 & 12: Regenerate field function
+function regenerateField(fieldName) {
+  const prompt = buildEtsyPrompt();
+  const msg = `Copie le prompt ci-dessous, demande à Claude de régénérer juste le champ "${fieldName}", puis reviens avec la réponse.\\n\\n${prompt}`;
+  toast(msg);
+}
+
+// Cycle 12: Download all images
+function downloadAllImages() {
+  if (lightboxImages.length === 0) {
+    toast('Aucune image à télécharger');
+    return;
+  }
+  lightboxImages.forEach((url, i) => {
+    setTimeout(() => {
+      window.open(url, '_blank');
+    }, i * 100);
+  });
+  toast('Ouverture des images...');
+}
+
+// Cycle 12: Pixa workflow checkbox persistence
+function savePixaCheckboxes() {
+  const checks = {
+    detourage: document.getElementById('pixaCheckDetourage')?.checked || false,
+    fond: document.getElementById('pixaCheckFond')?.checked || false,
+    upscale: document.getElementById('pixaCheckUpscale')?.checked || false
+  };
+  localStorage.setItem('pf_pixa_checks', JSON.stringify(checks));
+}
+
+function loadPixaCheckboxes() {
+  const saved = localStorage.getItem('pf_pixa_checks');
+  if (saved) {
+    try {
+      const checks = JSON.parse(saved);
+      const detEl = document.getElementById('pixaCheckDetourage');
+      const fondEl = document.getElementById('pixaCheckFond');
+      const upEl = document.getElementById('pixaCheckUpscale');
+      if (detEl) detEl.checked = checks.detourage;
+      if (fondEl) fondEl.checked = checks.fond;
+      if (upEl) upEl.checked = checks.upscale;
+    } catch (e) {
+      console.error('Failed to load Pixa checkboxes:', e);
+    }
+  }
+}
+
+// Load Pixa checkboxes on page load
+document.addEventListener('DOMContentLoaded', loadPixaCheckboxes);
+
+// Save Pixa checkboxes on change
+document.addEventListener('change', (e) => {
+  if (['pixaCheckDetourage', 'pixaCheckFond', 'pixaCheckUpscale'].includes(e.target.id)) {
+    savePixaCheckboxes();
+  }
+});
 </script>
 
 <footer style="text-align:center;padding:24px 16px 18px;color:var(--muted);font-size:11px;letter-spacing:0.02em;border-top:1px solid var(--border);margin-top:40px;opacity:0.7;">
