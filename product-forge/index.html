@@ -621,12 +621,62 @@
     }
     .confirm-box p { font-size: 14px; margin-bottom: 18px; }
     .confirm-box .actions { display: flex; gap: 8px; justify-content: center; margin-top: 0; }
+
+    /* Firebase Auth Login Screen */
+    #firebaseLoginScreen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+      animation: fadeInOnboard 0.4s ease;
+    }
+    #firebaseLoginScreen .login-box {
+      text-align: center; max-width: 400px; width: 90%;
+    }
+    #firebaseLoginScreen .login-logo { font-size: 64px; margin-bottom: 16px; }
+    #firebaseLoginScreen h2 {
+      font-size: 2rem; font-weight: 700; margin-bottom: 8px;
+      background: linear-gradient(135deg, #c8a961, #e8d5a3);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    #firebaseLoginScreen .login-sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+    .google-login-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #0a0a0f; border: none; border-radius: 14px;
+      padding: 16px 40px; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all 0.25s; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 12px;
+    }
+    .google-login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,169,97,0.3); }
+    .google-login-btn img { width: 22px; height: 22px; }
+    .sync-indicator {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--green); margin-left: 8px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .sync-indicator.visible { opacity: 1; }
   </style>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
+  <!-- Firebase Auth Login Screen -->
+  <div id="firebaseLoginScreen">
+    <div class="login-box">
+      <div class="login-logo">⚒</div>
+      <h2>Product Forge</h2>
+      <p class="login-sub">Connecte-toi pour sauvegarder tes tokens et fiches produit dans le cloud.</p>
+      <button class="google-login-btn" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Se connecter avec Google
+      </button>
+    </div>
+  </div>
+
   <!-- Profile Login Modal -->
-  <div class="profile-login-overlay" id="profileLoginOverlay" style="display:none;">
+  <div class="profile-login-overlay" id="profileLoginOverlay" style="display:none !important;">
     <div class="profile-login-box">
       <div class="pl-logo">⚒</div>
       <h2>Product Forge</h2>
@@ -1085,6 +1135,172 @@
   <div class="toast" id="toast"></div>
 
 <script>
+// ===== FIREBASE INIT =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDhuyzD-WvK-Z9kxq8lE_HixzijhqaS1q0",
+  authDomain: "product-forge-a0396.firebaseapp.com",
+  projectId: "product-forge-a0396",
+  storageBucket: "product-forge-a0396.firebasestorage.app",
+  messagingSenderId: "331987571121",
+  appId: "1:331987571121:web:d02ee0ef809745be926d90"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let firebaseUser = null;
+let firestoreReady = false;
+
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    console.error('Login error:', err);
+    toast('Erreur de connexion Google: ' + err.message, 5000, 'error');
+  });
+}
+
+function signOutFirebase() {
+  auth.signOut().then(() => {
+    firebaseUser = null;
+    firestoreReady = false;
+    currentProfile = null;
+    sessionStorage.removeItem('pf_active_profile');
+    document.getElementById('firebaseLoginScreen').style.display = 'flex';
+    updateProfileBadge();
+  });
+}
+
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    firebaseUser = user;
+    firestoreReady = true;
+    document.getElementById('firebaseLoginScreen').style.display = 'none';
+
+    // Set profile from Google
+    currentProfile = user.displayName || user.email.split('@')[0];
+    sessionStorage.setItem('pf_active_profile', currentProfile);
+    localStorage.setItem('pf_last_profile', currentProfile);
+
+    // Update profile badge with Google avatar
+    updateFirebaseProfileBadge(user);
+
+    // Load config from Firestore
+    await loadConfigFromFirestore();
+
+    // Load products from Firestore
+    await loadProductsFromFirestore();
+
+    updateModeBadge();
+    updateTokenStatuses();
+    updateDraftsBadge();
+    checkOnboarding();
+
+    showSyncIndicator();
+  } else {
+    document.getElementById('firebaseLoginScreen').style.display = 'flex';
+  }
+});
+
+function updateFirebaseProfileBadge(user) {
+  const badge = document.getElementById('profileBadge');
+  badge.style.display = 'flex';
+  const avatar = document.getElementById('profileAvatar');
+  if (user.photoURL) {
+    avatar.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+  } else {
+    avatar.textContent = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+  }
+  document.getElementById('profileName').textContent = user.displayName || user.email.split('@')[0];
+
+  // Add sync indicator if not present
+  if (!document.getElementById('syncIndicator')) {
+    const syncEl = document.createElement('span');
+    syncEl.id = 'syncIndicator';
+    syncEl.className = 'sync-indicator';
+    syncEl.innerHTML = '☁️';
+    badge.parentElement.insertBefore(syncEl, badge.nextSibling);
+  }
+}
+
+function showSyncIndicator() {
+  const el = document.getElementById('syncIndicator');
+  if (el) { el.classList.add('visible'); setTimeout(() => el.classList.remove('visible'), 2000); }
+}
+
+// ===== FIRESTORE SYNC =====
+async function saveConfigToFirestore() {
+  if (!firebaseUser || !firestoreReady) return;
+  try {
+    const s = getSettings();
+    await db.collection('users').doc(firebaseUser.uid).collection('config').doc('settings').set({
+      mode: s.mode,
+      claudeKey: s.claudeKey,
+      apifyToken: s.apifyToken,
+      apifyActorId: s.apifyActorId,
+      claudeModel: s.claudeModel,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showSyncIndicator();
+  } catch (e) { console.error('Firestore save config error:', e); }
+}
+
+async function loadConfigFromFirestore() {
+  if (!firebaseUser || !firestoreReady) return;
+  try {
+    const doc = await db.collection('users').doc(firebaseUser.uid).collection('config').doc('settings').get();
+    if (doc.exists) {
+      const data = doc.data();
+      const keys = { mode: 'mode', claudeKey: 'claude_key', apifyToken: 'apify_token', apifyActorId: 'apify_actor_id', claudeModel: 'claude_model' };
+      Object.entries(keys).forEach(([fsKey, lsKey]) => {
+        if (data[fsKey]) {
+          if (currentProfile) localStorage.setItem(profileKey(currentProfile, lsKey), data[fsKey]);
+          localStorage.setItem('pf_' + lsKey, data[fsKey]);
+        }
+      });
+      showSyncIndicator();
+    }
+  } catch (e) { console.error('Firestore load config error:', e); }
+}
+
+async function saveProductToFirestore(draft) {
+  if (!firebaseUser || !firestoreReady || !draft) return;
+  try {
+    const id = draft.id || ('prod_' + Date.now());
+    await db.collection('users').doc(firebaseUser.uid).collection('products').doc(id).set({
+      ...draft,
+      id: id,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showSyncIndicator();
+    return id;
+  } catch (e) { console.error('Firestore save product error:', e); return null; }
+}
+
+async function loadProductsFromFirestore() {
+  if (!firebaseUser || !firestoreReady) return;
+  try {
+    const snapshot = await db.collection('users').doc(firebaseUser.uid).collection('products').orderBy('updatedAt', 'desc').get();
+    if (!snapshot.empty) {
+      const products = [];
+      snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+      // Merge with localStorage drafts
+      const lsKey = currentProfile ? profileKey(currentProfile, 'drafts') : 'pf_drafts';
+      const existing = JSON.parse(localStorage.getItem(lsKey) || '[]');
+      const merged = [...products];
+      existing.forEach(e => {
+        if (!merged.find(m => m.id === e.id)) merged.push(e);
+      });
+      localStorage.setItem(lsKey, JSON.stringify(merged));
+    }
+  } catch (e) { console.error('Firestore load products error:', e); }
+}
+
+async function deleteProductFromFirestore(id) {
+  if (!firebaseUser || !firestoreReady || !id) return;
+  try {
+    await db.collection('users').doc(firebaseUser.uid).collection('products').doc(id).delete();
+  } catch (e) { console.error('Firestore delete product error:', e); }
+}
+
 let currentProduct = null;
 let currentListing = null;
 let selectedCategory = 'Autre';
@@ -1165,11 +1381,15 @@ function loginProfile(name) {
 }
 
 function logoutProfile() {
-  currentProfile = null;
-  sessionStorage.removeItem('pf_active_profile');
-  closeSettings();
-  updateProfileBadge();
-  showProfileLogin();
+  if (firebaseUser) {
+    signOutFirebase();
+  } else {
+    currentProfile = null;
+    sessionStorage.removeItem('pf_active_profile');
+    closeSettings();
+    updateProfileBadge();
+    showProfileLogin();
+  }
 }
 
 function updateProfileBadge() {
@@ -1377,6 +1597,7 @@ function saveSettings() {
   });
   closeSettings(); updateModeBadge(); updateGenerateZone(); updateTokenStatuses();
   toast('Configuration sauvegardée', 3000, 'success');
+  saveConfigToFirestore();
 }
 
 function switchToFreeMode() {
@@ -2608,6 +2829,7 @@ function saveToDrafts(silent) {
     drafts.unshift(draft);
     localStorage.setItem('pf_drafts', JSON.stringify(drafts.slice(0,100)));
     updateDraftsBadge();
+    saveProductToFirestore(draft);
     if (!silent) toast('Fiche sauvegardée !', 3000, 'success');
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
@@ -2723,6 +2945,7 @@ function deleteDraft(id) {
   let drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
   drafts = drafts.filter(d => d.id !== id);
   localStorage.setItem('pf_drafts', JSON.stringify(drafts));
+  deleteProductFromFirestore(id);
   renderDrafts();
   updateDraftsBadge();
   toast('Fiche supprimée');
@@ -2763,14 +2986,14 @@ function checkOnboarding() {
 }
 
 (function init() {
-  // Check profile
+  // Firebase handles auth state - don't show old profile login
+  // If Firebase user already set by onAuthStateChanged, use it
   const savedProfile = getActiveProfileName();
-  if (savedProfile) {
+  if (savedProfile && !firebaseUser) {
     currentProfile = savedProfile;
     updateProfileBadge();
-  } else {
-    showProfileLogin();
   }
+  // Don't show old profile login - Firebase login screen handles it
 
   updateModeBadge();
   initCategories();
@@ -2778,8 +3001,9 @@ function checkOnboarding() {
   updateDraftsBadge();
   updateTokenStatuses();
 
-  // Handle Enter key on profile input
-  document.getElementById('profileNameInput').addEventListener('keydown', function(e) {
+  // Handle Enter key on profile input (keep for backward compat)
+  const profileInput = document.getElementById('profileNameInput');
+  if (profileInput) profileInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') createOrLoginProfile();
   });
 
