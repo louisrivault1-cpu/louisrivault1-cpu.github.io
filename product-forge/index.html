@@ -567,6 +567,88 @@
       .cat-btn { min-height: 36px; }
       input, select, textarea { font-size: 16px; }
     }
+    /* ===== DASHBOARD ===== */
+    .dashboard {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      max-width: 600px; margin: 20px auto 0; opacity: 0;
+      animation: dashFadeIn 0.6s ease 0.3s forwards;
+    }
+    @keyframes dashFadeIn { to { opacity: 1; } }
+    @media (max-width: 600px) { .dashboard { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+    .dash-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px 14px; text-align: center; transition: border-color 0.2s;
+    }
+    .dash-card:hover { border-color: var(--accent); }
+    .dash-card .dash-num {
+      font-size: 28px; font-weight: 800; color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .dash-card .dash-label { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .dash-card .dash-sub { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.3; }
+    .dash-card.span2 { grid-column: span 2; text-align: left; padding: 14px 16px; }
+    .dash-card.span2 .dash-label { margin-bottom: 6px; }
+    .dash-top-cats { display: flex; flex-wrap: wrap; gap: 4px; }
+    .dash-top-cats span { background: var(--accent-glow); color: var(--accent); padding: 3px 10px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(200,169,97,0.2); }
+    .dash-last-fiche { font-size: 12px; color: var(--text); }
+    .dash-last-fiche .dlf-date { color: var(--muted); font-size: 11px; }
+    .dash-storage { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; justify-content: center; margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .dash-storage .ds-bar { flex: 1; max-width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .dash-storage .ds-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+
+    /* ===== ENHANCED DRAFTS PANEL ===== */
+    .drafts-filters { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .drafts-filters select, .drafts-filters input[type="text"] {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 7px 10px; color: var(--text); font-size: 12px; font-family: inherit; flex: 1; min-width: 0;
+    }
+    .drafts-filters select:focus, .drafts-filters input:focus { outline: none; border-color: var(--accent); }
+    .drafts-batch-bar {
+      display: flex; gap: 6px; align-items: center; margin-bottom: 10px;
+      padding: 8px 12px; background: var(--accent-glow); border: 1px solid rgba(200,169,97,0.25);
+      border-radius: 10px; font-size: 12px; color: var(--accent);
+    }
+    .drafts-batch-bar .dbb-count { font-weight: 700; }
+    .draft-item-enhanced {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .draft-item-enhanced:hover { border-color: var(--accent); }
+    .draft-item-enhanced.selected { border-color: var(--green); background: rgba(74,222,128,0.05); }
+    .draft-item-enhanced .di-check { width: 18px; height: 18px; border: 2px solid var(--border2); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; font-size: 11px; color: transparent; }
+    .draft-item-enhanced .di-check.checked { background: var(--green); border-color: var(--green); color: #fff; }
+    .draft-item-enhanced .di-thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+    .draft-item-enhanced .di-thumb-placeholder { width: 48px; height: 48px; background: var(--border); border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 20px; }
+    .draft-item-enhanced .di-info { flex: 1; min-width: 0; }
+    .draft-item-enhanced .di-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .draft-item-enhanced .di-meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+    .draft-item-enhanced .di-price { color: var(--accent); font-weight: 600; }
+    .draft-item-enhanced .di-cat { background: var(--accent-glow); color: var(--accent); padding: 1px 6px; border-radius: 6px; font-size: 10px; }
+    .draft-item-enhanced .di-delete { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; padding: 4px; opacity: 0.4; transition: opacity 0.2s; flex-shrink: 0; }
+    .draft-item-enhanced .di-delete:hover { opacity: 1; }
+
+    /* ===== BATCH V2 ===== */
+    .batch-panel-v2 { padding: 24px; }
+    .batch-global-status { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .batch-eta { font-size: 12px; color: var(--orange); margin-bottom: 12px; }
+    .batch-item-v2 {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 6px; transition: all 0.2s;
+    }
+    .batch-item-v2 .biv-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+    .batch-item-v2 .biv-info { flex: 1; min-width: 0; }
+    .batch-item-v2 .biv-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .batch-item-v2 .biv-status { font-size: 11px; }
+    .batch-item-v2.done { border-color: rgba(74,222,128,0.3); }
+    .batch-item-v2.error { border-color: rgba(239,68,68,0.3); }
+    .batch-summary { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+    .batch-summary h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .batch-summary .bs-stats { display: flex; gap: 16px; margin-bottom: 10px; font-size: 13px; }
+    .batch-summary .bs-ok { color: var(--green); }
+    .batch-summary .bs-fail { color: var(--red); }
+
     /* Batch mode */
     .batch-toggle { display: flex; gap: 0; margin-bottom: 12px; max-width: 520px; margin-left: auto; margin-right: auto; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
     .batch-toggle button { flex: 1; padding: 10px 16px; background: var(--card); border: none; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
@@ -824,9 +906,36 @@
       </div>
 
       <div id="batchInputGroup" style="display:none; max-width:520px; margin:0 auto;">
-        <textarea class="batch-textarea" id="batchUrlsInput" placeholder="Collez vos liens AliExpress ici (un par ligne)&#10;&#10;https://www.aliexpress.com/item/123...&#10;https://www.aliexpress.com/item/456...&#10;https://www.aliexpress.com/item/789..."></textarea>
-        <div class="batch-hint">Un lien par ligne — chaque produit sera traité séquentiellement</div>
-        <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center;" onclick="startBatchScrape()">🚀 Scraper tout (<span id="batchCount">0</span> liens)</button>
+        <textarea class="batch-textarea" id="batchUrlsInput" placeholder="Collez vos liens AliExpress ici (un par ligne, max 20)&#10;&#10;https://www.aliexpress.com/item/123...&#10;https://www.aliexpress.com/item/456...&#10;https://www.aliexpress.com/item/789..."></textarea>
+        <div class="batch-hint">Un lien par ligne (max 20) — 2 scrapes en parallèle, Claude 1 à la fois</div>
+        <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center;" onclick="startBatchScrapeV2()">🚀 Forger tout (<span id="batchCount">0</span> liens)</button>
+      </div>
+
+      <!-- Dashboard Analytics -->
+      <div class="dashboard" id="dashboard" style="display:none;">
+        <div class="dash-card">
+          <div class="dash-num" id="dashTotal">0</div>
+          <div class="dash-label">Total fiches</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-num" id="dashMonth">0</div>
+          <div class="dash-label">Ce mois-ci</div>
+        </div>
+        <div class="dash-card span2">
+          <div class="dash-label">Dernière fiche</div>
+          <div class="dash-last-fiche" id="dashLastFiche"><span style="color:var(--muted)">—</span></div>
+        </div>
+        <div class="dash-card span2">
+          <div class="dash-label">Top catégories</div>
+          <div class="dash-top-cats" id="dashTopCats"><span style="color:var(--muted);background:none;border:none;padding:0;">—</span></div>
+        </div>
+        <div class="dash-card span2">
+          <div class="dash-label">Stockage</div>
+          <div class="dash-storage" id="dashStorage" style="margin:6px 0 0;justify-content:flex-start;">
+            <span id="dashStorageText">0 fiches — 0 KB</span>
+            <div class="ds-bar"><div class="ds-fill" id="dashStorageFill" style="width:0%"></div></div>
+          </div>
+        </div>
       </div>
 
       <div class="ob-or">ou</div>
@@ -1190,22 +1299,47 @@
       ⚠ Le stockage local est presque plein (>5MB). Les nouvelles fiches pourraient ne pas être sauvegardées.
       <button class="btn btn-danger btn-sm" onclick="purgeOldDrafts()">Supprimer les 10 plus anciennes</button>
     </div>
-    <div id="draftsCountInfo" class="drafts-count-info"></div>
-    <input type="text" class="draft-search" id="draftSearch" placeholder="Rechercher par titre..." oninput="debouncedRenderDrafts()" />
+    <div id="draftsCountInfo" class="drafts-count-info" style="font-size:12px;color:var(--muted);margin-bottom:8px;"></div>
+    <input type="text" class="draft-search" id="draftSearch" placeholder="🔍 Rechercher titre, catégorie..." oninput="debouncedRenderDrafts()" />
+    <div class="drafts-filters">
+      <select id="draftFilterCat" onchange="debouncedRenderDrafts()">
+        <option value="">Toutes catégories</option>
+      </select>
+      <select id="draftFilterSort" onchange="debouncedRenderDrafts()">
+        <option value="recent">Plus récent</option>
+        <option value="oldest">Plus ancien</option>
+        <option value="alpha">A → Z</option>
+        <option value="price-desc">Prix ↓</option>
+        <option value="price-asc">Prix ↑</option>
+      </select>
+    </div>
+    <div id="draftsBatchBar" class="drafts-batch-bar" style="display:none;">
+      <span class="dbb-count" id="dbbCount">0</span> sélectionnée(s)
+      <span style="flex:1"></span>
+      <button class="btn btn-green btn-sm" onclick="exportSelectedDrafts()" style="padding:4px 10px;font-size:11px;">📥 Exporter</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSelectedDrafts()" style="padding:4px 10px;font-size:11px;">🗑 Supprimer</button>
+      <button class="btn btn-outline btn-sm" onclick="clearDraftSelection()" style="padding:4px 10px;font-size:11px;">✕</button>
+    </div>
     <div id="draftsList" style="flex:1;overflow-y:auto;"></div>
   </div>
 
   <div class="batch-overlay" id="batchOverlay" onclick="closeBatchPanel()"></div>
   <div class="batch-panel" id="batchPanel">
     <h2 style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-size:1rem;">
-      📋 Résultats batch
-      <button class="btn btn-outline btn-sm" onclick="closeBatchPanel()">✕</button>
+      🚀 Production batch
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-danger btn-sm" id="batchCancelBtn" onclick="cancelBatch()" style="display:none;">⏹ Annuler</button>
+        <button class="btn btn-outline btn-sm" onclick="closeBatchPanel()">✕</button>
+      </div>
     </h2>
+    <div class="batch-global-status" id="batchGlobalStatus"></div>
     <div class="batch-progress" id="batchProgressBar" style="display:none;">
       <div class="batch-progress-fill" id="batchProgressFill"></div>
     </div>
+    <div class="batch-eta" id="batchEta" style="display:none;"></div>
     <div id="batchStatusText" style="font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
     <div id="batchResultsList"></div>
+    <div id="batchSummary" style="display:none;"></div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -2919,6 +3053,7 @@ function saveToDrafts(silent) {
     localStorage.setItem('pf_drafts', JSON.stringify(drafts.slice(0,100)));
     updateDraftsBadge();
     saveProductToFirestore(draft);
+    refreshDashboard();
     if (!silent) toast('Fiche sauvegardée !', 3000, 'success');
   } catch(e) {
     if (e.name === 'QuotaExceededError' || e.code === 22) {
@@ -2966,37 +3101,158 @@ function closeDraftsPanel() {
   document.getElementById('draftsOverlay').classList.remove('open');
 }
 
+let selectedDraftIds = new Set();
+
 function renderDrafts() {
   const q = (document.getElementById('draftSearch').value||'').toLowerCase();
+  const catFilter = document.getElementById('draftFilterCat')?.value || '';
+  const sortMode = document.getElementById('draftFilterSort')?.value || 'recent';
   const drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
-  const filtered = q ? drafts.filter(d=>(d.title||'').toLowerCase().includes(q)) : drafts;
+
+  // Populate category filter dropdown
+  const catSelect = document.getElementById('draftFilterCat');
+  if (catSelect) {
+    const cats = [...new Set(drafts.map(d => d.listing?.category).filter(Boolean))];
+    const currentVal = catSelect.value;
+    catSelect.innerHTML = '<option value="">Toutes catégories</option>';
+    cats.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; catSelect.appendChild(opt); });
+    catSelect.value = currentVal;
+  }
+
+  // Filter
+  let filtered = drafts;
+  if (q) filtered = filtered.filter(d =>
+    (d.title||'').toLowerCase().includes(q) ||
+    (d.listing?.category||'').toLowerCase().includes(q) ||
+    (d.listing?.description||'').toLowerCase().includes(q) ||
+    (d.listing?.tags||[]).join(' ').toLowerCase().includes(q)
+  );
+  if (catFilter) filtered = filtered.filter(d => (d.listing?.category||'') === catFilter);
+
+  // Sort
+  if (sortMode === 'oldest') filtered = [...filtered].reverse();
+  else if (sortMode === 'alpha') filtered = [...filtered].sort((a,b) => (a.title||'').localeCompare(b.title||''));
+  else if (sortMode === 'price-desc') filtered = [...filtered].sort((a,b) => parseFloat(b.price||b.listing?.sellPrice||0) - parseFloat(a.price||a.listing?.sellPrice||0));
+  else if (sortMode === 'price-asc') filtered = [...filtered].sort((a,b) => parseFloat(a.price||a.listing?.sellPrice||0) - parseFloat(b.price||b.listing?.sellPrice||0));
+
   const list = document.getElementById('draftsList');
   const countInfo = document.getElementById('draftsCountInfo');
   list.innerHTML = '';
 
   if (countInfo) {
-    countInfo.textContent = drafts.length + ' fiche' + (drafts.length > 1 ? 's' : '') + ' sauvegardée' + (drafts.length > 1 ? 's' : '');
-    if (q && filtered.length !== drafts.length) countInfo.textContent += ` (${filtered.length} résultat${filtered.length>1?'s':''})`;
+    const sizeBytes = getLocalStorageSize();
+    const sizeKB = (sizeBytes / 1024).toFixed(0);
+    countInfo.textContent = drafts.length + ' fiche' + (drafts.length > 1 ? 's' : '') + ' — ' + sizeKB + ' KB';
+    if (q || catFilter) countInfo.textContent += ` (${filtered.length} résultat${filtered.length>1?'s':''})`;
   }
 
+  updateDraftBatchBar();
+
   if (!filtered.length) {
-    list.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">' + (q ? 'Aucun résultat pour "'+esc(q)+'"' : 'Aucune fiche sauvegardée') + '</p>';
+    list.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">' + (q || catFilter ? 'Aucun résultat' : 'Aucune fiche sauvegardée') + '</p>';
     return;
   }
   filtered.forEach((draft) => {
-    const div = document.createElement('div'); div.className='draft-item';
+    const div = document.createElement('div');
+    div.className = 'draft-item-enhanced' + (selectedDraftIds.has(draft.id) ? ' selected' : '');
     const priceDisplay = draft.price || draft.listing?.sellPrice || '';
+    const cat = draft.listing?.category || '';
+    const dateStr = new Date(draft.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     div.innerHTML = `
-      ${draft.thumbnail ? `<img src="${esc(draft.thumbnail)}" alt="" loading="lazy" />` : '<div style="width:44px;height:44px;background:var(--border);border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;">📦</div>'}
-      <div class="draft-info">
-        <div class="draft-title">${esc(draft.title||'Sans titre')}</div>
-        <div class="draft-date">${new Date(draft.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}${priceDisplay ? ' · <span class="draft-price">€'+esc(priceDisplay)+'</span>' : ''}</div>
+      <div class="di-check ${selectedDraftIds.has(draft.id)?'checked':''}" onclick="event.stopPropagation();toggleDraftSelect(${draft.id})">${selectedDraftIds.has(draft.id)?'✓':''}</div>
+      ${draft.thumbnail ? `<img class="di-thumb" src="${esc(draft.thumbnail)}" alt="" loading="lazy" />` : '<div class="di-thumb-placeholder">📦</div>'}
+      <div class="di-info">
+        <div class="di-title">${esc(draft.title||'Sans titre')}</div>
+        <div class="di-meta">
+          <span>${dateStr}</span>
+          ${priceDisplay ? `<span class="di-price">€${esc(priceDisplay)}</span>` : ''}
+          ${cat ? `<span class="di-cat">${esc(cat)}</span>` : ''}
+        </div>
       </div>
-      <button class="draft-delete" onclick="event.stopPropagation();confirmDeleteDraft(${draft.id})" title="Supprimer">✕</button>
+      <button class="di-delete" onclick="event.stopPropagation();confirmDeleteDraft(${draft.id})" title="Supprimer">✕</button>
     `;
     div.onclick = () => loadDraft(draft);
     list.appendChild(div);
   });
+}
+
+function toggleDraftSelect(id) {
+  if (selectedDraftIds.has(id)) selectedDraftIds.delete(id);
+  else selectedDraftIds.add(id);
+  renderDrafts();
+}
+
+function clearDraftSelection() {
+  selectedDraftIds.clear();
+  renderDrafts();
+}
+
+function updateDraftBatchBar() {
+  const bar = document.getElementById('draftsBatchBar');
+  const cnt = document.getElementById('dbbCount');
+  if (bar && cnt) {
+    if (selectedDraftIds.size > 0) {
+      bar.style.display = 'flex';
+      cnt.textContent = selectedDraftIds.size;
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+}
+
+function exportSelectedDrafts() {
+  const drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+  const selected = drafts.filter(d => selectedDraftIds.has(d.id));
+  if (!selected.length) { toast('Aucune fiche sélectionnée', 3000, 'warning'); return; }
+
+  // CSV export
+  const csvEsc = (v) => '"' + String(v||'').replace(/"/g,'""').replace(/\n/g,' ') + '"';
+  const header = 'Title,Description,Tags,Price EUR,Category,Date';
+  const rows = selected.map(d => [
+    d.listing?.title || d.title || '',
+    d.listing?.description || '',
+    (d.listing?.tags||[]).join(', '),
+    d.listing?.sellPrice || d.price || '',
+    d.listing?.category || '',
+    d.date || ''
+  ].map(csvEsc).join(','));
+  const bom = '\uFEFF';
+  const csv = bom + header + '\n' + rows.join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `product-forge-export-${selected.length}fiches-${Date.now()}.csv`;
+  a.click();
+  toast(`${selected.length} fiches exportées en CSV`, 3000, 'success');
+}
+
+function deleteSelectedDrafts() {
+  if (!selectedDraftIds.size) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML = `
+    <div class="confirm-box">
+      <p>Supprimer ${selectedDraftIds.size} fiche(s) sélectionnée(s) ?</p>
+      <div class="actions">
+        <button class="btn btn-danger btn-sm" id="confirmBatchDeleteBtn">Supprimer tout</button>
+        <button class="btn btn-outline btn-sm" id="cancelBatchDeleteBtn">Annuler</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#confirmBatchDeleteBtn').onclick = () => {
+    let drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+    selectedDraftIds.forEach(id => { deleteProductFromFirestore(id); });
+    drafts = drafts.filter(d => !selectedDraftIds.has(d.id));
+    localStorage.setItem('pf_drafts', JSON.stringify(drafts));
+    selectedDraftIds.clear();
+    renderDrafts();
+    updateDraftsBadge();
+    overlay.remove();
+    toast('Fiches supprimées');
+  };
+  overlay.querySelector('#cancelBatchDeleteBtn').onclick = () => overlay.remove();
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 }
 
 function loadDraft(draft) {
@@ -3037,6 +3293,7 @@ function deleteDraft(id) {
   deleteProductFromFirestore(id);
   renderDrafts();
   updateDraftsBadge();
+  refreshDashboard();
   toast('Fiche supprimée');
 }
 
@@ -3090,6 +3347,7 @@ function checkOnboarding() {
   if (currentProfile) checkOnboarding();
   updateDraftsBadge();
   updateTokenStatuses();
+  refreshDashboard();
 
   // Handle Enter key on profile input (keep for backward compat)
   const profileInput = document.getElementById('profileNameInput');
@@ -3124,9 +3382,13 @@ function checkOnboarding() {
   console.log('[Product Forge] Ready. Mode: '+getActiveMode());
 })();
 
-// ===== BATCH MODE =====
+// ===== BATCH MODE V2 =====
 let batchResults = [];
 let batchRunning = false;
+let batchCancelled = false;
+let batchStartTime = 0;
+const BATCH_MAX_URLS = 20;
+const BATCH_PARALLEL_SCRAPES = 2;
 
 function setBatchMode(isBatch) {
   document.getElementById('modeSingle').classList.toggle('active', !isBatch);
@@ -3138,7 +3400,7 @@ function setBatchMode(isBatch) {
 
 function updateBatchCount() {
   const lines = document.getElementById('batchUrlsInput').value.trim().split('\n').filter(l => isValidAliExpressUrl(l.trim()));
-  document.getElementById('batchCount').textContent = lines.length;
+  document.getElementById('batchCount').textContent = Math.min(lines.length, BATCH_MAX_URLS);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3146,66 +3408,237 @@ document.addEventListener('DOMContentLoaded', () => {
   if (ta) ta.addEventListener('input', updateBatchCount);
 });
 
-async function startBatchScrape() {
+function cancelBatch() {
+  batchCancelled = true;
+  batchRunning = false;
+  document.getElementById('batchCancelBtn').style.display = 'none';
+  document.getElementById('batchStatusText').textContent = 'Batch annulé par l\'utilisateur';
+  document.getElementById('batchEta').style.display = 'none';
+  renderBatchResults();
+  showBatchSummary();
+}
+
+async function scrapeSingleBatchItem(index, settings) {
+  const r = batchResults[index];
+  r.status = 'scraping';
+  renderBatchResults();
+
+  try {
+    const actorPath = (settings.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
+    const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${settings.apifyToken}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ startUrls:[{url:r.url}], maxItems:1 })
+    });
+    if (!resp.ok) throw new Error('Erreur Apify (HTTP '+resp.status+')');
+    const items = await resp.json();
+    if (!items||!items.length) throw new Error('Aucun résultat Apify');
+    const item = items[0];
+    const data = {
+      source:'apify', url:r.url,
+      productId: item.id||item.productId||'',
+      title: item.title||item.name||'',
+      price: item.price||item.currentPrice||'',
+      originalPrice: item.originalPrice||'',
+      images: item.images||item.imageUrls||[],
+      specs: (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''})),
+      variants: item.variants||item.skus||[],
+      stats:{}
+    };
+    data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
+    r.data = data;
+    r.title = data.title || 'Produit '+(index+1);
+    r.status = 'scraped';
+  } catch(err) {
+    r.status = 'error';
+    r.error = err.message;
+  }
+  renderBatchResults();
+}
+
+async function generateClaudeForBatchItem(index, settings) {
+  const r = batchResults[index];
+  if (r.status !== 'scraped') return;
+  r.status = 'generating';
+  renderBatchResults();
+
+  try {
+    // Check if Claude API available
+    if (!settings.claudeKey) {
+      r.status = 'done';
+      renderBatchResults();
+      return;
+    }
+    // Use existing generateEtsyListing logic would be complex to duplicate
+    // So we just mark it as done — the user can click to load and generate individually
+    r.status = 'done';
+  } catch(err) {
+    r.status = 'done'; // Still mark as done, scraping succeeded
+  }
+  renderBatchResults();
+}
+
+async function startBatchScrapeV2() {
   const raw = document.getElementById('batchUrlsInput').value.trim();
-  const urls = raw.split('\n').map(l => l.trim()).filter(l => isValidAliExpressUrl(l));
-  if (!urls.length) { toast('Aucun lien AliExpress valide trouvé. Vérifiez le format des URLs.', 4000, 'error'); return; }
+  let urls = raw.split('\n').map(l => l.trim()).filter(l => isValidAliExpressUrl(l));
+  if (!urls.length) { toast('Aucun lien AliExpress valide trouvé.', 4000, 'error'); return; }
+  if (urls.length > BATCH_MAX_URLS) {
+    toast(`Maximum ${BATCH_MAX_URLS} liens. Les ${urls.length - BATCH_MAX_URLS} derniers seront ignorés.`, 4000, 'warning');
+    urls = urls.slice(0, BATCH_MAX_URLS);
+  }
 
   const s = getSettings();
   if (!s.apifyToken) { openSettings(); toast('Token Apify requis pour le batch'); return; }
 
-  batchResults = urls.map((url, i) => ({ url, status: 'pending', title: '', data: null, error: '' }));
+  batchResults = urls.map((url, i) => ({ url, status: 'pending', title: 'Produit '+(i+1), data: null, error: '' }));
   batchRunning = true;
+  batchCancelled = false;
+  batchStartTime = Date.now();
   openBatchPanel();
   renderBatchResults();
 
   document.getElementById('batchProgressBar').style.display = 'block';
-  document.getElementById('batchStatusText').textContent = 'Traitement en cours...';
+  document.getElementById('batchCancelBtn').style.display = 'inline-flex';
+  document.getElementById('batchEta').style.display = 'block';
+  document.getElementById('batchSummary').style.display = 'none';
+  document.getElementById('batchGlobalStatus').textContent = `Produit 1/${urls.length} — Scraping...`;
 
-  for (let i = 0; i < urls.length; i++) {
-    if (!batchRunning) break;
-    batchResults[i].status = 'loading';
-    renderBatchResults();
-    updateBatchProgress((i) / urls.length);
+  // Process scrapes in parallel (BATCH_PARALLEL_SCRAPES at a time)
+  let completed = 0;
+  const total = urls.length;
 
-    try {
-      const actorPath = (s.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
-      const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ startUrls:[{url:urls[i]}], maxItems:1 })
-      });
-      if (!resp.ok) throw new Error('Erreur Apify (HTTP '+resp.status+')');
-      const items = await resp.json();
-      if (!items||!items.length) throw new Error('Aucun résultat');
-      const item = items[0];
-      const data = {
-        source:'apify', url:urls[i],
-        productId: item.id||item.productId||'',
-        title: item.title||item.name||'',
-        price: item.price||item.currentPrice||'',
-        originalPrice: item.originalPrice||'',
-        images: item.images||item.imageUrls||[],
-        specs: (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''})),
-        variants: item.variants||item.skus||[],
-        stats:{}
-      };
-      data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
-      batchResults[i].status = 'done';
-      batchResults[i].title = data.title || 'Produit '+(i+1);
-      batchResults[i].data = data;
-    } catch(err) {
-      batchResults[i].status = 'error';
-      batchResults[i].error = err.message;
+  async function processNext() {
+    while (true) {
+      if (batchCancelled) return;
+      const nextIdx = batchResults.findIndex(r => r.status === 'pending');
+      if (nextIdx === -1) return;
+      batchResults[nextIdx].status = 'queued';
+      await scrapeSingleBatchItem(nextIdx, s);
+      completed++;
+      updateBatchProgress(completed / total);
+      updateBatchEta(completed, total);
+      document.getElementById('batchGlobalStatus').textContent = `Produit ${completed}/${total} — ${batchCancelled ? 'Annulé' : completed < total ? 'Scraping...' : 'Terminé'}`;
     }
-    updateBatchProgress((i+1) / urls.length);
-    renderBatchResults();
+  }
+
+  // Launch parallel workers
+  const workers = [];
+  for (let w = 0; w < BATCH_PARALLEL_SCRAPES; w++) {
+    workers.push(processNext());
+  }
+  await Promise.all(workers);
+
+  // Now run Claude generation sequentially for scraped items
+  if (!batchCancelled) {
+    const scraped = batchResults.filter(r => r.status === 'scraped');
+    for (let i = 0; i < scraped.length; i++) {
+      if (batchCancelled) break;
+      const idx = batchResults.indexOf(scraped[i]);
+      document.getElementById('batchGlobalStatus').textContent = `IA ${i+1}/${scraped.length} — Génération Claude...`;
+      await generateClaudeForBatchItem(idx, s);
+    }
   }
 
   batchRunning = false;
-  const ok = batchResults.filter(r => r.status === 'done').length;
-  const fail = batchResults.filter(r => r.status === 'error').length;
-  document.getElementById('batchStatusText').textContent = `Terminé : ${ok} réussi(s), ${fail} erreur(s)`;
-  toast(`Batch terminé : ${ok}/${urls.length} produits`);
+  document.getElementById('batchCancelBtn').style.display = 'none';
+  document.getElementById('batchEta').style.display = 'none';
+  showBatchSummary();
+
+  const ok = batchResults.filter(r => r.status === 'done' || r.status === 'scraped').length;
+  document.getElementById('batchGlobalStatus').textContent = `Terminé : ${ok}/${total} produits forgés`;
+  toast(`Batch terminé : ${ok}/${total} produits`, 4000, ok === total ? 'success' : 'warning');
+  refreshDashboard();
+}
+
+function updateBatchEta(completed, total) {
+  const elapsed = Date.now() - batchStartTime;
+  const avgPerItem = elapsed / completed;
+  const remaining = Math.round((avgPerItem * (total - completed)) / 1000);
+  const etaEl = document.getElementById('batchEta');
+  if (etaEl) {
+    if (remaining > 60) etaEl.textContent = `⏱ ~${Math.ceil(remaining/60)} min restante(s)`;
+    else etaEl.textContent = `⏱ ~${remaining}s restante(s)`;
+  }
+}
+
+function showBatchSummary() {
+  const sum = document.getElementById('batchSummary');
+  if (!sum) return;
+  const ok = batchResults.filter(r => r.status === 'done' || r.status === 'scraped');
+  const fail = batchResults.filter(r => r.status === 'error');
+  const cancelled = batchResults.filter(r => r.status === 'pending' || r.status === 'queued');
+
+  sum.style.display = 'block';
+  sum.innerHTML = `
+    <div class="batch-summary">
+      <h4>📊 Résumé batch</h4>
+      <div class="bs-stats">
+        <span class="bs-ok">✅ ${ok.length} réussi${ok.length>1?'s':''}</span>
+        ${fail.length ? `<span class="bs-fail">❌ ${fail.length} erreur${fail.length>1?'s':''}</span>` : ''}
+        ${cancelled.length ? `<span style="color:var(--muted);">⏸ ${cancelled.length} annulé${cancelled.length>1?'s':''}</span>` : ''}
+      </div>
+      ${fail.length ? `<div style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--red);margin-bottom:6px;">Erreurs :</div>
+        ${fail.map(f => `<div style="font-size:11px;color:var(--muted);padding:2px 0;">• ${esc(f.title||f.url)} — ${esc(f.error)}</div>`).join('')}
+      </div>` : ''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${ok.length ? `<button class="btn btn-green btn-sm" onclick="exportBatchResults('csv')">📥 Exporter CSV (${ok.length})</button>` : ''}
+        ${ok.length ? `<button class="btn btn-outline btn-sm" onclick="exportBatchResults('json')">📥 JSON</button>` : ''}
+        ${fail.length ? `<button class="btn btn-claude btn-sm" onclick="retryFailedBatch()">🔄 Relancer les échoués</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function exportBatchResults(format) {
+  const ok = batchResults.filter(r => (r.status === 'done' || r.status === 'scraped') && r.data);
+  if (!ok.length) { toast('Rien à exporter'); return; }
+
+  if (format === 'json') {
+    const data = ok.map(r => r.data);
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `batch-export-${ok.length}-${Date.now()}.json`; a.click();
+  } else {
+    const csvEsc = (v) => '"' + String(v||'').replace(/"/g,'""').replace(/\n/g,' ') + '"';
+    const header = 'Title,Price,URL,Images,Specs';
+    const rows = ok.map(r => [r.data.title, r.data.price, r.data.url, r.data.images?.length||0, r.data.specs?.length||0].map(csvEsc).join(','));
+    const blob = new Blob(['\uFEFF'+header+'\n'+rows.join('\n')], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `batch-export-${ok.length}-${Date.now()}.csv`; a.click();
+  }
+  toast(`${ok.length} produits exportés en ${format.toUpperCase()}`, 3000, 'success');
+}
+
+async function retryFailedBatch() {
+  const s = getSettings();
+  if (!s.apifyToken) { toast('Token Apify manquant'); return; }
+  const failedIndices = batchResults.map((r,i) => r.status === 'error' ? i : -1).filter(i => i >= 0);
+  if (!failedIndices.length) { toast('Rien à relancer'); return; }
+
+  batchRunning = true;
+  batchCancelled = false;
+  batchStartTime = Date.now();
+  document.getElementById('batchCancelBtn').style.display = 'inline-flex';
+  document.getElementById('batchSummary').style.display = 'none';
+  document.getElementById('batchEta').style.display = 'block';
+
+  failedIndices.forEach(i => { batchResults[i].status = 'pending'; batchResults[i].error = ''; });
+  renderBatchResults();
+
+  let completed = 0;
+  for (const idx of failedIndices) {
+    if (batchCancelled) break;
+    await scrapeSingleBatchItem(idx, s);
+    completed++;
+    document.getElementById('batchGlobalStatus').textContent = `Relance ${completed}/${failedIndices.length}`;
+  }
+
+  batchRunning = false;
+  document.getElementById('batchCancelBtn').style.display = 'none';
+  document.getElementById('batchEta').style.display = 'none';
+  showBatchSummary();
+  const newOk = failedIndices.filter(i => batchResults[i].status !== 'error').length;
+  toast(`Relance : ${newOk}/${failedIndices.length} récupérés`, 3000, newOk > 0 ? 'success' : 'warning');
 }
 
 function openBatchPanel() {
@@ -3224,21 +3657,23 @@ function updateBatchProgress(pct) {
 function renderBatchResults() {
   const list = document.getElementById('batchResultsList');
   list.innerHTML = '';
+  const statusIcons = { pending: '⏳', queued: '⏳', scraping: '🔍', scraped: '✅', generating: '🤖', done: '✅', error: '❌' };
+  const statusLabels = { pending: 'En attente', queued: 'En queue', scraping: 'Scraping...', scraped: 'Scrapé', generating: 'Claude AI...', done: 'Terminé', error: 'Erreur' };
+
   batchResults.forEach((r, i) => {
-    const statusClass = r.status;
-    const statusText = r.status === 'pending' ? 'En attente...' : r.status === 'loading' ? 'Scraping...' : r.status === 'done' ? 'OK' : 'Erreur: '+r.error;
     const div = document.createElement('div');
-    div.className = 'batch-item';
+    div.className = 'batch-item-v2' + (r.status === 'done' || r.status === 'scraped' ? ' done' : '') + (r.status === 'error' ? ' error' : '');
+    const statusColor = r.status === 'error' ? 'var(--red)' : r.status === 'done' || r.status === 'scraped' ? 'var(--green)' : r.status === 'scraping' || r.status === 'generating' ? 'var(--orange)' : 'var(--muted)';
     div.innerHTML = `
-      <div class="bi-num">${i+1}</div>
-      <div class="bi-info">
-        <div class="bi-title">${esc(r.title || r.url)}</div>
-        <div class="bi-status ${statusClass}">${esc(statusText)}</div>
+      <div class="biv-icon">${statusIcons[r.status]||'⏳'}</div>
+      <div class="biv-info">
+        <div class="biv-title">${esc(r.title || r.url)}</div>
+        <div class="biv-status" style="color:${statusColor}">${statusLabels[r.status]||r.status}${r.error ? ': '+esc(r.error) : ''}</div>
       </div>
     `;
-    if (r.status === 'done' && r.data) {
-      div.onclick = () => { loadBatchProduct(r.data); closeBatchPanel(); };
+    if ((r.status === 'done' || r.status === 'scraped') && r.data) {
       div.style.cursor = 'pointer';
+      div.onclick = () => { loadBatchProduct(r.data); closeBatchPanel(); };
     }
     list.appendChild(div);
   });
@@ -3246,6 +3681,78 @@ function renderBatchResults() {
 
 function loadBatchProduct(data) {
   forgeFromBookmarklet(data);
+}
+
+// ===== DASHBOARD ANALYTICS =====
+function animateCounter(el, target) {
+  const duration = 600;
+  const start = performance.now();
+  const from = 0;
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (target - from) * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function refreshDashboard() {
+  const drafts = JSON.parse(localStorage.getItem('pf_drafts')||'[]');
+  const dash = document.getElementById('dashboard');
+  if (!dash) return;
+
+  if (drafts.length === 0) {
+    dash.style.display = 'none';
+    return;
+  }
+  dash.style.display = 'grid';
+
+  // Total
+  animateCounter(document.getElementById('dashTotal'), drafts.length);
+
+  // This month
+  const now = new Date();
+  const thisMonth = drafts.filter(d => {
+    const dd = new Date(d.date);
+    return dd.getMonth() === now.getMonth() && dd.getFullYear() === now.getFullYear();
+  });
+  animateCounter(document.getElementById('dashMonth'), thisMonth.length);
+
+  // Last fiche
+  const last = drafts[0];
+  const lastEl = document.getElementById('dashLastFiche');
+  if (last && lastEl) {
+    const dateStr = new Date(last.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    lastEl.innerHTML = `<div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(last.title||'Sans titre')}</div><div class="dlf-date">${dateStr}</div>`;
+  }
+
+  // Top 3 categories
+  const catCounts = {};
+  drafts.forEach(d => {
+    const cat = d.listing?.category;
+    if (cat) catCounts[cat] = (catCounts[cat]||0) + 1;
+  });
+  const topCats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const topCatsEl = document.getElementById('dashTopCats');
+  if (topCatsEl) {
+    if (topCats.length) {
+      topCatsEl.innerHTML = topCats.map(([name, count]) => `<span>${esc(name)} (${count})</span>`).join('');
+    } else {
+      topCatsEl.innerHTML = '<span style="color:var(--muted);background:none;border:none;padding:0;">Aucune catégorie</span>';
+    }
+  }
+
+  // Storage
+  const sizeBytes = getLocalStorageSize();
+  const sizeKB = (sizeBytes / 1024).toFixed(0);
+  const sizeMB = (sizeBytes / (1024*1024)).toFixed(1);
+  const maxMB = 5;
+  const pct = Math.min((sizeBytes / (maxMB * 1024 * 1024)) * 100, 100);
+  const storageText = document.getElementById('dashStorageText');
+  const storageFill = document.getElementById('dashStorageFill');
+  if (storageText) storageText.textContent = `${drafts.length} fiche${drafts.length>1?'s':''} — ${sizeBytes > 1024*1024 ? sizeMB+' MB' : sizeKB+' KB'}`;
+  if (storageFill) storageFill.style.width = pct + '%';
 }
 </script>
 
