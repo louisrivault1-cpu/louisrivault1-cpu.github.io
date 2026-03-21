@@ -377,6 +377,7 @@
     .export-menu button:hover { background: var(--card2); }
     .export-menu button .icon { font-size: 16px; }
 
+    .etsy-preview-card * { box-sizing: border-box; }
     .etsy-preview-card {
       background: #fff; border-radius: 14px; padding: 20px; margin-top: 20px;
       color: #222; font-family: inherit;
@@ -656,35 +657,90 @@
       </div>
 
       <div id="etsyOutput" class="hidden">
+        <!-- Margin display prominent -->
+        <div class="data-card" id="marginDisplayBox" style="background:linear-gradient(135deg,rgba(74,222,128,0.06),rgba(200,169,97,0.06));border-color:rgba(74,222,128,0.2);margin-bottom:18px;"></div>
+
         <div class="etsy-section">
-          <label>Titre Etsy (140 car. max)</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Titre Etsy (140 car. max)
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTitle')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
           <input type="text" id="etsyTitle" maxlength="140" oninput="updateTitleCounter(); updateEtsyPreview()" />
           <div class="char-counter" id="titleCounter">0/140</div>
         </div>
 
         <div class="etsy-section">
-          <label>Description</label>
-          <textarea id="etsyDesc" rows="10" oninput="updateEtsyPreview()"></textarea>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Description
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <textarea id="etsyDesc" rows="10" oninput="updateDescCounter(); updateEtsyPreview()"></textarea>
+          <div class="char-counter" id="descCounter">0 mots</div>
         </div>
 
         <div class="etsy-section">
-          <label>Tags Etsy (exactement 13)</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Tags Etsy (exactement 13)
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTags')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
           <input type="text" id="etsyTags" placeholder="tag1, tag2, tag3, ..." oninput="updateTagsDisplay(); updateEtsyPreview();" />
           <div id="tagsDisplay"></div>
         </div>
 
         <div class="etsy-section">
-          <label>Catégorie Etsy</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Catégorie Etsy
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyCategory')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
           <input type="text" id="etsyCategory" />
         </div>
 
         <div class="etsy-section">
-          <label>Caractéristiques clés</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Caractéristiques clés
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('keyFeaturesList')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
           <ul class="key-features-list" id="keyFeaturesList"></ul>
         </div>
 
         <div class="etsy-section">
-          <label>Textes alternatifs (Alt) pour images</label>
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Matériaux
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('materialsDisplay')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <div class="tags-display" id="materialsDisplay"></div>
+        </div>
+
+        <div class="etsy-section">
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Occasions
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('occasionsDisplay')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <div class="tags-display" id="occasionsDisplay"></div>
+        </div>
+
+        <div class="etsy-section">
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Fêtes / Holidays
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('holidaysDisplay')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <div class="tags-display" id="holidaysDisplay"></div>
+        </div>
+
+        <div class="etsy-section">
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Meta Description SEO (155 car. max)
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyMetaDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <input type="text" id="etsyMetaDesc" maxlength="160" oninput="updateMetaDescCounter()" placeholder="Meta description pour Google..." />
+          <div class="char-counter" id="metaDescCounter">0/155</div>
+        </div>
+
+        <div class="etsy-section">
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Textes alternatifs (Alt) pour images
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('altTextsDisplay')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier tout</button>
+          </label>
           <div id="altTextsDisplay"></div>
         </div>
 
@@ -701,8 +757,11 @@
         </div>
 
         <div class="etsy-section">
-          <label>Prix de vente suggéré (EUR)</label>
-          <input type="text" id="etsySellPrice" oninput="updateEtsyPreview()" />
+          <label style="display:flex;justify-content:space-between;align-items:center;">
+            Prix de vente (EUR)
+            <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsySellPrice')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
+          </label>
+          <input type="text" id="etsySellPrice" oninput="updateEtsyPreview(); updateMarginDisplay(this.value)" />
         </div>
 
         <div class="etsy-section">
@@ -713,13 +772,9 @@
           <ul class="photo-names" id="photoNames"></ul>
         </div>
 
-        <div class="etsy-preview-label">👁 Aperçu Etsy</div>
-        <div class="etsy-preview-card" id="etsyPreviewCard">
-          <div class="ep-img-row" id="epImages"></div>
-          <div class="ep-title" id="epTitle">—</div>
-          <div class="ep-price" id="epPrice">—</div>
-          <div class="ep-desc" id="epDesc">—</div>
-          <div class="ep-tags" id="epTags"></div>
+        <div class="etsy-preview-label">👁 Aperçu réaliste Etsy</div>
+        <div class="etsy-preview-card" id="etsyPreviewCard" style="padding:20px;">
+          <div style="text-align:center;color:#999;font-size:13px;padding:40px 0;">L'aperçu apparaît ici une fois la fiche générée</div>
         </div>
 
         <div class="actions">
@@ -985,51 +1040,122 @@ function buildEtsyPrompt(product) {
     return `  - ${v.name||'Option'}: ${opts}`;
   }).join('\n');
   const nbImages = (product.images||[]).length;
+  const aliPriceRaw = String(product.price||'0').replace(/[^0-9.]/g,'');
+  const aliPrice = parseFloat(aliPriceRaw)||0;
+  const suggestedPrice = (aliPrice * 3.5).toFixed(2);
 
-  return `Tu es un expert en e-commerce Etsy et en SEO. Analyse ce produit AliExpress et cree une fiche Etsy optimisee pour maximiser les ventes.
+  return `You are a top-tier Etsy SEO copywriter and e-commerce optimization expert. Your job is to transform an AliExpress product into a high-converting Etsy listing that ranks well in Etsy search and Google Shopping.
 
-=== CATEGORIE: ${selectedCategory} ===
-Ton a adopter: ${cat.tone}
-Style de description: ${cat.descStyle}
-Tags SEO prioritaires a inclure si pertinent: ${cat.seoTags.join(', ')}
+=== PRODUCT CATEGORY: ${selectedCategory} ===
+Tone: ${cat.tone}
+Description style: ${cat.descStyle}
+Priority SEO tags to include if relevant: ${cat.seoTags.join(', ')}
 
-=== DONNEES PRODUIT ALIEXPRESS ===
-Titre: ${product.title||'N/A'}
-Prix AliExpress: ${product.price||'N/A'}
-Prix original: ${product.originalPrice||'N/A'}
-Nombre d'images: ${nbImages}
+=== ALIEXPRESS SOURCE DATA ===
+Title: ${product.title||'N/A'}
+AliExpress price: ${product.price||'N/A'}
+Original price: ${product.originalPrice||'N/A'}
+Number of images: ${nbImages}
 
 Specifications:
-${specs||'  Aucune'}
+${specs||'  None'}
 
-Variantes:
-${variants||'  Aucune'}
+Variants:
+${variants||'  None'}
 
-URL source: ${product.url||'N/A'}
+Source URL: ${product.url||'N/A'}
 
-=== CE QUE TU DOIS GENERER ===
-1. TITRE ETSY: max 140 caracteres, mots-cles SEO en premier, | comme separateur, PAS de marque AliExpress/chinoise
-2. DESCRIPTION: 200+ mots en ANGLAIS avec hook + features + CTA fort
-3. KEY_FEATURES: 5-7 points cles (bullets) qui decrivent le produit
-4. TAGS: exactement 13 tags Etsy (max 20 car. chacun, lowercase, uniques)
-5. ALT_TEXTS: 1 texte alternatif par image (8-15 mots, SEO), pour accessibility et Google Images
-6. CATEGORIE: la plus pertinente (format: Categorie > Sous-categorie)
-7. PRIX DE VENTE: en EUR, marge x2.5-x4 sur le prix AliExpress (frais Etsy 6.5% + envoi inclus)
-8. NOMS SEO PHOTOS: ${nbImages} noms de fichier pour Google Images, format "mot-cle-descriptif-N.jpg"
+=== STRICT REQUIREMENTS FOR EACH FIELD ===
 
-=== FORMAT DE REPONSE ===
-Reponds UNIQUEMENT avec ce bloc JSON:
+1. title (max 140 characters)
+   - Put the most important SEO keywords FIRST
+   - Use | as separator between keyword groups
+   - Structure: [Main Keyword] | [Material/Style] | [Product Type] | [Use Case/Gift]
+   - NO Chinese brand names, NO AliExpress references
+   - Example: "Minimalist Gold Necklace | Dainty Chain Pendant | 18K Gold Plated | Gift for Her"
+
+2. description (200+ words, ENGLISH only)
+   - First sentence = emotional hook that grabs attention
+   - Paragraph 1: What makes this product special, unique selling points
+   - Paragraph 2: Detailed features, materials, dimensions, quality details
+   - Paragraph 3: Include "From a Star Seller shop with 400+ reviews" naturally
+   - Paragraph 4: Gift-oriented CTA — mention occasions (birthday, Christmas, housewarming...)
+   - Paragraph 5: Care instructions or usage tips
+   - Use line breaks between paragraphs for readability
+
+3. key_features (exactly 5 to 7 bullet points)
+   Each bullet must follow one of these patterns:
+   - Material: "Made from [material] — [benefit]"
+   - Size: "Dimensions: [L x W x H] — [context]"
+   - Color: "Available in [color] — [style note]"
+   - Style: "[Style name] design — [aesthetic description]"
+   - Usage: "Perfect for [use case] — [benefit]"
+   - Special: "[Unique feature] — [why it matters]"
+   - Occasion: "Ideal gift for [occasion] — [emotional appeal]"
+
+4. tags (EXACTLY 13 tags, no more, no less)
+   - All lowercase
+   - Each tag MUST be under 20 characters
+   - All tags must be unique (no duplicates)
+   - Mix of broad tags (e.g. "home decor") and specific long-tail tags (e.g. "boho wall shelf")
+   - Include 2-3 gift-related tags (e.g. "gift for mom", "birthday gift")
+   - NO commas inside a single tag
+
+5. materials (array of strings)
+   - List all materials used in the product
+   - Example: ["18K gold plated brass", "stainless steel chain", "cubic zirconia"]
+
+6. occasions (array of strings)
+   - List gift occasions this product suits
+   - Example: ["Birthday", "Anniversary", "Housewarming", "Mother's Day"]
+
+7. holidays (array of strings)
+   - List holidays where this product makes a great gift
+   - Example: ["Christmas", "Valentine's Day", "Easter"]
+
+8. meta_description (max 155 characters)
+   - SEO meta description for Google
+   - Include main keyword + benefit + CTA
+   - Example: "Minimalist gold necklace perfect for layering. Dainty 18K gold plated pendant. Free shipping. Shop now!"
+
+9. alt_texts (1 per image = ${nbImages} total)
+   - Each alt text: 8-15 words
+   - Include product keywords naturally for SEO
+   - Describe what the image shows
+   - Example: "Minimalist gold pendant necklace on white background close-up detail shot"
+
+10. price_eur (number)
+    - Calculate: AliExpress price (${aliPrice} EUR) x 3.5 = ${suggestedPrice} EUR
+    - Round to nearest .99 for psychological pricing
+    - This must be a number, not a string
+
+11. category (string)
+    - Most relevant Etsy category
+    - Format: "Category > Subcategory > Sub-subcategory"
+    - Example: "Jewelry > Necklaces > Pendant Necklaces"
+
+12. photoNames (array of ${nbImages} strings)
+    - SEO-optimized file names for Google Images
+    - Format: "keyword-descriptif-N.jpg"
+    - Example: ["gold-pendant-necklace-main-1.jpg", "dainty-chain-detail-2.jpg"]
+
+=== RESPONSE FORMAT ===
+Reply ONLY with this JSON block, no text before or after:
 
 \`\`\`json
 {
-  "title": "Titre Etsy optimise avec | separateurs",
-  "description": "Description complete en ANGLAIS 200+ mots avec hook, features, CTA...",
-  "key_features": ["Feature 1", "Feature 2", "Feature 3", "Feature 4", "Feature 5"],
+  "title": "SEO Keyword First | Material Style | Product Type | Gift Occasion",
+  "description": "Full 200+ word description in English with hook, features, Star Seller mention, gift CTA...",
+  "key_features": ["Material: ...", "Size: ...", "Color: ...", "Style: ...", "Usage: ...", "Special: ...", "Occasion: ..."],
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10", "tag11", "tag12", "tag13"],
-  "alt_texts": ["Alt text 1 for image 1", "Alt text 2 for image 2"],
-  "category": "Categorie > Sous-categorie",
-  "sellPrice": "XX.XX",
-  "photoNames": ["nom-seo-1.jpg", "nom-seo-2.jpg"]
+  "materials": ["material 1", "material 2"],
+  "occasions": ["Birthday", "Anniversary"],
+  "holidays": ["Christmas", "Valentine's Day"],
+  "meta_description": "Max 155 chars SEO meta description with keyword and CTA",
+  "alt_texts": ["alt text for image 1", "alt text for image 2"],
+  "price_eur": ${suggestedPrice},
+  "category": "Category > Subcategory",
+  "photoNames": ["seo-name-1.jpg", "seo-name-2.jpg"]
 }
 \`\`\``;
 }
@@ -1483,12 +1609,16 @@ function updateTagsDisplay() {
   tags.forEach(tag => {
     const badge = document.createElement('div');
     badge.className = 'tag-badge';
+    badge.style.cursor = 'pointer';
+    badge.title = 'Cliquer pour copier';
     const chars = tag.length;
     const charSpan = document.createElement('span');
     charSpan.className = 'tag-count' + (chars > 20 ? ' warning' : '');
     charSpan.textContent = chars;
+    if (chars > 20) charSpan.style.color = 'var(--red)';
     badge.textContent = tag + ' ';
     badge.appendChild(charSpan);
+    badge.onclick = () => { navigator.clipboard.writeText(tag).then(()=>toast('Tag copié: '+tag)); };
     container.appendChild(badge);
   });
   display.appendChild(container);
@@ -1505,36 +1635,110 @@ function displayEtsyListing(listing) {
   document.getElementById('generateZone').classList.add('hidden');
   document.getElementById('etsyOutput').classList.remove('hidden');
 
+  // Handle price_eur (new) or sellPrice (legacy)
+  const priceVal = listing.price_eur || listing.sellPrice || '';
+  const priceStr = typeof priceVal === 'number' ? priceVal.toFixed(2) : String(priceVal);
+
   document.getElementById('etsyTitle').value = listing.title||'';
   document.getElementById('etsyDesc').value = listing.description||'';
   document.getElementById('etsyTags').value = (listing.tags||[]).join(', ');
   document.getElementById('etsyCategory').value = listing.category||'';
-  document.getElementById('etsySellPrice').value = listing.sellPrice||'';
+  document.getElementById('etsySellPrice').value = priceStr;
 
   updateTitleCounter();
+  updateDescCounter();
   updateTagsDisplay();
 
+  // Key features
   const keyFeaturesDiv = document.getElementById('keyFeaturesList');
   keyFeaturesDiv.innerHTML = '';
   (listing.key_features||[]).forEach(feat => {
     const li = document.createElement('li');
     li.textContent = feat;
+    li.style.cursor = 'pointer';
+    li.title = 'Cliquer pour copier';
+    li.onclick = () => { navigator.clipboard.writeText(feat).then(()=>toast('Copié !')); };
     keyFeaturesDiv.appendChild(li);
   });
 
+  // Materials
+  const materialsDiv = document.getElementById('materialsDisplay');
+  if (materialsDiv) {
+    materialsDiv.innerHTML = '';
+    (listing.materials||[]).forEach(mat => {
+      const badge = document.createElement('span');
+      badge.className = 'tag-badge';
+      badge.style.cursor = 'pointer';
+      badge.textContent = mat;
+      badge.onclick = () => { navigator.clipboard.writeText(mat).then(()=>toast('Copié: '+mat)); };
+      materialsDiv.appendChild(badge);
+    });
+    if (!(listing.materials||[]).length) materialsDiv.innerHTML = '<span style="color:var(--muted);font-size:12px;">Non renseigné</span>';
+  }
+
+  // Occasions
+  const occasionsDiv = document.getElementById('occasionsDisplay');
+  if (occasionsDiv) {
+    occasionsDiv.innerHTML = '';
+    (listing.occasions||[]).forEach(occ => {
+      const badge = document.createElement('span');
+      badge.className = 'tag-badge';
+      badge.style.background = 'rgba(217,119,6,0.1)';
+      badge.style.color = '#fbbf24';
+      badge.style.borderColor = 'rgba(217,119,6,0.25)';
+      badge.style.cursor = 'pointer';
+      badge.textContent = occ;
+      badge.onclick = () => { navigator.clipboard.writeText(occ).then(()=>toast('Copié: '+occ)); };
+      occasionsDiv.appendChild(badge);
+    });
+    if (!(listing.occasions||[]).length) occasionsDiv.innerHTML = '<span style="color:var(--muted);font-size:12px;">Non renseigné</span>';
+  }
+
+  // Holidays
+  const holidaysDiv = document.getElementById('holidaysDisplay');
+  if (holidaysDiv) {
+    holidaysDiv.innerHTML = '';
+    (listing.holidays||[]).forEach(hol => {
+      const badge = document.createElement('span');
+      badge.className = 'tag-badge';
+      badge.style.background = 'rgba(239,68,68,0.1)';
+      badge.style.color = '#f87171';
+      badge.style.borderColor = 'rgba(239,68,68,0.25)';
+      badge.style.cursor = 'pointer';
+      badge.textContent = hol;
+      badge.onclick = () => { navigator.clipboard.writeText(hol).then(()=>toast('Copié: '+hol)); };
+      holidaysDiv.appendChild(badge);
+    });
+    if (!(listing.holidays||[]).length) holidaysDiv.innerHTML = '<span style="color:var(--muted);font-size:12px;">Non renseigné</span>';
+  }
+
+  // Meta description
+  const metaDescEl = document.getElementById('etsyMetaDesc');
+  if (metaDescEl) {
+    metaDescEl.value = listing.meta_description||'';
+    updateMetaDescCounter();
+  }
+
+  // Margin display
+  updateMarginDisplay(priceStr);
+
+  // Alt texts
   const altTextsDiv = document.getElementById('altTextsDisplay');
   altTextsDiv.innerHTML = '';
   (listing.alt_texts||[]).forEach((alt, i) => {
     const item = document.createElement('div');
     item.className = 'alt-text-item';
+    const wordCount = alt.split(/\s+/).length;
+    const wordClass = (wordCount < 8 || wordCount > 15) ? 'color:var(--orange)' : 'color:var(--green)';
     item.innerHTML = `
-      <div class="alt-label">Image ${i+1}</div>
+      <div class="alt-label">Image ${i+1} <span style="font-size:10px;${wordClass};">(${wordCount} mots)</span></div>
       <div class="alt-content">${esc(alt)}</div>
       <button class="copy-btn" onclick="copyToClipboard('${esc(alt).replace(/'/g, "\\'")}')">📋 Copier</button>
     `;
     altTextsDiv.appendChild(item);
   });
 
+  // Photo names
   const photoList = document.getElementById('photoNames');
   photoList.innerHTML = '';
   const images = currentProduct ? (currentProduct.images||[]) : [];
@@ -1554,6 +1758,72 @@ function displayEtsyListing(listing) {
   });
 
   updateEtsyPreview();
+}
+
+function updateDescCounter() {
+  const desc = document.getElementById('etsyDesc').value;
+  const words = desc.trim().split(/\s+/).filter(Boolean).length;
+  const counter = document.getElementById('descCounter');
+  if (counter) {
+    counter.textContent = words + ' mots' + (words < 200 ? ' (min 200)' : ' ✓');
+    counter.className = words >= 200 ? 'char-counter' : 'char-counter warning';
+    counter.style.color = words >= 200 ? 'var(--green)' : '';
+  }
+}
+
+function updateMetaDescCounter() {
+  const meta = document.getElementById('etsyMetaDesc');
+  if (!meta) return;
+  const counter = document.getElementById('metaDescCounter');
+  if (counter) {
+    const len = meta.value.length;
+    counter.textContent = len + '/155';
+    counter.className = len > 155 ? 'char-counter danger' : len > 140 ? 'char-counter warning' : 'char-counter';
+  }
+}
+
+function updateMarginDisplay(priceStr) {
+  const marginBox = document.getElementById('marginDisplayBox');
+  if (!marginBox) return;
+  const sellPrice = parseFloat(String(priceStr).replace(/[^0-9.]/g,''))||0;
+  const aliPriceRaw = parseFloat(String(currentProduct?.price||'0').replace(/[^0-9.]/g,''))||0;
+  const margin = sellPrice - aliPriceRaw;
+  const multiplier = aliPriceRaw > 0 ? (sellPrice / aliPriceRaw).toFixed(1) : '—';
+  marginBox.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Prix Ali</div>
+        <div style="font-size:18px;font-weight:700;color:var(--red);">${aliPriceRaw.toFixed(2)}€</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">× ${multiplier}</div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent);">${sellPrice.toFixed(2)}€</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Marge brute</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">+${margin.toFixed(2)}€</div>
+      </div>
+    </div>
+  `;
+}
+
+function copySectionToClipboard(sectionId) {
+  let text = '';
+  const el = document.getElementById(sectionId);
+  if (sectionId === 'etsyTitle' || sectionId === 'etsyDesc' || sectionId === 'etsySellPrice' || sectionId === 'etsyCategory' || sectionId === 'etsyMetaDesc') {
+    text = el.value;
+  } else if (sectionId === 'etsyTags') {
+    text = el.value;
+  } else if (sectionId === 'keyFeaturesList') {
+    text = Array.from(el.querySelectorAll('li')).map(li => '• ' + li.textContent).join('\n');
+  } else if (sectionId === 'altTextsDisplay') {
+    text = Array.from(el.querySelectorAll('.alt-content')).map(d => d.textContent).join('\n');
+  } else if (sectionId === 'materialsDisplay' || sectionId === 'occasionsDisplay' || sectionId === 'holidaysDisplay') {
+    text = Array.from(el.querySelectorAll('span.tag-badge')).map(s => s.textContent).join(', ');
+  } else {
+    text = el?.textContent || '';
+  }
+  navigator.clipboard.writeText(text).then(()=>toast('Copié !')).catch(()=>toast('Erreur'));
 }
 
 function generateSEOPhotoNames(title, tags, count) {
@@ -1616,24 +1886,48 @@ function updateEtsyPreview() {
   const price = document.getElementById('etsySellPrice').value||'—';
   const tags = document.getElementById('etsyTags').value.split(',').map(t=>t.trim()).filter(Boolean);
   const images = currentProduct?(currentProduct.images||[]):[];
+  const category = document.getElementById('etsyCategory').value||'';
+  const keyFeatures = currentListing?.key_features||[];
+  const materials = currentListing?.materials||[];
+  const priceDisplay = price.startsWith('€')||price.startsWith('$') ? price : '€'+price;
 
-  document.getElementById('epTitle').textContent = title;
-  document.getElementById('epPrice').textContent = price.startsWith('€')||price.startsWith('$') ? price : '€'+price;
-  document.getElementById('epDesc').textContent = desc;
-
-  const imgRow = document.getElementById('epImages');
-  imgRow.innerHTML = '';
-  images.slice(0,6).forEach(url => {
-    const img = document.createElement('img');
-    img.src = url.replace(/^\/\//,'https://');
-    imgRow.appendChild(img);
-  });
-
-  const tagsDiv = document.getElementById('epTags');
-  tagsDiv.innerHTML = '';
-  tags.forEach(tag => {
-    const span = document.createElement('span'); span.className='ep-tag'; span.textContent=tag; tagsDiv.appendChild(span);
-  });
+  const card = document.getElementById('etsyPreviewCard');
+  card.innerHTML = `
+    <div style="display:flex;gap:16px;margin-bottom:16px;">
+      <div style="flex:0 0 280px;">
+        ${images.length ? `<img src="${images[0].replace(/^\/\//,'https://')}" style="width:280px;height:280px;object-fit:cover;border-radius:12px;border:1px solid #e0e0e0;" onerror="this.style.display='none'" />` : '<div style="width:280px;height:280px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">No image</div>'}
+        <div class="ep-img-row" style="margin-top:8px;">
+          ${images.slice(0,6).map((url,i) => `<img src="${url.replace(/^\/\//,'https://')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:2px solid ${i===0?'#222':'#e0e0e0'};cursor:pointer;flex-shrink:0;" onerror="this.style.display='none'" />`).join('')}
+        </div>
+      </div>
+      <div style="flex:1;min-width:0;">
+        ${category ? `<div style="font-size:11px;color:#888;margin-bottom:6px;">${esc(category)}</div>` : ''}
+        <div class="ep-title" style="font-size:16px;font-weight:600;color:#222;margin-bottom:8px;line-height:1.35;">${esc(title)}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span class="ep-price" style="font-size:26px;font-weight:700;color:#222;">${esc(priceDisplay)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+          <span style="color:#f59e0b;font-size:14px;">★★★★★</span>
+          <span style="font-size:12px;color:#888;">(427 reviews)</span>
+          <span style="background:#7b2;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;">Star Seller</span>
+        </div>
+        ${keyFeatures.length ? `<div style="margin-bottom:10px;">${keyFeatures.slice(0,3).map(f => `<div style="font-size:12px;color:#555;padding:2px 0;">✓ ${esc(f)}</div>`).join('')}</div>` : ''}
+        ${materials.length ? `<div style="font-size:11px;color:#888;margin-bottom:6px;">Materials: ${materials.map(m=>esc(m)).join(', ')}</div>` : ''}
+        <div style="margin-top:10px;padding:10px 0;border-top:1px solid #eee;">
+          <div style="background:#222;color:#fff;text-align:center;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:default;">Add to cart</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #eee;padding-top:14px;">
+      <div style="font-size:13px;font-weight:600;color:#222;margin-bottom:8px;">Description</div>
+      <div class="ep-desc" style="font-size:12px;color:#555;white-space:pre-wrap;line-height:1.65;max-height:180px;overflow-y:auto;">${esc(desc)}</div>
+    </div>
+    ${tags.length ? `<div style="border-top:1px solid #eee;padding-top:12px;margin-top:12px;">
+      <div class="ep-tags" style="display:flex;flex-wrap:wrap;gap:4px;">
+        ${tags.map(t => `<span class="ep-tag" style="background:#f0f0f0;color:#555;padding:3px 10px;border-radius:20px;font-size:11px;">${esc(t)}</span>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
 }
 
 function showGenerateZone() {
@@ -1662,7 +1956,12 @@ function exportForEtsy() {
   const title = document.getElementById('etsyTitle').value;
   const desc = document.getElementById('etsyDesc').value;
   const tags = document.getElementById('etsyTags').value;
-  const text = `TITRE:\n${title}\n\nDESCRIPTION:\n${desc}\n\nTAGS:\n${tags}`;
+  const cat = document.getElementById('etsyCategory').value;
+  const price = document.getElementById('etsySellPrice').value;
+  const meta = document.getElementById('etsyMetaDesc')?.value||'';
+  const materials = (currentListing?.materials||[]).join(', ');
+  const occasions = (currentListing?.occasions||[]).join(', ');
+  const text = `TITRE:\n${title}\n\nDESCRIPTION:\n${desc}\n\nTAGS:\n${tags}\n\nCATÉGORIE:\n${cat}\n\nPRIX: ${price}€\n\nMATÉRIAUX:\n${materials}\n\nOCCASIONS:\n${occasions}\n\nMETA DESCRIPTION:\n${meta}`;
   navigator.clipboard.writeText(text).then(()=>toast('Copié pour Etsy !')).catch(()=>toast('Erreur'));
   document.getElementById('exportMenu').classList.remove('open');
 }
@@ -1676,6 +1975,11 @@ function downloadJSON() {
     tags: document.getElementById('etsyTags').value.split(',').map(t=>t.trim()),
     category: document.getElementById('etsyCategory').value,
     sellPrice: document.getElementById('etsySellPrice').value,
+    price_eur: parseFloat(document.getElementById('etsySellPrice').value)||0,
+    materials: currentListing?.materials||[],
+    occasions: currentListing?.occasions||[],
+    holidays: currentListing?.holidays||[],
+    meta_description: document.getElementById('etsyMetaDesc')?.value||'',
     photoNames: currentListing?.photoNames||[],
     source: currentProduct
   };
@@ -1719,6 +2023,11 @@ function saveToDrafts() {
       tags: document.getElementById('etsyTags').value.split(',').map(t=>t.trim()),
       category: document.getElementById('etsyCategory').value,
       sellPrice: document.getElementById('etsySellPrice').value,
+      price_eur: parseFloat(document.getElementById('etsySellPrice').value)||0,
+      materials: currentListing?.materials||[],
+      occasions: currentListing?.occasions||[],
+      holidays: currentListing?.holidays||[],
+      meta_description: document.getElementById('etsyMetaDesc')?.value||'',
       photoNames: currentListing?.photoNames||[]
     }
   });
