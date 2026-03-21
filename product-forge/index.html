@@ -2,8 +2,16 @@
 <html lang="fr" style="scroll-behavior:smooth;">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Forge – Générateur de Fiches Etsy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Product Forge – Générateur de Fiches Etsy optimisées SEO</title>
+  <meta name="description" content="Product Forge transforme n'importe quel produit AliExpress en fiche Etsy professionnelle optimisée SEO grâce à Claude AI. Titres, descriptions, tags et prix calculés automatiquement. 100% gratuit.">
+  <meta name="theme-color" content="#c8a961">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Product Forge">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>⚒</text></svg>">
   <style>
     :root {
       --bg: #0a0a0f;
@@ -1209,7 +1217,7 @@ async function generateViaAPI() {
       headers: { 'Content-Type':'application/json', 'x-api-key':s.claudeKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
       body: JSON.stringify({ model:s.claudeModel, max_tokens:4096, messages:[{role:'user',content:buildEtsyPrompt(currentProduct)}] })
     });
-    if (!resp.ok) { const err=await resp.json().catch(()=>({})); throw new Error(err.error?.message||`API error ${resp.status}`); }
+    if (!resp.ok) { const err=await resp.json().catch(()=>({})); throw new Error(err.error?.message||`Erreur API (HTTP ${resp.status})`); }
     const result = await resp.json();
     const text = result.content[0].text;
     const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/\{[\s\S]*"title"[\s\S]*\}/);
@@ -1932,7 +1940,7 @@ function updateEtsyPreview() {
   card.innerHTML = `
     <div style="display:flex;gap:16px;margin-bottom:16px;">
       <div style="flex:0 0 280px;">
-        ${images.length ? `<img src="${images[0].replace(/^\/\//,'https://')}" style="width:280px;height:280px;object-fit:cover;border-radius:12px;border:1px solid #e0e0e0;" onerror="this.style.display='none'" />` : '<div style="width:280px;height:280px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">No image</div>'}
+        ${images.length ? `<img src="${images[0].replace(/^\/\//,'https://')}" style="width:280px;height:280px;object-fit:cover;border-radius:12px;border:1px solid #e0e0e0;" onerror="this.style.display='none'" />` : '<div style="width:280px;height:280px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">Pas d\'image</div>'}
         <div class="ep-img-row" style="margin-top:8px;">
           ${images.slice(0,6).map((url,i) => `<img src="${url.replace(/^\/\//,'https://')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:2px solid ${i===0?'#222':'#e0e0e0'};cursor:pointer;flex-shrink:0;" onerror="this.style.display='none'" />`).join('')}
         </div>
@@ -2358,7 +2366,7 @@ async function startBatchScrape() {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ startUrls:[{url:urls[i]}], maxItems:1 })
       });
-      if (!resp.ok) throw new Error('Apify error: '+resp.status);
+      if (!resp.ok) throw new Error('Erreur Apify (HTTP '+resp.status+')');
       const items = await resp.json();
       if (!items||!items.length) throw new Error('Aucun résultat');
       const item = items[0];
@@ -2432,6 +2440,10 @@ function loadBatchProduct(data) {
   forgeFromBookmarklet(data);
 }
 </script>
+
+<footer style="text-align:center;padding:24px 16px 18px;color:var(--muted);font-size:11px;letter-spacing:0.02em;border-top:1px solid var(--border);margin-top:40px;opacity:0.7;">
+  Product Forge v2.0 — Créé par Louis Rivault
+</footer>
 
 </body>
 </html>

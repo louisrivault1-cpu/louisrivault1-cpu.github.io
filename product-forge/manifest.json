@@ -1,0 +1,18 @@
+{
+  "name": "Product Forge",
+  "short_name": "PF",
+  "description": "Transforme n'importe quel produit AliExpress en fiche Etsy optimisée SEO grâce à l'IA.",
+  "start_url": "/product-forge/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#c8a961",
+  "orientation": "any",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>⚒</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
