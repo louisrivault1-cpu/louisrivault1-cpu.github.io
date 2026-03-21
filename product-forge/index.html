@@ -1171,9 +1171,6 @@ function parseClaudeResponse() {
     if (!safeListing.title) missing.push('titre');
     if (!safeListing.description) missing.push('description');
     if (!safeListing.tags || !safeListing.tags.length) missing.push('tags');
-    if (missing.length) {
-      toast('Attention : champ(s) manquant(s) : ' + missing.join(', ') + '. Vous pouvez les compléter manuellement.', 5000, 'warning');
-    }
 
     // Ensure tags is always an array
     if (typeof safeListing.tags === 'string') {
@@ -1188,7 +1185,11 @@ function parseClaudeResponse() {
     currentListing = safeListing;
     displayEtsyListing(safeListing);
     setStatus('Fiche importée !','green');
-    toast('Fiche Etsy importée avec succès !', 3000, 'success');
+    if (missing.length) {
+      toast('Importée, mais champ(s) manquant(s) : ' + missing.join(', ') + '. Complétez-les manuellement.', 5000, 'warning');
+    } else {
+      toast('Fiche Etsy importée avec succès !', 3000, 'success');
+    }
   } catch(err) {
     console.error('[PF] Parse error:', err);
     toast(err.message || 'Erreur lors de l\'analyse de la réponse. Vérifiez le format JSON.', 5000, 'error');
@@ -1199,7 +1200,7 @@ function forgeFromBookmarklet(data) {
   currentProduct = data;
   displaySourceData(data);
   setStatus('Données reçues','green');
-  toast('Produit chargé !');
+  toast('Produit chargé !', 3000, 'success');
   saveToRecent(data);
   if (getActiveMode()==='api' && getSettings().claudeKey) setTimeout(()=>generateViaAPI(), 500);
 }
