@@ -408,16 +408,93 @@
     .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
     .cat-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
+    /* ===== TABLET (768px) ===== */
     @media (max-width: 768px) {
-      .header { padding: 12px 16px; }
+      .header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
       .header h1 { font-size: 1.1rem; }
+      .header .nav-btns { gap: 6px; }
+      .header .nav-btns .btn { font-size: 12px; padding: 8px 12px; }
       .panel { padding: 16px; }
       .drafts-panel { width: 100%; right: -100%; }
       .calc-grid { grid-template-columns: 1fr; }
       .url-input-group { flex-direction: column; }
-      .url-input-group .btn { width: 100%; justify-content: center; }
+      .url-input-group .btn { width: 100%; justify-content: center; min-height: 44px; }
       .pixa-buttons { flex-direction: column; }
-      .pixa-buttons .btn { min-width: auto; }
+      .pixa-buttons .btn { min-width: auto; min-height: 44px; }
+      .welcome-methods { flex-direction: column; }
+      .method-card { min-width: auto; }
+      .modal { padding: 24px 18px; border-radius: 16px; width: 96%; max-height: 85vh; }
+      .onboarding-box { padding: 28px 20px; width: 96%; }
+      .claude-steps { flex-direction: column; align-items: stretch; }
+    }
+
+    /* ===== MOBILE (480px) ===== */
+    @media (max-width: 480px) {
+      body { font-size: 14px; }
+      .header { padding: 10px 12px; }
+      .header h1 { font-size: 1rem; }
+      .header .logo-area { gap: 8px; }
+      .header .nav-btns { width: 100%; justify-content: flex-end; }
+      .header .nav-btns .btn { padding: 8px 10px; font-size: 11px; min-height: 44px; }
+      .panel { padding: 12px; max-height: none; overflow-y: visible; }
+      .panel-left { border-right: none; border-bottom: 1px solid var(--border); }
+      .main { min-height: auto; }
+      .data-card { padding: 16px; border-radius: 12px; }
+      .data-card h3 { font-size: 10px; }
+      .images-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
+      .welcome { padding: 24px 16px; min-height: calc(100vh - 90px); }
+      .welcome h2 { font-size: 1.3rem; }
+      .welcome p { font-size: 13px; }
+      .url-input-group input { font-size: 14px; padding: 12px; }
+      .batch-toggle button { padding: 10px 8px; font-size: 12px; }
+      .batch-textarea { font-size: 14px; min-height: 100px; }
+      .btn { min-height: 44px; font-size: 13px; }
+      .btn-sm { min-height: 36px; }
+      .modal { padding: 20px 16px; width: 100%; max-width: 100%; border-radius: 16px 16px 0 0; max-height: 90vh; }
+      .modal-backdrop.active { align-items: flex-end; }
+      .onboarding-box { padding: 24px 16px; border-radius: 20px; width: 96%; }
+      .onboarding-box h2 { font-size: 1.2rem; }
+      .ob-step .ob-content strong { font-size: 13px; }
+      .ob-step .ob-content span { font-size: 12px; }
+      .ob-cta { padding: 14px 28px; font-size: 14px; min-height: 48px; }
+      .etsy-section textarea { min-height: 100px; font-size: 14px; }
+      .etsy-section input, .etsy-section select { font-size: 14px; padding: 12px; }
+      .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; font-size: 12px; }
+      .loading-box { padding: 32px 24px; max-width: 90%; }
+      .help-trigger { bottom: 16px; left: 16px; width: 40px; height: 40px; font-size: 16px; }
+      .export-menu { left: auto; right: 0; min-width: 200px; }
+      .actions { gap: 6px; }
+      .actions .btn { flex: 1; min-width: 0; justify-content: center; font-size: 12px; padding: 10px 12px; }
+      .etsy-preview-card { padding: 14px; }
+      .etsy-preview-card .ep-title { font-size: 16px; }
+      .etsy-preview-card .ep-price { font-size: 20px; }
+      .etsy-preview-card .ep-img-row img { width: 48px; height: 48px; }
+      .calc-result .big-price { font-size: 24px; }
+      .prompt-preview { font-size: 10px; max-height: 180px; }
+      .claude-card { padding: 20px 16px; border-radius: 14px; }
+      .mode-selector { flex-direction: column; }
+      .mode-option { padding: 12px; }
+      .cat-selector { gap: 4px; }
+      .cat-btn { padding: 6px 10px; font-size: 11px; }
+      .photo-names li .name { font-size: 11px; }
+      .specs-table td { padding: 6px 0; font-size: 12px; }
+      .drafts-panel { padding: 16px; }
+      .draft-search { font-size: 14px; }
+    }
+
+    /* Ensure all images are responsive */
+    img { max-width: 100%; height: auto; }
+    .images-grid img { max-width: 100%; }
+    .etsy-preview-card img { max-width: 100%; height: auto; }
+
+    /* Touch-friendly minimum sizes */
+    @media (pointer: coarse) {
+      .btn { min-height: 44px; }
+      .btn-sm { min-height: 38px; }
+      .image-overlay-btns { opacity: 1; pointer-events: auto; }
+      .image-overlay-btn { padding: 6px 10px; font-size: 11px; }
+      .cat-btn { min-height: 36px; }
+      input, select, textarea { font-size: 16px; }
     }
     /* Batch mode */
     .batch-toggle { display: flex; gap: 0; margin-bottom: 12px; max-width: 520px; margin-left: auto; margin-right: auto; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
@@ -443,7 +520,8 @@
     .batch-item .bi-status.loading { color: var(--orange); }
     .batch-item .bi-status.done { color: var(--green); }
     .batch-item .bi-status.error { color: var(--red); }
-    @media (max-width: 768px) { .batch-panel { width: 100%; right: -100%; } }
+    @media (max-width: 768px) { .batch-panel { width: 100%; right: -100%; padding: 16px; } }
+    @media (max-width: 480px) { .batch-item { padding: 10px; gap: 10px; } .batch-item .bi-num { width: 28px; height: 28px; font-size: 12px; } }
 
     .drafts-badge {
       position: absolute; top: -6px; right: -6px;
@@ -701,7 +779,7 @@
             Titre Etsy (140 car. max)
             <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTitle')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
           </label>
-          <input type="text" id="etsyTitle" maxlength="140" oninput="updateTitleCounter(); updateEtsyPreview()" />
+          <input type="text" id="etsyTitle" maxlength="140" oninput="updateTitleCounter(); debouncedUpdateEtsyPreview()" />
           <div class="char-counter" id="titleCounter">0/140</div>
         </div>
 
@@ -710,7 +788,7 @@
             Description
             <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyDesc')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
           </label>
-          <textarea id="etsyDesc" rows="10" oninput="updateDescCounter(); updateEtsyPreview()"></textarea>
+          <textarea id="etsyDesc" rows="10" oninput="updateDescCounter(); debouncedUpdateEtsyPreview()"></textarea>
           <div class="char-counter" id="descCounter">0 mots</div>
         </div>
 
@@ -719,7 +797,7 @@
             Tags Etsy (exactement 13)
             <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsyTags')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
           </label>
-          <input type="text" id="etsyTags" placeholder="tag1, tag2, tag3, ..." oninput="updateTagsDisplay(); updateEtsyPreview();" />
+          <input type="text" id="etsyTags" placeholder="tag1, tag2, tag3, ..." oninput="updateTagsDisplay(); debouncedUpdateEtsyPreview();" />
           <div id="tagsDisplay"></div>
         </div>
 
@@ -797,7 +875,7 @@
             Prix de vente (EUR)
             <button class="btn btn-outline btn-sm" onclick="copySectionToClipboard('etsySellPrice')" style="text-transform:none;letter-spacing:0;font-size:10px;padding:3px 8px;">📋 Copier</button>
           </label>
-          <input type="text" id="etsySellPrice" oninput="updateEtsyPreview(); updateMarginDisplay(this.value)" />
+          <input type="text" id="etsySellPrice" oninput="debouncedUpdateEtsyPreview(); updateMarginDisplay(this.value)" />
         </div>
 
         <div class="etsy-section">
@@ -890,7 +968,7 @@
       <button class="btn btn-danger btn-sm" onclick="purgeOldDrafts()">Supprimer les 10 plus anciennes</button>
     </div>
     <div id="draftsCountInfo" class="drafts-count-info"></div>
-    <input type="text" class="draft-search" id="draftSearch" placeholder="Rechercher par titre..." oninput="renderDrafts()" />
+    <input type="text" class="draft-search" id="draftSearch" placeholder="Rechercher par titre..." oninput="debouncedRenderDrafts()" />
     <div id="draftsList" style="flex:1;overflow-y:auto;"></div>
   </div>
 
@@ -1938,14 +2016,14 @@ function updateEtsyPreview() {
 
   const card = document.getElementById('etsyPreviewCard');
   card.innerHTML = `
-    <div style="display:flex;gap:16px;margin-bottom:16px;">
-      <div style="flex:0 0 280px;">
-        ${images.length ? `<img src="${images[0].replace(/^\/\//,'https://')}" style="width:280px;height:280px;object-fit:cover;border-radius:12px;border:1px solid #e0e0e0;" onerror="this.style.display='none'" />` : '<div style="width:280px;height:280px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">Pas d\'image</div>'}
+    <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+      <div style="flex:1 1 200px;max-width:280px;min-width:0;">
+        ${images.length ? `<img src="${images[0].replace(/^\/\//,'https://')}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;border:1px solid #e0e0e0;" loading="lazy" onerror="this.style.display='none'" />` : '<div style="width:100%;aspect-ratio:1;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;">Pas d\'image</div>'}
         <div class="ep-img-row" style="margin-top:8px;">
-          ${images.slice(0,6).map((url,i) => `<img src="${url.replace(/^\/\//,'https://')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:2px solid ${i===0?'#222':'#e0e0e0'};cursor:pointer;flex-shrink:0;" onerror="this.style.display='none'" />`).join('')}
+          ${images.slice(0,6).map((url,i) => `<img src="${url.replace(/^\/\//,'https://')}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:2px solid ${i===0?'#222':'#e0e0e0'};cursor:pointer;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'" />`).join('')}
         </div>
       </div>
-      <div style="flex:1;min-width:0;">
+      <div style="flex:1 1 200px;min-width:0;">
         ${category ? `<div style="font-size:11px;color:#888;margin-bottom:6px;">${esc(category)}</div>` : ''}
         <div class="ep-title" style="font-size:16px;font-weight:600;color:#222;margin-bottom:8px;line-height:1.35;">${esc(title)}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -2267,6 +2345,17 @@ function saveToRecent(product) {
 }
 
 function esc(str) { const d=document.createElement('div'); d.textContent=str||''; return d.innerHTML; }
+
+// Debounce utility for performance
+function debounce(fn, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+const debouncedUpdateEtsyPreview = debounce(updateEtsyPreview, 250);
+const debouncedRenderDrafts = debounce(renderDrafts, 200);
 
 function showOnboarding() {
   document.getElementById('onboardingGuide').style.display = 'flex';
