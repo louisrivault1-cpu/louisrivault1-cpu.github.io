@@ -1286,7 +1286,7 @@
           <button class="btn btn-primary btn-forge" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit">⚒ Forger</button>
         </div>
         <div id="noApifyHint" style="display:none;font-size:12px;color:var(--orange);margin-top:8px;text-align:center;">
-          ⚠️ Pas de token Apify configuré — <a href="https://louisrivault1-cpu.github.io/" target="_blank" style="color:var(--accent);">utilise le bookmarklet</a> (recommandé) ou <a href="#" onclick="openSettings();return false;" style="color:var(--accent);">ajoute un token Apify</a>.
+          ⚠️ Pas de clé scraping configurée — <a href="#" onclick="openSettings();return false;" style="color:var(--accent);">ajoute une clé ScraperAPI</a> (gratuit, 5000 req) ou <a href="https://louisrivault1-cpu.github.io/" target="_blank" style="color:var(--accent);">utilise le bookmarklet</a>.
         </div>
       </div>
 
@@ -1774,13 +1774,20 @@
         <label>Modèle Claude</label>
         <input type="text" id="claudeModel" value="claude-sonnet-4-20250514" />
       </div>
-      <label>Token API Apify</label>
+      <label>Clé ScraperAPI <span style="font-size:11px;color:var(--accent);font-weight:400;">(recommandé)</span></label>
+      <div class="token-row">
+        <input type="password" id="scraperApiKey" placeholder="Colle ta clé ScraperAPI ici" />
+        <button class="token-test-btn" id="testScraperApiBtn" onclick="testScraperApiKey()">Tester</button>
+      </div>
+      <div class="token-status" id="scraperApiStatus"><span class="ts-dot"></span> <span class="ts-text">—</span></div>
+      <div class="hint">Scraping via URL sans Apify. <a href="https://www.scraperapi.com/signup" target="_blank" style="color:var(--accent);">Obtenir une clé gratuite (5000 requêtes)</a></div>
+      <label>Token API Apify <span style="font-size:11px;color:var(--muted);font-weight:400;">(fallback)</span></label>
       <div class="token-row">
         <input type="password" id="apifyToken" placeholder="apify_api_..." />
         <button class="token-test-btn" id="testApifyBtn" onclick="testApifyToken()">Tester</button>
       </div>
       <div class="token-status" id="apifyStatus"><span class="ts-dot"></span> <span class="ts-text">—</span></div>
-      <div class="hint">Nécessaire pour scraper via URL. Le bookmarklet n'en a pas besoin.</div>
+      <div class="hint">Utilisé si ScraperAPI n'est pas configuré. Le bookmarklet n'en a pas besoin.</div>
       <label>Actor ID Apify</label>
       <input type="text" id="apifyActorId" placeholder="painless_rachis/product-forge-scraper" />
       <div class="hint">L'ID de l'actor Apify à utiliser pour le scraping</div>
@@ -2145,7 +2152,7 @@ function createOrLoginProfile() {
 }
 
 function migrateSettingsToProfile(name) {
-  const keys = ['mode', 'claude_key', 'apify_token', 'apify_actor_id', 'claude_model'];
+  const keys = ['mode', 'claude_key', 'scraperapi_key', 'apify_token', 'apify_actor_id', 'claude_model'];
   keys.forEach(k => {
     const val = localStorage.getItem('pf_' + k);
     if (val) localStorage.setItem(profileKey(name, k), val);
@@ -2193,6 +2200,7 @@ function openProfileMenu() {
 
 function updateTokenStatuses() {
   const s = getSettings();
+  updateSingleTokenStatus('scraperApiStatus', s.scraperApiKey);
   updateSingleTokenStatus('apifyStatus', s.apifyToken);
   updateSingleTokenStatus('claudeStatus', s.claudeKey);
 }
@@ -2214,6 +2222,40 @@ function updateSingleTokenStatus(elId, value) {
 function maskToken(token) {
   if (!token || token.length < 8) return '****';
   return '****' + token.slice(-6);
+}
+
+async function testScraperApiKey() {
+  const btn = document.getElementById('testScraperApiBtn');
+  const key = document.getElementById('scraperApiKey').value.trim();
+  if (!key) { toast('Entre une clé ScraperAPI pour la tester.', 3000, 'warning'); return; }
+
+  btn.className = 'token-test-btn testing';
+  btn.textContent = '...';
+
+  try {
+    const resp = await fetch('https://api.scraperapi.com/account?api_key=' + encodeURIComponent(key));
+    if (resp.ok) {
+      const data = await resp.json();
+      btn.className = 'token-test-btn ok';
+      btn.textContent = '✓ OK';
+      const statusEl = document.getElementById('scraperApiStatus');
+      statusEl.className = 'token-status configured';
+      const remaining = data.requestLimit - data.requestCount;
+      statusEl.querySelector('.ts-text').textContent = 'Valide — ' + remaining + ' requêtes restantes';
+      toast('Clé ScraperAPI valide !', 3000, 'success');
+    } else {
+      throw new Error('HTTP ' + resp.status);
+    }
+  } catch(err) {
+    btn.className = 'token-test-btn fail';
+    btn.textContent = '✗ Erreur';
+    const statusEl = document.getElementById('scraperApiStatus');
+    statusEl.className = 'token-status missing';
+    statusEl.querySelector('.ts-text').textContent = 'Clé invalide — vérifie sur scraperapi.com/dashboard';
+    toast('Clé ScraperAPI invalide : ' + err.message, 4000, 'error');
+  }
+
+  setTimeout(() => { btn.className = 'token-test-btn'; btn.textContent = 'Tester'; }, 5000);
 }
 
 async function testApifyToken() {
@@ -2346,6 +2388,7 @@ function getSettings() {
   return {
     mode: get('mode', 'free'),
     claudeKey: get('claude_key', ''),
+    scraperApiKey: get('scraperapi_key', ''),
     apifyToken: get('apify_token', ''),
     apifyActorId: get('apify_actor_id', 'painless_rachis/product-forge-scraper'),
     claudeModel: get('claude_model', 'claude-sonnet-4-20250514')
@@ -2373,15 +2416,16 @@ function updateWelcomeForTokens() {
   const noApifyHint = document.getElementById('noApifyHint');
   const methodCardUrl = document.getElementById('methodCardUrl');
 
-  // Si pas de token Apify → afficher un hint sous l'input URL
+  const hasScrapingKey = (s.scraperApiKey && s.scraperApiKey.length >= 5) || (s.apifyToken && s.apifyToken.length >= 5);
+  // Si pas de clé scraping → afficher un hint sous l'input URL
   if (noApifyHint) {
-    noApifyHint.style.display = (!s.apifyToken || s.apifyToken.length < 5) ? 'block' : 'none';
+    noApifyHint.style.display = hasScrapingKey ? 'none' : 'block';
   }
-  // Si pas de token Apify → dimmer la carte "Coller un lien"
+  // Si pas de clé scraping → dimmer la carte "Coller un lien"
   if (methodCardUrl) {
-    if (!s.apifyToken || s.apifyToken.length < 5) {
+    if (!hasScrapingKey) {
       methodCardUrl.style.opacity = '0.5';
-      methodCardUrl.querySelector('.mc-desc').textContent = 'Nécessite un token Apify gratuit. Va dans ⚙ Settings pour en ajouter un, ou utilise le bookmarklet.';
+      methodCardUrl.querySelector('.mc-desc').textContent = 'Nécessite une clé ScraperAPI ou un token Apify. Va dans ⚙ Settings ou utilise le bookmarklet.';
     } else {
       methodCardUrl.style.opacity = '1';
       methodCardUrl.querySelector('.mc-desc').textContent = 'Copie l\'URL d\'un produit AliExpress et colle-la dans le champ ci-dessus.';
@@ -2392,6 +2436,7 @@ function updateWelcomeForTokens() {
 function openSettings() {
   const s = getSettings();
   document.getElementById('claudeKey').value = s.claudeKey;
+  document.getElementById('scraperApiKey').value = s.scraperApiKey;
   document.getElementById('apifyToken').value = s.apifyToken;
   document.getElementById('apifyActorId').value = s.apifyActorId;
   document.getElementById('claudeModel').value = s.claudeModel;
@@ -2414,6 +2459,7 @@ function saveSettings() {
   const vals = {
     mode: m,
     claude_key: document.getElementById('claudeKey').value.trim(),
+    scraperapi_key: document.getElementById('scraperApiKey').value.trim(),
     apify_token: document.getElementById('apifyToken').value.trim(),
     apify_actor_id: document.getElementById('apifyActorId').value.trim(),
     claude_model: document.getElementById('claudeModel').value.trim()
@@ -2969,209 +3015,280 @@ function showBookmarkletFallback(url) {
 }
 
 const PROGRESS_MESSAGES = [
-  { delay: 0, msg: 'Connexion à AliExpress via Apify...' },
+  { delay: 0, msg: 'Connexion à AliExpress...' },
   { delay: 5000, msg: 'Chargement de la page produit...' },
-  { delay: 12000, msg: 'Extraction des données...' },
-  { delay: 18000, msg: 'Si ça prend trop longtemps, le bookmarklet prendra le relais...' }
+  { delay: 15000, msg: 'Extraction des données...' },
+  { delay: 30000, msg: 'Si ça prend trop longtemps, le bookmarklet prendra le relais...' }
 ];
 
+/* ── ScraperAPI HTML parser ── */
+async function scrapeWithScraperAPI(url, apiKey) {
+  const resp = await fetch(`https://api.scraperapi.com?api_key=${encodeURIComponent(apiKey)}&url=${encodeURIComponent(url)}&render=true`, {
+    signal: AbortSignal.timeout(60000)
+  });
+  if (!resp.ok) {
+    const status = resp.status;
+    if (status === 401 || status === 403) throw { message: 'Clé ScraperAPI invalide. Vérifie-la dans ⚙ Settings.', noRetry: true };
+    if (status === 429) throw { message: 'Quota ScraperAPI épuisé — réessaie plus tard.', noRetry: true };
+    throw new Error('ScraperAPI erreur HTTP ' + status);
+  }
+  const html = await resp.text();
+
+  // Parse the HTML
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // Title
+  let title = '';
+  const titleEl = doc.querySelector('[data-pl="product-title"]');
+  if (titleEl) title = titleEl.textContent.trim();
+  if (!title) { const h1 = doc.querySelector('h1'); if (h1) title = h1.textContent.trim(); }
+  if (!title || /^aliexpress$/i.test(title)) {
+    const og = doc.querySelector('meta[property="og:title"]');
+    if (og && og.content) title = og.content.split(/[-–|]/)[0].trim();
+  }
+  if (!title || /^aliexpress$/i.test(title)) title = doc.title.replace(/\s*[-–|].*ali.*/i, '').trim();
+
+  // Price via DOM (regex are broken on current AliExpress)
+  let price = '';
+  for (const el of doc.querySelectorAll('[class*="rice"] span, [class*="Price"] span, [class*="price--current"] span, [class*="uniform-banner-box-price"]')) {
+    const m = el.textContent.match(/(\d+[\.,]\d+)/);
+    if (m) { price = m[1].replace(',', '.'); break; }
+  }
+  // Fallback: regex in raw HTML
+  if (!price) {
+    const prx = [/\$\s?(\d+[\.,]\d{2})/, /"minPrice"\s*:\s*"?(\d+\.?\d*)"?/, /"formatedActivityPrice"\s*:\s*"[^"]*?(\d+[\.,]\d+)/];
+    for (const rx of prx) { const m = html.match(rx); if (m) { price = m[1].replace(',', '.'); break; } }
+  }
+  // Fallback: meta tag
+  if (!price) {
+    const ogPrice = doc.querySelector('meta[property="product:price:amount"],meta[property="og:price:amount"]');
+    if (ogPrice) price = ogPrice.content;
+  }
+
+  // Images via imagePathList in HTML source (proven to work)
+  const images = [];
+  const seen = new Set();
+  let m;
+  const rx = /"imagePathList"\s*:\s*\[([\s\S]*?)\]/g;
+  while ((m = rx.exec(html)) !== null) {
+    const r = /"(https?:\/\/[^"]+)"/g;
+    let u;
+    while ((u = r.exec(m[1])) !== null) {
+      let img = u[1].replace(/_\d+x\d+\./g, '.').split('?')[0];
+      if (img.startsWith('//')) img = 'https:' + img;
+      if (!seen.has(img) && images.length < 20) { seen.add(img); images.push(img); }
+    }
+  }
+  // Fallback: all alicdn images in HTML
+  if (images.length < 3) {
+    const imgRx = /(https?:\/\/[a-z0-9]+\.alicdn\.com\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp))/gi;
+    while ((m = imgRx.exec(html)) !== null) {
+      let img = m[1].split('?')[0];
+      if (!/\/(tfs|assets|icons?)\//i.test(img) && !seen.has(img) && images.length < 20) { seen.add(img); images.push(img); }
+    }
+  }
+
+  // Specs from JSON in HTML
+  const specs = [];
+  const specRx = /"attrName"\s*:\s*"([^"]+)"\s*,\s*"attrValue"\s*:\s*"([^"]+)"/g;
+  while ((m = specRx.exec(html)) !== null) {
+    specs.push({ name: m[1], value: m[2] });
+  }
+
+  // Variants from JSON in HTML
+  const variants = [];
+  const skuRx = /"skuPropertyName"\s*:\s*"([^"]+)"[\s\S]*?"skuPropertyValues"\s*:\s*\[([\s\S]*?)\]/g;
+  while ((m = skuRx.exec(html)) !== null) {
+    const gr = { name: m[1], options: [] };
+    const optRx = /"propertyValueDefinitionName"\s*:\s*"([^"]+)"/g;
+    let o;
+    while ((o = optRx.exec(m[2])) !== null) {
+      gr.options.push({ name: o[1] });
+    }
+    if (gr.options.length) variants.push(gr);
+  }
+
+  return {
+    source: 'scraperapi', url,
+    productId: (url.match(/\/(\d{5,})\.html/) || [])[1] || '',
+    title, price, originalPrice: '',
+    images, specs, variants,
+    sourceUrl: url
+  };
+}
+
+/* ── Apify scraper (kept as fallback) ── */
+async function scrapeWithApify(url, s) {
+  // Pre-validate token
+  const checkResp = await fetch('https://api.apify.com/v2/users/me?token=' + encodeURIComponent(s.apifyToken));
+  if (!checkResp.ok) throw { message: 'Token Apify invalide.', noRetry: true };
+
+  const actorPath = (s.apifyActorId || 'painless_rachis/product-forge-scraper').replace(/\//g, '~');
+  const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: url, startUrls: [{ url: url }], maxItems: 1 }),
+    signal: AbortSignal.timeout(35000)
+  });
+
+  if (!resp.ok) {
+    const status = resp.status;
+    if (status === 401 || status === 402) throw { message: getScrapeErrorMessage(status, ''), noRetry: true };
+    throw new Error(getScrapeErrorMessage(status, ''));
+  }
+
+  const items = await resp.json();
+  if (!items || !items.length) throw new Error('Aucune donnée retournée par Apify.');
+
+  const item = items[0];
+  const isBlocked = item.blocked === true || item.error;
+  const titleLooksBlocked = !item.title || /^aliexpress$/i.test((item.title || '').trim());
+  const priceIsEmpty = !item.price || item.price === '0' || item.price === '';
+  const realImages = (item.images || []).filter(u => {
+    if (/\/(tfs|assets|icons?)\//i.test(u)) return false;
+    const dims = u.match(/[-_/](\d+)x(\d+)[._]/);
+    if (dims && (parseInt(dims[1]) < 200 || parseInt(dims[2]) < 200)) return false;
+    return true;
+  });
+  const imagesAreBogus = realImages.length < 2;
+
+  if (isBlocked || (titleLooksBlocked && priceIsEmpty) || (titleLooksBlocked && imagesAreBogus) || (priceIsEmpty && imagesAreBogus)) {
+    throw { message: 'AliExpress a bloqué Apify.', useBookmarklet: true };
+  }
+
+  const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k, v]) => ({ name: k, value: v })) : (item.specifications || item.attributes || []).map(sp => ({ name: sp.name || sp.attrName || '', value: sp.value || sp.attrValue || '' }));
+  return {
+    source: 'apify', url,
+    productId: item.id || item.productId || (url.match(/\/(\d+)\.html/) || [])[1] || '',
+    title: item.title || item.name || '',
+    price: item.price || item.currentPrice || '',
+    originalPrice: item.originalPrice || item.price || '',
+    images: realImages.length > 0 ? realImages : (item.images || item.imageUrls || []),
+    specs: mappedSpecs,
+    variants: (item.variants || item.skus || []).map(v => typeof v === 'string' ? { name: 'Option', options: [{ name: v }] } : v),
+    sourceUrl: item.sourceUrl || url
+  };
+}
+
+/* ── Main scrape orchestrator: ScraperAPI → Apify → Bookmarklet ── */
 async function doScrape(url) {
   const validation = validateUrlInput(url);
   if (!validation.valid) { toast(validation.msg, 4000, 'error'); return; }
 
   const s = getSettings();
-  if (!s.apifyToken || s.apifyToken.length < 5) {
-    // Pas de token → guide vers le bookmarklet
-    toast('💡 Pas de token Apify — utilise le bookmarklet pour récupérer les données !', 5000, 'warning');
+  const hasScraperApi = s.scraperApiKey && s.scraperApiKey.length >= 5;
+  const hasApify = s.apifyToken && s.apifyToken.length >= 5;
+
+  if (!hasScraperApi && !hasApify) {
+    toast('💡 Pas de clé scraping — ajoute une clé ScraperAPI dans ⚙ Settings ou utilise le bookmarklet !', 5000, 'warning');
     showBookmarkletFallback(url);
     if (url) window.open(url, '_blank');
     return;
-  }
-
-  // Pre-validate Apify token before wasting time on retries
-  setStatus('Vérification du token Apify...','orange');
-  try {
-    const checkResp = await fetch('https://api.apify.com/v2/users/me?token=' + encodeURIComponent(s.apifyToken));
-    if (!checkResp.ok) {
-      hideLoading();
-      toast('Token Apify invalide ou expiré. Utilise le bookmarklet ou mets à jour ton token dans les Settings.', 6000, 'error');
-      setStatus('Token invalide','red');
-      showBookmarkletFallback(url);
-      return;
-    }
-  } catch(checkErr) {
-    console.warn('[PF] Token check failed:', checkErr);
-    // Network error — proceed anyway, the actual scrape call will fail too if network is down
   }
 
   // Hide any previous fallback banner
   const prevFallback = document.getElementById('scrapeBookmarkletFallback');
   if (prevFallback) prevFallback.classList.add('hidden');
 
-  const MAX_RETRIES = 2;
-  const TIMEOUTS = [25000, 35000]; // Reduced: AliExpress blocks fast or not at all
-  const actorPath = (s.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
+  const steps = [];
+  if (hasScraperApi) steps.push('ScraperAPI');
+  if (hasApify) steps.push('Apify');
 
-  setStatus('Scraping via Apify...','orange');
+  setStatus('Scraping en cours...', 'orange');
   showLoading('Scraping en cours...', 'Connexion à AliExpress...', [
     'Connexion à AliExpress',
     'Analyse de la page produit',
     'Extraction des données'
   ]);
+  const progressTimers = PROGRESS_MESSAGES.map(p =>
+    setTimeout(() => updateLoadingMsg(p.msg), p.delay)
+  );
 
   let lastError = null;
-  let lastErrorStatus = 0;
 
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  // ── Step 1: Try ScraperAPI ──
+  if (hasScraperApi) {
     try {
-      const timeoutMs = TIMEOUTS[attempt - 1] || 60000;
-
-      if (attempt > 1) {
-        showRetryBadge(attempt, MAX_RETRIES);
-        updateLoadingMsg('Tentative ' + attempt + '/' + MAX_RETRIES + '... (délai ' + (timeoutMs/1000) + 's)');
-        updateLoadingStep(0, 'active');
-        updateLoadingStep(1, '');
-        updateLoadingStep(2, '');
-      }
-
       updateLoadingStep(0, 'active');
+      updateLoadingMsg('Scraping via ScraperAPI...');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const data = await scrapeWithScraperAPI(url, s.scraperApiKey);
+      data.stats = { images: (data.images || []).length, specs: (data.specs || []).length, variants: (data.variants || []).length };
 
-      // Progressive status messages
-      const progressTimers = PROGRESS_MESSAGES.map(p =>
-        setTimeout(() => updateLoadingMsg(p.msg), p.delay)
-      );
-
-      let resp;
-      try {
-        resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${s.apifyToken}`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ url: url, startUrls:[{url: url}], maxItems:1 }),
-          signal: controller.signal
-        });
-      } catch(fetchErr) {
-        clearTimeout(timeoutId);
-        progressTimers.forEach(t => clearTimeout(t));
-        if (fetchErr.name === 'AbortError') {
-          lastErrorStatus = 408;
-          throw new Error('AliExpress est lent — réessaie ou utilise le bookmarklet.');
-        }
-        throw fetchErr;
+      // Validate data quality
+      const titleOk = data.title && !/^aliexpress$/i.test(data.title.trim());
+      const imagesOk = data.images.length >= 2;
+      if (!titleOk && !imagesOk) {
+        console.warn('[PF] ScraperAPI returned weak data, trying fallback...', data);
+        throw new Error('Données insuffisantes via ScraperAPI');
       }
-      clearTimeout(timeoutId);
+
       progressTimers.forEach(t => clearTimeout(t));
-
       updateLoadingStep(0, 'done');
-      updateLoadingStep(1, 'active');
-      updateLoadingMsg('Analyse de la réponse...');
-
-      if (!resp.ok) {
-        lastErrorStatus = resp.status;
-        const errBody = await resp.text().catch(() => '');
-        // Don't retry on auth/quota errors — they won't fix themselves
-        if (resp.status === 401 || resp.status === 402) {
-          throw { message: getScrapeErrorMessage(resp.status, ''), noRetry: true };
-        }
-        throw new Error(getScrapeErrorMessage(resp.status, errBody));
-      }
-
-      let items;
-      try {
-        items = await resp.json();
-      } catch(jsonErr) {
-        throw new Error('Réponse Apify invalide. Le serveur a peut-être eu un problème.');
-      }
-
       updateLoadingStep(1, 'done');
-      updateLoadingStep(2, 'active');
-      updateLoadingMsg('Extraction des données...');
-
-      if (!items || !items.length) {
-        throw new Error('Aucune donnée trouvée. Le produit AliExpress n\'existe peut-être plus ou l\'URL est incorrecte.');
-      }
-
-      const item = items[0];
-
-      // Detect blocked/empty responses from Apify (AliExpress anti-bot)
-      const isBlocked = item.blocked === true || item.error;
-      const titleLooksBlocked = !item.title || /^aliexpress$/i.test((item.title||'').trim());
-      const priceIsEmpty = !item.price || item.price === '0' || item.price === '';
-      // Improved: filter non-product images (logos, icons, tiny images, /tfs/ path = static assets)
-      const realImages = (item.images||[]).filter(u => {
-        if (/\/(tfs|assets|icons?)\//i.test(u)) return false;
-        const dims = u.match(/[-_/](\d+)x(\d+)[._]/);
-        if (dims && (parseInt(dims[1]) < 200 || parseInt(dims[2]) < 200)) return false;
-        return true;
-      });
-      const imagesAreBogus = realImages.length < 2;
-
-      if (isBlocked || (titleLooksBlocked && priceIsEmpty) || (titleLooksBlocked && imagesAreBogus) || (priceIsEmpty && imagesAreBogus)) {
-        console.warn('[PF] Apify returned blocked/empty data:', {title: item.title, price: item.price, images: item.images?.length, realImages: realImages.length});
-        throw { message: 'AliExpress a bloqué le scraping automatique. Redirection vers le bookmarklet...', useBookmarklet: true };
-      }
-
-      // Robust mapping: handle both old format (specifications/skuOptions) and new format (specs object/variants array)
-      const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k,v]) => ({name:k, value:v})) : (item.specifications||item.attributes||[]).map(sp=>({name:sp.name||sp.attrName||'',value:sp.value||sp.attrValue||''}));
-      const data = {
-        source:'apify', url,
-        productId: item.id||item.productId||url.match(/\/(\d+)\.html/)?.[1]||'',
-        title: item.title||item.name||'',
-        price: item.price||item.currentPrice||'',
-        originalPrice: item.originalPrice||item.price||'',
-        images: realImages.length > 0 ? realImages : (item.images||item.imageUrls||[]),
-        specs: mappedSpecs,
-        variants: (item.variants||item.skus||[]).map(v => typeof v === 'string' ? {name:'Option', options:[{name:v}]} : v),
-        sourceUrl: item.sourceUrl||url,
-        stats:{}
-      };
-      data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
-
-      // Second validation: even if not flagged as blocked, check data quality
-      if (!data.title && !data.images.length) {
-        throw { message: 'Le produit a été trouvé mais les données sont vides. Redirection vers le bookmarklet...', useBookmarklet: true };
-      }
-
       updateLoadingStep(2, 'done');
       hideLoading();
       forgeFromBookmarklet(data);
-      toast('Produit scrapé avec succès !', 3000, 'success');
-      setStatus('Prêt','green');
+      toast('Produit scrapé via ScraperAPI !', 3000, 'success');
+      setStatus('Prêt', 'green');
       return;
-
-    } catch(err) {
+    } catch (err) {
       lastError = err;
-      console.error('[PF] Scrape attempt '+attempt+' error:', err);
-
-      // Don't retry on non-retryable errors (auth, quota, blocked)
-      if (err.noRetry || err.useBookmarklet) break;
-
-      if (attempt < MAX_RETRIES) {
-        toast('Tentative ' + attempt + '/' + MAX_RETRIES + ' échouée, nouvel essai...', 2500, 'warning');
-        await new Promise(r => setTimeout(r, 2000));
-        continue;
+      console.warn('[PF] ScraperAPI failed:', err.message || err);
+      if (err.noRetry && !hasApify) {
+        progressTimers.forEach(t => clearTimeout(t));
+        hideLoading();
+        toast(err.message || 'Erreur ScraperAPI', 6000, 'error');
+        setStatus('Erreur scraping', 'red');
+        showBookmarkletFallback(url);
+        return;
       }
+      if (hasApify) toast('ScraperAPI échoué, tentative Apify...', 3000, 'warning');
     }
   }
 
+  // ── Step 2: Try Apify ──
+  if (hasApify) {
+    try {
+      updateLoadingStep(0, 'active');
+      updateLoadingMsg('Scraping via Apify...');
+
+      const data = await scrapeWithApify(url, s);
+      data.stats = { images: (data.images || []).length, specs: (data.specs || []).length, variants: (data.variants || []).length };
+
+      if (!data.title && !data.images.length) {
+        throw { message: 'Données vides via Apify.', useBookmarklet: true };
+      }
+
+      progressTimers.forEach(t => clearTimeout(t));
+      updateLoadingStep(0, 'done');
+      updateLoadingStep(1, 'done');
+      updateLoadingStep(2, 'done');
+      hideLoading();
+      forgeFromBookmarklet(data);
+      toast('Produit scrapé via Apify !', 3000, 'success');
+      setStatus('Prêt', 'green');
+      return;
+    } catch (err) {
+      lastError = err;
+      console.warn('[PF] Apify failed:', err.message || err);
+    }
+  }
+
+  // ── Step 3: All failed → Bookmarklet fallback ──
+  progressTimers.forEach(t => clearTimeout(t));
   hideLoading();
 
-  // If AliExpress blocked → auto-open URL and show bookmarklet instructions
   if (lastError && lastError.useBookmarklet) {
-    toast('AliExpress bloque le scraping automatique — ouvre le lien et utilise le bookmarklet.', 6000, 'warning');
-    setStatus('Utilise le bookmarklet','orange');
+    toast('AliExpress bloque le scraping — ouvre le lien et utilise le bookmarklet.', 6000, 'warning');
+    setStatus('Utilise le bookmarklet', 'orange');
     showBookmarkletFallback(url);
-    // Auto-open the AliExpress URL so user can immediately use the bookmarklet
     window.open(url, '_blank');
     return;
   }
 
   const errorMsg = lastError?.message || 'Erreur inconnue lors du scraping.';
   toast(errorMsg, 6000, 'error');
-  setStatus('Erreur scraping','red');
-
-  // After all retries failed → propose bookmarklet fallback
+  setStatus('Erreur scraping', 'red');
   showBookmarkletFallback(url);
 }
 
@@ -4405,36 +4522,36 @@ async function scrapeSingleBatchItem(index, settings) {
   renderBatchResults();
 
   try {
-    const actorPath = (settings.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
-    const resp = await fetch(`https://api.apify.com/v2/acts/${actorPath}/run-sync-get-dataset-items?token=${settings.apifyToken}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ url: r.url, startUrls:[{url: r.url}], maxItems:1 })
-    });
-    if (!resp.ok) throw new Error('Erreur Apify (HTTP '+resp.status+')');
-    const items = await resp.json();
-    if (!items||!items.length) throw new Error('Aucun résultat Apify');
-    const item = items[0];
-    // Robust mapping: handle both old format (specifications/skuOptions) and new format (specs object/variants array)
-    const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k,v]) => ({name:k, value:v})) : (item.specifications||item.attributes||[]).map(s=>({name:s.name||s.attrName||'',value:s.value||s.attrValue||''}));
-    const data = {
-      source:'apify', url:r.url,
-      productId: item.id||item.productId||r.url.match(/\/(\d+)\.html/)?.[1]||'',
-      title: item.title||item.name||'',
-      price: item.price||item.currentPrice||'',
-      originalPrice: item.originalPrice||item.price||'',
-      images: item.images||item.imageUrls||[],
-      specs: mappedSpecs,
-      variants: item.variants||item.skus||[],
-      sourceUrl: item.sourceUrl||r.url,
-      stats:{}
-    };
-    data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
+    let data = null;
+
+    // Try ScraperAPI first if configured
+    if (settings.scraperApiKey && settings.scraperApiKey.length >= 5) {
+      try {
+        data = await scrapeWithScraperAPI(r.url, settings.scraperApiKey);
+        data.stats = { images: (data.images||[]).length, specs: (data.specs||[]).length, variants: (data.variants||[]).length };
+        const titleOk = data.title && !/^aliexpress$/i.test(data.title.trim());
+        const imagesOk = data.images.length >= 2;
+        if (!titleOk && !imagesOk) { data = null; throw new Error('Données ScraperAPI insuffisantes'); }
+      } catch(scraperErr) {
+        console.warn('[PF Batch] ScraperAPI failed for', r.url, scraperErr.message);
+        data = null;
+      }
+    }
+
+    // Fallback to Apify
+    if (!data && settings.apifyToken && settings.apifyToken.length >= 5) {
+      data = await scrapeWithApify(r.url, settings);
+      data.stats = { images: (data.images||[]).length, specs: (data.specs||[]).length, variants: (data.variants||[]).length };
+    }
+
+    if (!data) throw new Error('Aucune méthode de scraping disponible');
+
     r.data = data;
     r.title = data.title || 'Produit '+(index+1);
     r.status = 'scraped';
   } catch(err) {
     r.status = 'error';
-    r.error = err.message;
+    r.error = err.message || 'Erreur de scraping';
   }
   renderBatchResults();
 }
@@ -4471,7 +4588,8 @@ async function startBatchScrapeV2() {
   }
 
   const s = getSettings();
-  if (!s.apifyToken) { openSettings(); toast('Token Apify requis pour le batch'); return; }
+  const hasScrapingKey = (s.scraperApiKey && s.scraperApiKey.length >= 5) || (s.apifyToken && s.apifyToken.length >= 5);
+  if (!hasScrapingKey) { openSettings(); toast('Clé ScraperAPI ou token Apify requis pour le batch'); return; }
 
   batchResults = urls.map((url, i) => ({ url, status: 'pending', title: 'Produit '+(i+1), data: null, error: '' }));
   batchRunning = true;

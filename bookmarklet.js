@@ -100,12 +100,29 @@ if(!R.title){
 }
 
 /* ═══════════════════════════════════════════════
-   PHASE 3 – PRICE (6 fallbacks)
+   PHASE 3 – PRICE (DOM-first, regex broken on current AliExpress)
    ═══════════════════════════════════════════════ */
 R.price='';R.originalPrice='';
 
-/* P1: JSON price fields */
-if(D){
+/* P1: DOM selectors first (most reliable on current AliExpress) */
+var priceSelectors=[
+  '[class*="price--current"] span','[class*="price-default--current"]',
+  '[class*="product-price-current"]','[class*="uniform-banner-box-price"]',
+  '.product-price-value','[class*="snow-price"] [class*="current"]',
+  '[class*="es--wrap--"] [class*="notranslate"]',
+  '[class*="rice"] span','[class*="Price"] span'
+];
+for(var pi=0;pi<priceSelectors.length&&!R.price;pi++){
+  var pels=document.querySelectorAll(priceSelectors[pi]);
+  for(var pj=0;pj<pels.length&&!R.price;pj++){
+    var ptxt=pels[pj].textContent.trim();
+    var pm=ptxt.match(/(\d+[\.,]\d+)/);
+    if(pm&&parseFloat(pm[1].replace(',','.'))>0.01) R.price=ptxt;
+  }
+}
+
+/* P2: JSON price fields (may still work on some layouts) */
+if(!R.price&&D){
   var pc=D.priceComponent||D.priceModule||{};
   R.price=pc.formatedActivityPrice||pc.formatedPrice||pc.actPrice||pc.minPrice||'';
   R.originalPrice=pc.formatedPrice||pc.origPrice||pc.oriPrice||'';
@@ -115,7 +132,7 @@ if(D){
   }
 }
 
-/* P2: Regex in HTML for price patterns */
+/* P3: Regex in HTML for price patterns */
 if(!R.price){
   var prx=[
     /"formatedActivityPrice"\s*:\s*"([^"]+)"/,
@@ -130,19 +147,13 @@ if(!R.price){
   }
 }
 
-/* P3: DOM elements with price classes */
-if(!R.price){
-  var pe=document.querySelector('[class*="price--current"] span, [class*="price-default--current"], [class*="product-price-current"], [class*="uniform-banner-box-price"], .product-price-value, [class*="snow-price"] [class*="current"], [class*="es--wrap--"] [class*="notranslate"]');
-  if(pe&&/\d/.test(pe.textContent)) R.price=pe.textContent.trim();
-}
-
 /* P4: Any element with price pattern */
 if(!R.price){
   var priceEls=document.querySelectorAll('[class*="Price"],[class*="price"],[data-price]');
-  for(var pi=0;pi<priceEls.length&&!R.price;pi++){
-    var ptxt=priceEls[pi].textContent.trim();
-    var pm2=ptxt.match(/(\d+[.,]\d{2})/);
-    if(pm2&&parseFloat(pm2[1].replace(',','.'))>0.01) R.price=ptxt;
+  for(var pi2=0;pi2<priceEls.length&&!R.price;pi2++){
+    var ptxt2=priceEls[pi2].textContent.trim();
+    var pm2=ptxt2.match(/(\d+[\.,]\d{2})/);
+    if(pm2&&parseFloat(pm2[1].replace(',','.'))>0.01) R.price=ptxt2;
   }
 }
 
@@ -159,17 +170,23 @@ if(!R.price){
   if(bpm) R.price=bpm[0];
 }
 
+/* Original price */
+if(!R.originalPrice){
+  var oe=document.querySelector('[class*="price--original"] span, [class*="price-default--origin"] bdi, [class*="price-default--del"], [class*="product-price-original"]');
+  if(oe) R.originalPrice=oe.textContent.trim();
+}
+
 /* P-orig: DOM fallback for original price */
 if(!R.originalPrice){
   var oSels=['[class*="price--original"] span','[class*="price-default--origin"] bdi','[class*="price-default--del"]','[class*="product-price-original"]','[class*="price--line-through"]'];
   for(var i=0;i<oSels.length;i++){
-    var oe=document.querySelector(oSels[i]);
-    if(oe){R.originalPrice=oe.textContent.trim();break}
+    var oe2=document.querySelector(oSels[i]);
+    if(oe2){R.originalPrice=oe2.textContent.trim();break}
   }
 }
 
 /* ═══════════════════════════════════════════════
-   PHASE 4 – IMAGES (7 fallbacks)
+   PHASE 4 – IMAGES (9 fallbacks)
    ═══════════════════════════════════════════════ */
 R.images=[];var seen={};
 function addI(u){
@@ -190,7 +207,7 @@ if(D){
   try{var ipl=(D.imageComponent||D.imageModule||{}).imagePathList;if(ipl&&ipl.forEach)ipl.forEach(function(u){addI(u)})}catch(e){}
 }
 
-/* I2: Regex imagePathList in HTML */
+/* I2: Regex imagePathList in HTML (proven reliable) */
 if(R.images.length<3){
   var irx=/"imagePathList"\s*:\s*\[([\s\S]*?)\]/g;
   var im;
