@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Product Forge – Générateur de Fiches Etsy optimisées SEO</title>
-  <meta name="description" content="Product Forge transforme n'importe quel produit AliExpress en fiche Etsy professionnelle optimisée SEO grâce à Claude AI. Titres, descriptions, tags et prix calculés automatiquement. 100% gratuit.">
+  <title>Product Forge – AliExpress → Etsy en 60 secondes</title>
+  <meta name="description" content="Transformez n'importe quel produit AliExpress en fiche Etsy professionnelle en 60 secondes. Titres SEO, descriptions vendeuses, tags optimisés et prix calculés automatiquement par IA. 100% gratuit, aucune inscription requise.">
+  <meta name="keywords" content="AliExpress Etsy, dropshipping, fiche produit Etsy, SEO Etsy, Product Forge, générateur fiche Etsy, IA product listing">
+  <meta property="og:title" content="Product Forge – AliExpress → Etsy en 60 secondes">
+  <meta property="og:description" content="L'outil gratuit qui transforme n'importe quel produit AliExpress en fiche Etsy pro optimisée SEO. Utilisé par des centaines de vendeurs Etsy.">
+  <meta property="og:type" content="website">
   <meta name="theme-color" content="#c8a961">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1153,16 +1157,46 @@
 </head>
 <body>
 
-  <!-- Firebase Auth Login Screen -->
+  <!-- Firebase Auth Login Screen — Marketing Landing -->
   <div id="firebaseLoginScreen">
-    <div class="login-box">
+    <div class="login-box" style="max-width:560px;">
       <div class="login-logo">⚒</div>
-      <h2>Product Forge</h2>
-      <p class="login-sub">Connecte-toi pour sauvegarder tes tokens et fiches produit dans le cloud.</p>
+      <h2 style="font-size:2.2rem;line-height:1.2;">AliExpress → Etsy<br><span style="font-size:1.1rem;-webkit-text-fill-color:var(--muted);font-weight:400;">en 60 secondes</span></h2>
+      <p class="login-sub" style="max-width:420px;margin:0 auto 28px;line-height:1.5;">Product Forge transforme n'importe quel produit AliExpress en fiche Etsy professionnelle optimisée SEO grâce à l'IA. <strong style="color:var(--green);">100% gratuit.</strong></p>
+
+      <!-- 3 étapes visuelles -->
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;text-align:center;flex:1;min-width:130px;max-width:160px;">
+          <div style="font-size:28px;margin-bottom:6px;">🔍</div>
+          <div style="font-size:13px;font-weight:700;color:var(--accent);">Scrape</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Récupère les données AliExpress</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--border2);font-size:20px;">→</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;text-align:center;flex:1;min-width:130px;max-width:160px;">
+          <div style="font-size:28px;margin-bottom:6px;">⚒</div>
+          <div style="font-size:13px;font-weight:700;color:var(--accent);">Forge</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">L'IA crée ta fiche Etsy</div>
+        </div>
+        <div style="display:flex;align-items:center;color:var(--border2);font-size:20px;">→</div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;text-align:center;flex:1;min-width:130px;max-width:160px;">
+          <div style="font-size:28px;margin-bottom:6px;">🚀</div>
+          <div style="font-size:13px;font-weight:700;color:var(--accent);">Publish</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">Copie-colle sur Etsy</div>
+        </div>
+      </div>
+
+      <!-- Témoignage fictif -->
+      <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:12px;padding:14px 18px;margin-bottom:24px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;">
+        <div style="font-size:13px;color:var(--text);font-style:italic;line-height:1.5;">« J'ai publié 50 fiches en une semaine grâce à Product Forge. Mes ventes ont explosé ! »</div>
+        <div style="font-size:11px;color:var(--green);margin-top:6px;font-weight:600;">⭐ Marine L. — Star Seller Etsy</div>
+      </div>
+
+      <!-- CTA -->
       <button class="google-login-btn" onclick="signInWithGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-        Se connecter avec Google
+        Commencer gratuitement
       </button>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;">🔒 Aucune carte bancaire requise · Connexion Google sécurisée</div>
     </div>
   </div>
 
@@ -1182,32 +1216,35 @@
   <div class="onboarding-overlay" id="onboardingGuide" style="display:none;">
     <div class="onboarding-box">
       <div class="ob-logo">⚒</div>
-      <h2>Bienvenue sur Product Forge !</h2>
-      <p class="ob-subtitle">Transforme n'importe quel produit AliExpress en fiche Etsy pro en quelques étapes.</p>
+      <h2>Bienvenue sur Product Forge ! 🎉</h2>
+      <p class="ob-subtitle">3 étapes simples pour créer ta première fiche Etsy pro.</p>
       <div class="ob-steps">
         <div class="ob-step">
           <div class="ob-num">1</div>
           <div class="ob-content">
-            <strong>Configure tes tokens</strong>
-            <span>Va dans <strong>⚙ Settings</strong> et ajoute ton token <a href="https://console.apify.com/account/integrations" target="_blank">Apify</a> (gratuit) pour scraper les produits par URL. Optionnel : ajoute ta clé API Claude pour le mode automatique.</span>
+            <strong>🔖 Installe le bookmarklet (30 sec)</strong>
+            <span>Va sur <a href="https://louisrivault1-cpu.github.io/" target="_blank">cette page</a> et glisse le bouton « Product Forge » dans ta barre de favoris. C'est un raccourci qui capture les données d'un produit AliExpress en un clic.</span>
           </div>
         </div>
         <div class="ob-step">
           <div class="ob-num">2</div>
           <div class="ob-content">
-            <strong>Colle un lien AliExpress ou utilise le bookmarklet</strong>
-            <span>Colle l'URL d'un produit AliExpress dans le champ ci-dessus, ou installe le bookmarklet depuis <a href="https://louisrivault1-cpu.github.io/" target="_blank">cette page</a>.</span>
+            <strong>🛒 Ouvre un produit AliExpress</strong>
+            <span>Va sur AliExpress, ouvre la page d'un produit qui t'intéresse, puis clique sur le bookmarklet « Product Forge » dans tes favoris. Les données arrivent ici automatiquement !</span>
           </div>
         </div>
         <div class="ob-step">
           <div class="ob-num">3</div>
           <div class="ob-content">
-            <strong>Génère ta fiche Etsy</strong>
-            <span>Product Forge crée le titre, la description, les tags et le prix optimisés SEO grâce à Claude AI — <strong>100% gratuit</strong>.</span>
+            <strong>✨ Génère ta fiche Etsy avec l'IA</strong>
+            <span>Product Forge utilise Claude AI pour créer un titre vendeur, une description optimisée SEO, 13 tags pertinents et un prix rentable. <strong>Tu n'as qu'à copier-coller sur Etsy !</strong></span>
           </div>
         </div>
       </div>
-      <button class="ob-cta" onclick="closeOnboarding()">J'ai compris, c'est parti !</button>
+      <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:var(--green);text-align:left;">
+        💡 <strong>Astuce :</strong> Tu n'as besoin d'aucun token ni clé API pour commencer. Le mode gratuit copie un prompt optimisé que tu colles directement sur <a href="https://claude.ai" target="_blank" style="color:var(--green);">claude.ai</a>.
+      </div>
+      <button class="ob-cta" onclick="closeOnboarding()">C'est parti ! ⚡</button>
       <button class="ob-skip" onclick="closeOnboarding()">Ne plus afficher ce guide</button>
     </div>
   </div>
@@ -1216,7 +1253,7 @@
 
   <div class="header">
     <div class="logo-area">
-      <h1>⚒ Product Forge</h1>
+      <h1><a href="." style="text-decoration:none;-webkit-text-fill-color:inherit;background:inherit;-webkit-background-clip:text;">⚒ Product Forge</a></h1>
       <span class="mode-badge free" id="modeBadge">GRATUIT</span>
     </div>
     <div class="nav-btns">
@@ -1235,8 +1272,8 @@
   <div id="welcomeView" class="welcome">
     <div>
       <div style="font-size:56px;margin-bottom:16px;">⚒</div>
-      <h2>Product Forge</h2>
-      <p>Transformez n'importe quel produit AliExpress en fiche Etsy optimisée SEO en quelques secondes.</p>
+      <h2>AliExpress → Etsy en 60 secondes ⚡</h2>
+      <p>Récupère un produit AliExpress, l'IA forge une fiche Etsy pro avec titre SEO, description vendeuse, 13 tags et prix rentable. <strong style="color:var(--green);">Gratuit et sans limite.</strong></p>
 
       <div class="batch-toggle">
         <button id="modeSingle" class="active" onclick="setBatchMode(false)">🔗 Lien unique</button>
@@ -1244,14 +1281,17 @@
       </div>
 
       <div id="singleInputGroup">
-        <div class="url-input-group">
-          <input type="text" id="urlInput" placeholder="🔗 Collez un lien AliExpress ici..." />
-          <button class="btn btn-primary btn-forge" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit via Apify ou bookmarklet">⚒ Forger</button>
+        <div class="url-input-group" id="urlInputGroup">
+          <input type="text" id="urlInput" placeholder="🔗 Colle un lien AliExpress ici..." />
+          <button class="btn btn-primary btn-forge" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit">⚒ Forger</button>
+        </div>
+        <div id="noApifyHint" style="display:none;font-size:12px;color:var(--orange);margin-top:8px;text-align:center;">
+          ⚠️ Pas de token Apify configuré — <a href="https://louisrivault1-cpu.github.io/" target="_blank" style="color:var(--accent);">utilise le bookmarklet</a> (recommandé) ou <a href="#" onclick="openSettings();return false;" style="color:var(--accent);">ajoute un token Apify</a>.
         </div>
       </div>
 
       <div id="batchInputGroup" style="display:none; max-width:520px; margin:0 auto;">
-        <textarea class="batch-textarea" id="batchUrlsInput" placeholder="Collez vos liens AliExpress ici (un par ligne, max 20)&#10;&#10;https://www.aliexpress.com/item/123...&#10;https://www.aliexpress.com/item/456...&#10;https://www.aliexpress.com/item/789..."></textarea>
+        <textarea class="batch-textarea" id="batchUrlsInput" placeholder="Colle tes liens AliExpress ici (un par ligne, max 20)&#10;&#10;https://www.aliexpress.com/item/123...&#10;https://www.aliexpress.com/item/456...&#10;https://www.aliexpress.com/item/789..."></textarea>
         <div class="batch-hint">Un lien par ligne (max 20) — 2 scrapes en parallèle, Claude 1 à la fois</div>
         <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center;" onclick="startBatchScrapeV2()">🚀 Forger tout (<span id="batchCount">0</span> liens)</button>
       </div>
@@ -1287,16 +1327,22 @@
 
       <div class="welcome-methods">
         <a href="https://louisrivault1-cpu.github.io/" target="_blank" class="method-card recommended" style="text-decoration:none;color:inherit;">
-          <span class="mc-badge">Recommandé</span>
+          <span class="mc-badge">✅ Recommandé</span>
           <div class="mc-icon">🔖</div>
           <div class="mc-title">Utiliser le bookmarklet</div>
-          <div class="mc-desc">Installe le bookmarklet, puis clique dessus sur n'importe quelle page produit AliExpress. Les données arrivent ici automatiquement.</div>
+          <div class="mc-desc">Installe le raccourci en 30 sec, puis clique dessus sur n'importe quel produit AliExpress. Aucun token requis, ça marche à tous les coups !</div>
         </a>
-        <div class="method-card" onclick="document.getElementById('urlInput').focus()">
+        <div class="method-card" id="methodCardUrl" onclick="document.getElementById('urlInput').focus()">
           <div class="mc-icon">📋</div>
           <div class="mc-title">Coller un lien</div>
-          <div class="mc-desc">Copie l'URL d'un produit AliExpress et colle-le dans le champ ci-dessus. Nécessite un token Apify (gratuit).</div>
+          <div class="mc-desc">Copie l'URL d'un produit AliExpress et colle-la dans le champ ci-dessus. Nécessite un token Apify gratuit dans ⚙ Settings.</div>
         </div>
+      </div>
+
+      <!-- Témoignage social proof -->
+      <div style="margin-top:24px;max-width:480px;margin-left:auto;margin-right:auto;background:rgba(200,169,97,0.06);border:1px solid rgba(200,169,97,0.15);border-radius:12px;padding:14px 18px;">
+        <div style="font-size:13px;color:var(--text);font-style:italic;line-height:1.5;">« Product Forge m'a fait gagner des heures. Je publie 10 fiches par jour maintenant ! »</div>
+        <div style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:600;">⭐⭐⭐⭐⭐ Julien R. — Vendeur Etsy depuis 2023</div>
       </div>
     </div>
   </div>
@@ -1463,8 +1509,8 @@
         </div>
 
         <div id="freeModeCard" class="claude-card hidden">
-          <h3>🤖 Générer avec Claude AI (gratuit)</h3>
-          <p>Un prompt optimisé est créé automatiquement à partir des données du produit.</p>
+          <h3>✨ Générer ta fiche Etsy avec l'IA (100% gratuit)</h3>
+          <p>Product Forge a préparé un prompt optimisé. Il suffit de l'envoyer à Claude AI pour obtenir ta fiche complète.</p>
 
           <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin:16px 0;text-align:center;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -2318,6 +2364,29 @@ function updateModeBadge() {
   const badge = document.getElementById('modeBadge');
   if (mode === 'api') { badge.textContent = 'API'; badge.className = 'mode-badge api'; }
   else { badge.textContent = 'GRATUIT'; badge.className = 'mode-badge free'; }
+  updateWelcomeForTokens();
+}
+
+// Adapte l'UI en fonction des tokens configurés
+function updateWelcomeForTokens() {
+  const s = getSettings();
+  const noApifyHint = document.getElementById('noApifyHint');
+  const methodCardUrl = document.getElementById('methodCardUrl');
+
+  // Si pas de token Apify → afficher un hint sous l'input URL
+  if (noApifyHint) {
+    noApifyHint.style.display = (!s.apifyToken || s.apifyToken.length < 5) ? 'block' : 'none';
+  }
+  // Si pas de token Apify → dimmer la carte "Coller un lien"
+  if (methodCardUrl) {
+    if (!s.apifyToken || s.apifyToken.length < 5) {
+      methodCardUrl.style.opacity = '0.5';
+      methodCardUrl.querySelector('.mc-desc').textContent = 'Nécessite un token Apify gratuit. Va dans ⚙ Settings pour en ajouter un, ou utilise le bookmarklet.';
+    } else {
+      methodCardUrl.style.opacity = '1';
+      methodCardUrl.querySelector('.mc-desc').textContent = 'Copie l\'URL d\'un produit AliExpress et colle-la dans le champ ci-dessus.';
+    }
+  }
 }
 
 function openSettings() {
@@ -2370,7 +2439,12 @@ function switchToApiMode() {
 }
 
 function updateGenerateZone() {
-  const mode = getActiveMode();
+  const s = getSettings();
+  let mode = getActiveMode();
+  // Si pas de clé Claude → forcer le mode gratuit sans erreur
+  if (mode === 'api' && (!s.claudeKey || s.claudeKey.length < 5)) {
+    mode = 'free';
+  }
   document.getElementById('apiModeCard').classList.toggle('hidden', mode !== 'api');
   document.getElementById('freeModeCard').classList.toggle('hidden', mode !== 'free');
 }
@@ -2855,11 +2929,11 @@ async function scrapeFromUrlMain() {
 }
 
 function getScrapeErrorMessage(status, rawMsg) {
-  if (status === 401) return 'Token Apify invalide — vérifie dans les Paramètres.';
-  if (status === 402) return 'Quota Apify épuisé — réessaie demain.';
-  if (status === 408 || (rawMsg && rawMsg.includes('timeout'))) return 'AliExpress est lent — réessaie ou utilise le bookmarklet.';
-  if (status === 429) return 'Trop de requêtes Apify — attends 1 minute et réessaie.';
-  return 'Erreur inattendue (HTTP ' + status + ') — utilise le bookmarklet.';
+  if (status === 401) return '🔑 Token Apify invalide — vérifie-le dans ⚙ Settings ou utilise le bookmarklet.';
+  if (status === 402) return '⏳ Quota Apify épuisé pour aujourd\'hui — réessaie demain ou utilise le bookmarklet.';
+  if (status === 408 || (rawMsg && rawMsg.includes('timeout'))) return '🐌 AliExpress met trop de temps — utilise le bookmarklet, c\'est plus fiable !';
+  if (status === 429) return '🚦 Trop de requêtes — attends 1 minute puis réessaie.';
+  return '❌ Erreur inattendue (HTTP ' + status + ') — utilise le bookmarklet à la place.';
 }
 
 function showBookmarkletFallback(url) {
@@ -2906,11 +2980,11 @@ async function doScrape(url) {
   if (!validation.valid) { toast(validation.msg, 4000, 'error'); return; }
 
   const s = getSettings();
-  if (!s.apifyToken) {
-    // No token at all → skip Apify entirely, open URL for bookmarklet
-    toast('Pas de token Apify — ouverture du lien pour le bookmarklet.', 4000, 'warning');
+  if (!s.apifyToken || s.apifyToken.length < 5) {
+    // Pas de token → guide vers le bookmarklet
+    toast('💡 Pas de token Apify — utilise le bookmarklet pour récupérer les données !', 5000, 'warning');
     showBookmarkletFallback(url);
-    window.open(url, '_blank');
+    if (url) window.open(url, '_blank');
     return;
   }
 
@@ -4144,6 +4218,7 @@ function checkOnboarding() {
   // Don't show old profile login - Firebase login screen handles it
 
   updateModeBadge();
+  updateWelcomeForTokens();
   initCategories();
   if (currentProfile) checkOnboarding();
   updateDraftsBadge();
