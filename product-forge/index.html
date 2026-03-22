@@ -4231,38 +4231,67 @@ function checkOnboarding() {
     if (e.key === 'Enter') createOrLoginProfile();
   });
 
-  // Check hash data from bookmarklet
+  // Check hash data from bookmarklet (3 modes)
   if (window.location.hash) {
     const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const dataParam = params.get('data');
-    if (dataParam) {
-      try {
-        const jsonStr = decodeURIComponent(escape(atob(dataParam)));
-        const data = JSON.parse(jsonStr);
-        history.replaceState(null,'',window.location.pathname);
-        // CRITICAL: hide Firebase login screen so user can see the data
-        const loginScreen = document.getElementById('firebaseLoginScreen');
-        if (loginScreen) loginScreen.style.display = 'none';
-        forgeFromBookmarklet(data);
-        return;
-      } catch(e) { console.error('[PF] Hash parse error:',e); }
+
+    // Method 1: #data=BASE64 (small payloads)
+    if (hash.startsWith('data=')) {
+      const dataParam = hash.substring(5);
+      if (dataParam) {
+        try {
+          const jsonStr = decodeURIComponent(escape(atob(dataParam)));
+          const data = JSON.parse(jsonStr);
+          history.replaceState(null,'',window.location.pathname);
+          const loginScreen = document.getElementById('firebaseLoginScreen');
+          if (loginScreen) loginScreen.style.display = 'none';
+          console.log('[PF] Received bookmarklet data via hash (base64)');
+          forgeFromBookmarklet(data);
+          return;
+        } catch(e) { console.error('[PF] Hash parse error:',e); }
+      }
+    }
+
+    // Method 2: #fromStorage (large payloads via localStorage bridge)
+    if (hash === 'fromStorage') {
+      history.replaceState(null, '', window.location.pathname);
+      var bkmData = localStorage.getItem('pf_bookmarklet_data') || localStorage.getItem('pf_incoming_data');
+      if (bkmData) {
+        try {
+          var data = JSON.parse(bkmData);
+          localStorage.removeItem('pf_bookmarklet_data');
+          localStorage.removeItem('pf_incoming_data');
+          if (data && (data.title || data.images)) {
+            const loginScreen = document.getElementById('firebaseLoginScreen');
+            if (loginScreen) loginScreen.style.display = 'none';
+            console.log('[PF] Received bookmarklet data via localStorage (#fromStorage)');
+            forgeFromBookmarklet(data);
+            return;
+          }
+        } catch(e) { console.error('[PF] localStorage #fromStorage parse error:', e); }
+      }
+      // localStorage may be empty (cross-origin), fall through to postMessage
+      console.log('[PF] #fromStorage: localStorage empty, waiting for postMessage...');
     }
   }
 
-  // Check localStorage fallback from bookmarklet (same origin)
-  const lsData = localStorage.getItem('pf_incoming_data');
-  if (lsData) {
-    try {
-      const data = JSON.parse(lsData);
-      localStorage.removeItem('pf_incoming_data');
-      if (data && (data.title || data.images)) {
-        const loginScreen = document.getElementById('firebaseLoginScreen');
-        if (loginScreen) loginScreen.style.display = 'none';
-        forgeFromBookmarklet(data);
-        return;
-      }
-    } catch(e) { console.error('[PF] localStorage parse error:', e); }
+  // Check localStorage fallback from bookmarklet (same origin, both keys)
+  var lsKeys = ['pf_bookmarklet_data', 'pf_incoming_data'];
+  for (var lki = 0; lki < lsKeys.length; lki++) {
+    var lsData = localStorage.getItem(lsKeys[lki]);
+    if (lsData) {
+      try {
+        var data = JSON.parse(lsData);
+        localStorage.removeItem(lsKeys[lki]);
+        if (data && (data.title || data.images)) {
+          const loginScreen = document.getElementById('firebaseLoginScreen');
+          if (loginScreen) loginScreen.style.display = 'none';
+          console.log('[PF] Received bookmarklet data via localStorage key: ' + lsKeys[lki]);
+          forgeFromBookmarklet(data);
+          return;
+        }
+      } catch(e) { console.error('[PF] localStorage parse error:', e); }
+    }
   }
 
   window.addEventListener('message', function(event) {
@@ -4307,24 +4336,29 @@ window.addEventListener('hashchange', function() {
   }
 });
 
-// Also periodically check localStorage for bookmarklet data (cross-tab)
+// Also periodically check localStorage for bookmarklet data (cross-tab, both keys)
 (function pollLocalStorage() {
   let checks = 0;
+  const keys = ['pf_bookmarklet_data', 'pf_incoming_data'];
   const iv = setInterval(function() {
     checks++;
     if (checks > 60) { clearInterval(iv); return; } // Stop after 30s
-    const d = localStorage.getItem('pf_incoming_data');
-    if (d) {
-      try {
-        const data = JSON.parse(d);
-        localStorage.removeItem('pf_incoming_data');
-        if (data && (data.title || data.images)) {
-          const ls = document.getElementById('firebaseLoginScreen');
-          if (ls) ls.style.display = 'none';
-          forgeFromBookmarklet(data);
-          clearInterval(iv);
-        }
-      } catch(e) { localStorage.removeItem('pf_incoming_data'); }
+    for (var ki = 0; ki < keys.length; ki++) {
+      const d = localStorage.getItem(keys[ki]);
+      if (d) {
+        try {
+          const data = JSON.parse(d);
+          localStorage.removeItem(keys[ki]);
+          if (data && (data.title || data.images)) {
+            const ls = document.getElementById('firebaseLoginScreen');
+            if (ls) ls.style.display = 'none';
+            console.log('[PF] Poll: received data via localStorage key: ' + keys[ki]);
+            forgeFromBookmarklet(data);
+            clearInterval(iv);
+            return;
+          }
+        } catch(e) { localStorage.removeItem(keys[ki]); }
+      }
     }
   }, 500);
 })();
