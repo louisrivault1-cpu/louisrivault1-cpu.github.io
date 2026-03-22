@@ -2515,14 +2515,14 @@ function setLoadingProgress(pct) {
 // === URL VALIDATION ===
 function isValidAliExpressUrl(url) {
   if (!url || typeof url !== 'string') return false;
-  const pattern = /^https?:\/\/([\w-]+\.)*(aliexpress|ali)\.(com|us|ru)(\/.*)?$/i;
+  const pattern = /^https?:\/\/([\w-]+\.)*(aliexpress|ali)\.\w{2,}(\/.*)?$/i;
   return pattern.test(url.trim());
 }
 
 function isValidAliExpressProductUrl(url) {
   if (!url || typeof url !== 'string') return false;
   // Must contain /item/ to be an actual product page
-  const pattern = /^https?:\/\/([\w-]+\.)*(aliexpress|ali)\.(com|us|ru)\/item\/\d+/i;
+  const pattern = /^https?:\/\/([\w-]+\.)*(aliexpress|ali)\.\w{2,}\/item\/\d+/i;
   return pattern.test(url.trim());
 }
 
@@ -4231,6 +4231,7 @@ function checkOnboarding() {
     if (e.key === 'Enter') createOrLoginProfile();
   });
 
+  // Check hash data from bookmarklet
   if (window.location.hash) {
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
@@ -4240,10 +4241,28 @@ function checkOnboarding() {
         const jsonStr = decodeURIComponent(escape(atob(dataParam)));
         const data = JSON.parse(jsonStr);
         history.replaceState(null,'',window.location.pathname);
+        // CRITICAL: hide Firebase login screen so user can see the data
+        const loginScreen = document.getElementById('firebaseLoginScreen');
+        if (loginScreen) loginScreen.style.display = 'none';
         forgeFromBookmarklet(data);
         return;
       } catch(e) { console.error('[PF] Hash parse error:',e); }
     }
+  }
+
+  // Check localStorage fallback from bookmarklet (same origin)
+  const lsData = localStorage.getItem('pf_incoming_data');
+  if (lsData) {
+    try {
+      const data = JSON.parse(lsData);
+      localStorage.removeItem('pf_incoming_data');
+      if (data && (data.title || data.images)) {
+        const loginScreen = document.getElementById('firebaseLoginScreen');
+        if (loginScreen) loginScreen.style.display = 'none';
+        forgeFromBookmarklet(data);
+        return;
+      }
+    } catch(e) { console.error('[PF] localStorage parse error:', e); }
   }
 
   window.addEventListener('message', function(event) {
@@ -4251,16 +4270,63 @@ function checkOnboarding() {
       if (event.source) {
         event.source.postMessage({ type: 'productforge-ack' }, event.origin || '*');
       }
+      // Hide login screen for bookmarklet data
+      const ls = document.getElementById('firebaseLoginScreen');
+      if (ls) ls.style.display = 'none';
       forgeFromBookmarklet(event.data.product);
     }
   });
 
   const stored = sessionStorage.getItem('pf_incoming_data');
   if (stored) {
-    try { const data=JSON.parse(stored); sessionStorage.removeItem('pf_incoming_data'); forgeFromBookmarklet(data); return; } catch(e) {}
+    try {
+      const data=JSON.parse(stored);
+      sessionStorage.removeItem('pf_incoming_data');
+      const ls2 = document.getElementById('firebaseLoginScreen');
+      if (ls2) ls2.style.display = 'none';
+      forgeFromBookmarklet(data);
+      return;
+    } catch(e) {}
   }
 
   console.log('[Product Forge] Ready. Mode: '+getActiveMode());
+})();
+
+// Listen for hashchange (bookmarklet may open page then set hash)
+window.addEventListener('hashchange', function() {
+  if (window.location.hash && window.location.hash.startsWith('#data=')) {
+    try {
+      const b64 = window.location.hash.substring(6);
+      const jsonStr = decodeURIComponent(escape(atob(b64)));
+      const data = JSON.parse(jsonStr);
+      history.replaceState(null, '', window.location.pathname);
+      const ls = document.getElementById('firebaseLoginScreen');
+      if (ls) ls.style.display = 'none';
+      forgeFromBookmarklet(data);
+    } catch(e) { console.error('[PF] hashchange parse error:', e); }
+  }
+});
+
+// Also periodically check localStorage for bookmarklet data (cross-tab)
+(function pollLocalStorage() {
+  let checks = 0;
+  const iv = setInterval(function() {
+    checks++;
+    if (checks > 60) { clearInterval(iv); return; } // Stop after 30s
+    const d = localStorage.getItem('pf_incoming_data');
+    if (d) {
+      try {
+        const data = JSON.parse(d);
+        localStorage.removeItem('pf_incoming_data');
+        if (data && (data.title || data.images)) {
+          const ls = document.getElementById('firebaseLoginScreen');
+          if (ls) ls.style.display = 'none';
+          forgeFromBookmarklet(data);
+          clearInterval(iv);
+        }
+      } catch(e) { localStorage.removeItem('pf_incoming_data'); }
+    }
+  }, 500);
 })();
 
 // ===== BATCH MODE V2 =====

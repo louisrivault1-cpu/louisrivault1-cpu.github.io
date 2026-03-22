@@ -2,7 +2,7 @@
 (function(){
 try{
 var h=location.hostname.toLowerCase();
-if(!/aliexpress\.(com|us|ru)/i.test(h)){alert('Product Forge : ouvrez une page produit AliExpress.');return}
+if(!/aliexpress/i.test(h)){alert('Product Forge : ouvrez une page produit AliExpress.');return}
 
 var R={source:'aliexpress',url:location.href,domain:h,scrapedAt:new Date().toISOString()};
 
@@ -45,7 +45,15 @@ if(!R.title){
   var og=document.querySelector('meta[property="og:title"]');
   if(og) R.title=og.content||'';
 }
+if(!R.title){
+  var metas=['og:description','description','twitter:title'];
+  for(var mi=0;mi<metas.length;mi++){
+    var me=document.querySelector('meta[property="'+metas[mi]+'"],meta[name="'+metas[mi]+'"]');
+    if(me&&me.content&&me.content.length>15){R.title=me.content.split(/[-–|]/)[0].trim();break}
+  }
+}
 if(!R.title) R.title=document.title.replace(/\s*[-–|].*aliexpress.*/i,'').trim();
+if(!R.title) R.title=document.title.replace(/\s*[-–|].*/,'').trim();
 
 /* ── Price ── */
 R.price='';R.originalPrice='';
@@ -65,9 +73,22 @@ if(!R.originalPrice){
 }
 /* Regex fallback for price */
 if(!R.price){
-  var body=document.body.innerText.substring(0,5000);
+  var body=document.body.innerText.substring(0,8000);
   var pm=body.match(/(?:EUR|USD|US\s?\$|\$|€)\s*\d+[.,]\d{2}/);
   if(pm) R.price=pm[0];
+}
+/* Additional price fallbacks */
+if(!R.price){
+  var priceEls=document.querySelectorAll('[class*="Price"],[class*="price"],[data-price]');
+  for(var pi=0;pi<priceEls.length&&!R.price;pi++){
+    var ptxt=priceEls[pi].textContent.trim();
+    var pm2=ptxt.match(/(\d+[.,]\d{2})/);
+    if(pm2&&parseFloat(pm2[1].replace(',','.'))>0.01) R.price=ptxt;
+  }
+}
+if(!R.price){
+  var og2=document.querySelector('meta[property="product:price:amount"],meta[property="og:price:amount"]');
+  if(og2) R.price=og2.content;
 }
 
 /* ── Images ── */
@@ -76,7 +97,7 @@ function addI(u){
   if(!u||R.images.length>=20)return;
   u=u.replace(/^\/\//,'https://');
   if(!/^https?/.test(u))return;
-  if(u.indexOf('alicdn.com')<0&&u.indexOf('aliexpress-media.com')<0)return;
+  if(u.indexOf('alicdn.com')<0&&u.indexOf('aliexpress-media.com')<0&&u.indexOf('ae01.')<0&&u.indexOf('ae04.')<0)return;
   var c=u.replace(/_\d+x\d+\.\w+$/,'').split('?')[0];
   if(c.length<30||seen[c])return;
   seen[c]=1;R.images.push(c);
@@ -86,7 +107,27 @@ if(D){
 }
 document.querySelectorAll('[class*="slider"] img,[class*="gallery"] img,[class*="image-view"] img,[class*="main-image"] img').forEach(function(img){addI(img.getAttribute('data-src')||img.src)});
 if(R.images.length<3){
-  document.querySelectorAll('img[src*="alicdn.com"],img[data-src*="alicdn.com"],img[src*="aliexpress-media"],img[data-src*="aliexpress-media"]').forEach(function(img){addI(img.getAttribute('data-src')||img.src)});
+  document.querySelectorAll('img[src*="alicdn.com"],img[data-src*="alicdn.com"],img[src*="aliexpress-media"],img[data-src*="aliexpress-media"],img[src*="ae01"],img[src*="ae04"]').forEach(function(img){addI(img.getAttribute('data-src')||img.src)});
+}
+/* Fallback: og:image */
+if(R.images.length===0){
+  var ogImg=document.querySelector('meta[property="og:image"]');
+  if(ogImg&&ogImg.content) addI(ogImg.content);
+}
+/* Fallback: srcset and picture source */
+if(R.images.length<3){
+  document.querySelectorAll('source[srcset*="alicdn"],img[srcset*="alicdn"]').forEach(function(el){
+    var ss=el.getAttribute('srcset')||'';
+    var parts=ss.split(',');
+    for(var si=0;si<parts.length;si++){var u=parts[si].trim().split(/\s/)[0];addI(u)}
+  });
+}
+/* Fallback: background-image */
+if(R.images.length<3){
+  document.querySelectorAll('[style*="alicdn"],[style*="ae01"]').forEach(function(el){
+    var bgm=(el.style.backgroundImage||'').match(/url\(["']?(https?[^"')]+)/);
+    if(bgm) addI(bgm[1]);
+  });
 }
 
 /* ── Specs ── */
@@ -165,9 +206,13 @@ var FORGE='https://louisrivault1-cpu.github.io/product-forge/';
 var json=JSON.stringify(R);
 var enc=btoa(unescape(encodeURIComponent(json)));
 
+/* Also store in localStorage as fallback (same origin can read it) */
+try{localStorage.setItem('pf_incoming_data',json)}catch(e){}
+
 if(enc.length<32000){
   window.open(FORGE+'#data='+enc,'_blank');
 }else{
+  /* Data too big for hash — use postMessage + localStorage fallback */
   var fw=window.open(FORGE,'_blank');
   var att=0;
   var si=setInterval(function(){att++;if(att>30){clearInterval(si);return}try{fw.postMessage({type:'productforge-data',product:R},'*')}catch(e){}},500);
