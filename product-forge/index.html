@@ -103,13 +103,13 @@
 
     .data-card {
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      border: 1px solid rgba(200,169,97,0.15);
+      border-radius: 16px;
       padding: 20px;
       margin-bottom: 14px;
-      transition: border-color 0.2s;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
     }
-    .data-card:hover { border-color: var(--border2); }
+    .data-card:hover { border-color: rgba(200,169,97,0.3); box-shadow: 0 4px 20px rgba(200,169,97,0.06); transform: translateY(-1px); }
     .data-card h3 { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
     .data-card .value { font-size: 15px; font-weight: 600; }
     .data-card .price { color: var(--accent); font-size: 22px; font-weight: 700; }
@@ -198,7 +198,8 @@
 
     .url-input-group { display: flex; gap: 8px; max-width: 520px; margin: 0 auto; }
     .url-input-group input { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 14px; font-family: inherit; }
-    .url-input-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,97,0.1); }
+    .url-input-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(200,169,97,0.15), 0 0 20px rgba(200,169,97,0.12), 0 0 40px rgba(200,169,97,0.06); }
+    .url-input-group input { transition: border-color 0.3s, box-shadow 0.3s; }
 
     .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 900; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
     .modal-backdrop.active { display: flex; }
@@ -218,8 +219,8 @@
     .mode-option .mode-name { font-size: 13px; font-weight: 600; }
     .mode-option .mode-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--accent); color: var(--accent); padding: 12px 24px; border-radius: 12px; font-weight: 600; z-index: 2000; transform: translateY(100px); opacity: 0; transition: all 0.3s; font-size: 13px; display: flex; align-items: center; gap: 8px; max-width: 420px; }
-    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: rgba(19,19,24,0.92); backdrop-filter: blur(12px); border: 1px solid var(--accent); color: var(--accent); padding: 12px 24px; border-radius: 12px; font-weight: 600; z-index: 2000; transform: translateX(120%); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; font-size: 13px; display: flex; align-items: center; gap: 8px; max-width: 420px; }
+    .toast.show { transform: translateX(0); opacity: 1; }
     .toast.toast-error { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.08); }
     .toast.toast-success { border-color: var(--green); color: var(--green); background: rgba(74,222,128,0.08); }
     .toast.toast-warning { border-color: var(--orange); color: var(--orange); background: rgba(245,158,11,0.08); }
@@ -772,12 +773,9 @@
     .data-card { animation: fadeSlideUp 0.35s ease-out both; }
 
     /* === CYCLE 15: Scale on click buttons === */
-    .btn:active:not(:disabled) { transform: scale(0.96) !important; transition: transform 0.1s ease; }
+    .btn:active:not(:disabled) { transform: scale(0.97) !important; transition: transform 0.08s ease !important; }
 
-    /* === CYCLE 15: Toast entrance/exit animations === */
-    .toast {
-      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
-    }
+    /* === CYCLE 15: Toast entrance/exit animations — now handled in main .toast declaration === */
 
     /* === CYCLE 15: Progress bar for scraping/generation === */
     .progress-bar-container {
@@ -857,6 +855,136 @@
     .pixa-option { display: flex; align-items: center; gap: 8px; margin-right: 12px; }
     .pixa-option input[type="checkbox"] { cursor: pointer; }
     .pixa-option label { cursor: pointer; font-size: 12px; margin: 0; }
+
+    /* === ENHANCED: Animated gradient Forger button === */
+    .btn-forge {
+      background: linear-gradient(135deg, var(--accent), var(--accent2), #e8d5a3, var(--accent));
+      background-size: 300% 300%;
+      animation: forgeGradient 3s ease infinite;
+      color: #0a0a0f;
+      font-weight: 700;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-forge::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      transform: rotate(45deg);
+      animation: forgeShine 4s ease-in-out infinite;
+    }
+    @keyframes forgeGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes forgeShine {
+      0%, 100% { transform: translateX(-100%) rotate(45deg); }
+      50% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    /* === ENHANCED: Tag shimmer when generated === */
+    @keyframes tagShimmerIn {
+      0% { opacity: 0; transform: scale(0.85); filter: brightness(1.8); }
+      50% { filter: brightness(1.4); }
+      100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+    }
+    .tag-badge.tag-new { animation: tagShimmerIn 0.5s ease-out both; }
+
+    /* === ENHANCED: View transition (welcome → result) === */
+    .view-fade-out {
+      animation: viewFadeOut 0.35s ease-in forwards;
+    }
+    .view-fade-in {
+      animation: viewFadeIn 0.4s ease-out both;
+    }
+    @keyframes viewFadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.97); }
+    }
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === ENHANCED: Character counter gradient colors === */
+    .char-counter { transition: color 0.3s ease; }
+    .char-counter.safe { color: var(--green); }
+    .char-counter.mid { color: var(--orange); }
+    .char-counter.danger { color: var(--red); font-weight: 600; }
+
+    /* === ENHANCED: Section fade-in when data arrives === */
+    @keyframes sectionReveal {
+      from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    .section-reveal { animation: sectionReveal 0.5s ease-out both; }
+    .section-reveal-d1 { animation-delay: 0.1s; }
+    .section-reveal-d2 { animation-delay: 0.2s; }
+    .section-reveal-d3 { animation-delay: 0.3s; }
+    .section-reveal-d4 { animation-delay: 0.4s; }
+
+    /* === ENHANCED: Glassmorphism on modals === */
+    .modal {
+      background: rgba(19,19,24,0.92);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid rgba(200,169,97,0.15);
+      border-radius: 20px;
+    }
+    .loading-box {
+      background: rgba(19,19,24,0.92);
+      backdrop-filter: blur(20px) saturate(1.2);
+      -webkit-backdrop-filter: blur(20px) saturate(1.2);
+      border: 1px solid rgba(200,169,97,0.15);
+    }
+
+    /* === ENHANCED: Progress bar with percentage label === */
+    .progress-bar-container { position: relative; height: 6px; }
+    .progress-pct {
+      position: absolute; top: -20px; right: 0;
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      transition: opacity 0.3s;
+    }
+
+    /* === ENHANCED: Etsy section inputs focus glow === */
+    .etsy-section textarea:focus, .etsy-section input:focus, .etsy-section select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(200,169,97,0.12), 0 0 16px rgba(200,169,97,0.08);
+    }
+
+    /* === ENHANCED: Method cards hover === */
+    .method-card {
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .method-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(200,169,97,0.1);
+    }
+
+    /* === ENHANCED: Skeleton loader pulse === */
+    .skeleton-pulse {
+      animation: skeletonPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes skeletonPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    /* === ENHANCED: Card border-radius consistency === */
+    .method-card { border-radius: 16px; }
+    .claude-card { border-radius: 16px; }
+    .onboarding-box { border-radius: 24px; }
+    .draft-item { border-radius: 16px; }
+    .batch-item { border-radius: 16px; }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -955,7 +1083,7 @@
       <div id="singleInputGroup">
         <div class="url-input-group">
           <input type="text" id="urlInput" placeholder="🔗 Collez un lien AliExpress ici..." />
-          <button class="btn btn-primary" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit via Apify ou bookmarklet">Forger</button>
+          <button class="btn btn-primary btn-forge" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit via Apify ou bookmarklet">⚒ Forger</button>
         </div>
       </div>
 
@@ -1340,6 +1468,7 @@
         </div>
       </div>
       <div class="progress-bar-container">
+        <span class="progress-pct" id="loadingProgressPct" style="opacity:0;">0%</span>
         <div class="progress-bar-fill indeterminate" id="loadingProgressBar"></div>
       </div>
       <div style="font-weight:600;margin-bottom:8px;margin-top:16px;" id="loadingTitle">Génération en cours...</div>
@@ -2012,10 +2141,14 @@ function hideLoading() {
   document.getElementById('loadingOverlay').classList.add('hidden');
   const bar = document.getElementById('loadingProgressBar');
   if (bar) { bar.classList.add('indeterminate'); bar.style.width = '0%'; }
+  const pctEl = document.getElementById('loadingProgressPct');
+  if (pctEl) { pctEl.style.opacity = '0'; pctEl.textContent = '0%'; }
 }
 function setLoadingProgress(pct) {
   const bar = document.getElementById('loadingProgressBar');
+  const pctEl = document.getElementById('loadingProgressPct');
   if (bar) { bar.classList.remove('indeterminate'); bar.style.width = Math.min(100, pct) + '%'; }
+  if (pctEl) { pctEl.textContent = Math.round(Math.min(100, pct)) + '%'; pctEl.style.opacity = '1'; }
 }
 
 // === URL VALIDATION ===
@@ -2676,10 +2809,17 @@ async function doScrape(url) {
 }
 
 function displaySourceData(data) {
-  document.getElementById('welcomeView').classList.add('hidden');
+  const welcomeEl = document.getElementById('welcomeView');
+  welcomeEl.classList.add('view-fade-out');
+  setTimeout(() => {
+    welcomeEl.classList.add('hidden');
+    welcomeEl.classList.remove('view-fade-out');
+  }, 350);
   const mainView = document.getElementById('mainView');
-  mainView.classList.remove('hidden');
-  mainView.classList.add('anim-fade-in');
+  setTimeout(() => {
+    mainView.classList.remove('hidden');
+    mainView.classList.add('view-fade-in');
+  }, 300);
   document.getElementById('srcTitle').textContent = data.title||'Sans titre';
   document.getElementById('srcPrice').textContent = data.price||'—';
   document.getElementById('srcOrigPrice').textContent = data.originalPrice||'';
@@ -2870,9 +3010,11 @@ function updateTitleCounter() {
   const title = document.getElementById('etsyTitle').value;
   const counter = document.getElementById('titleCounter');
   counter.textContent = title.length + '/140';
-  if (title.length >= 140) counter.className = 'char-counter danger';
-  else if (title.length >= 120) counter.className = 'char-counter warning';
-  else counter.className = 'char-counter';
+  const len = title.length;
+  if (len >= 135) { counter.className = 'char-counter danger'; }
+  else if (len >= 120) { counter.className = 'char-counter mid'; }
+  else if (len >= 80) { counter.className = 'char-counter safe'; }
+  else { counter.className = 'char-counter'; }
 }
 
 function updateTagsDisplay() {
@@ -2891,8 +3033,9 @@ function updateTagsDisplay() {
   container.className = 'tags-display';
   tags.forEach((tag, idx) => {
     const badge = document.createElement('div');
-    badge.className = 'tag-badge tag-badge-interactive';
+    badge.className = 'tag-badge tag-badge-interactive tag-new';
     badge.style.cursor = 'pointer';
+    badge.style.animationDelay = (idx * 0.06) + 's';
     badge.title = 'Cliquer pour copier, X pour supprimer';
     const chars = tag.length;
     const charSpan = document.createElement('span');
@@ -2950,7 +3093,12 @@ function updateTagsDisplay() {
 
 function displayEtsyListing(listing) {
   document.getElementById('generateZone').classList.add('hidden');
-  document.getElementById('etsyOutput').classList.remove('hidden');
+  const etsyOut = document.getElementById('etsyOutput');
+  etsyOut.classList.remove('hidden');
+  etsyOut.classList.add('section-reveal');
+  // Add staggered reveal to child sections
+  const sections = etsyOut.querySelectorAll('.etsy-section, .data-card, .etsy-preview-label, .etsy-preview-card');
+  sections.forEach((s, i) => { s.classList.add('section-reveal', 'section-reveal-d' + Math.min(i, 4)); });
 
   // Handle price_eur (new) or sellPrice (legacy)
   const priceVal = listing.price_eur || listing.sellPrice || '';
