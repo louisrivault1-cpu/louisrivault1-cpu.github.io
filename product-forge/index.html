@@ -2473,7 +2473,8 @@ function buildEtsyPrompt(product) {
   const cat = CATEGORIES[selectedCategory] || CATEGORIES['Autre'];
   const specs = (product.specs||[]).map(s => `  - ${s.name}: ${s.value}`).join('\n');
   const variants = (product.variants||[]).map(v => {
-    const opts = (v.options||[]).map(o => o.name||o).join(', ');
+    if (typeof v === 'string') return `  - ${v}`;
+    const opts = Array.isArray(v.options) ? v.options.map(o => typeof o === 'string' ? o : (o.name||o.value||o)).join(', ') : (v.value||v.name||'');
     return `  - ${v.name||'Option'}: ${opts}`;
   }).join('\n');
   const nbImages = (product.images||[]).length;
@@ -3023,12 +3024,17 @@ async function doScrape(url) {
       const isBlocked = item.blocked === true || item.error;
       const titleLooksBlocked = !item.title || /^aliexpress$/i.test((item.title||'').trim());
       const priceIsEmpty = !item.price || item.price === '0' || item.price === '';
-      const imagesAreBogus = !item.images || item.images.length < 2 ||
-        (item.images.length > 0 && item.images.every(u => /\/(\d+)x(\d+)\./.test(u) &&
-          parseInt(u.match(/\/(\d+)x(\d+)\./)?.[1]||'999') < 100));
+      // Improved: filter non-product images (logos, icons, tiny images, /tfs/ path = static assets)
+      const realImages = (item.images||[]).filter(u => {
+        if (/\/(tfs|assets|icons?)\//i.test(u)) return false;
+        const dims = u.match(/[-_/](\d+)x(\d+)[._]/);
+        if (dims && (parseInt(dims[1]) < 200 || parseInt(dims[2]) < 200)) return false;
+        return true;
+      });
+      const imagesAreBogus = realImages.length < 2;
 
-      if (isBlocked || (titleLooksBlocked && priceIsEmpty && imagesAreBogus)) {
-        console.warn('[PF] Apify returned blocked/empty data:', {title: item.title, price: item.price, images: item.images?.length});
+      if (isBlocked || (titleLooksBlocked && priceIsEmpty) || (titleLooksBlocked && imagesAreBogus) || (priceIsEmpty && imagesAreBogus)) {
+        console.warn('[PF] Apify returned blocked/empty data:', {title: item.title, price: item.price, images: item.images?.length, realImages: realImages.length});
         throw { message: 'AliExpress a bloqué le scraping automatique. Redirection vers le bookmarklet...', useBookmarklet: true };
       }
 
@@ -3040,9 +3046,9 @@ async function doScrape(url) {
         title: item.title||item.name||'',
         price: item.price||item.currentPrice||'',
         originalPrice: item.originalPrice||item.price||'',
-        images: item.images||item.imageUrls||[],
+        images: realImages.length > 0 ? realImages : (item.images||item.imageUrls||[]),
         specs: mappedSpecs,
-        variants: item.variants||item.skus||[],
+        variants: (item.variants||item.skus||[]).map(v => typeof v === 'string' ? {name:'Option', options:[{name:v}]} : v),
         sourceUrl: item.sourceUrl||url,
         stats:{}
       };
