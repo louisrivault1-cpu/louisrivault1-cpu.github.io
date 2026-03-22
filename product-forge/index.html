@@ -985,6 +985,95 @@
     .onboarding-box { border-radius: 24px; }
     .draft-item { border-radius: 16px; }
     .batch-item { border-radius: 16px; }
+
+    /* === ROA Calculator === */
+    .roa-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .roa-section h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .roa-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .roa-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .roa-field input {
+      width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit;
+    }
+    .roa-field input:focus { outline: none; border-color: var(--accent); }
+    .roa-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .roa-stat { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
+    .roa-stat .roa-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .roa-stat .roa-value { font-size: 18px; font-weight: 700; }
+    .roa-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-top: 10px; }
+    .roa-badge.excellent { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+    .roa-badge.correct { background: rgba(245,158,11,0.15); color: var(--orange); border: 1px solid rgba(245,158,11,0.3); }
+    .roa-badge.low { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .roa-tips { margin-top: 10px; padding: 10px 14px; background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); border-radius: 10px; font-size: 12px; color: var(--muted); }
+    .roa-tips strong { color: var(--red); }
+    .roa-tips ul { margin: 6px 0 0 16px; list-style: disc; }
+    .roa-tips li { margin-bottom: 3px; }
+
+    /* === Recommendations Panel === */
+    .reco-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 899; display: none; backdrop-filter: blur(4px); }
+    .reco-overlay.open { display: block; }
+    .reco-panel {
+      position: fixed; top: 0; right: -560px; width: 540px; max-width: 100vw; height: 100vh;
+      background: var(--card); border-left: 1px solid var(--border);
+      z-index: 900; transition: right 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y: auto;
+      padding: 28px; display: flex; flex-direction: column; gap: 20px;
+    }
+    .reco-panel.open { right: 0; }
+    .reco-panel h2 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+    .reco-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .reco-tab { padding: 8px 16px; border-radius: 10px 10px 0 0; font-size: 12px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); font-family: inherit; transition: all 0.2s; }
+    .reco-tab.active { background: var(--accent-glow); color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .reco-tab:hover:not(.active) { color: var(--text); }
+    .reco-content { display: none; animation: fadeInUp 0.3s ease; }
+    .reco-content.active { display: block; }
+
+    .niche-card {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px 16px; margin-bottom: 8px; transition: all 0.2s;
+    }
+    .niche-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .niche-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .niche-title { font-size: 14px; font-weight: 600; }
+    .niche-diff { font-size: 10px; padding: 3px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .niche-diff.easy { background: rgba(74,222,128,0.15); color: var(--green); }
+    .niche-diff.medium { background: rgba(245,158,11,0.15); color: var(--orange); }
+    .niche-diff.hard { background: rgba(239,68,68,0.15); color: var(--red); }
+    .niche-desc { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .niche-margin { font-size: 11px; color: var(--accent); font-weight: 600; }
+
+    .seo-card {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px; margin-bottom: 8px; transition: all 0.2s;
+    }
+    .seo-card:hover { border-color: var(--accent); }
+    .seo-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .seo-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    .comparator-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .comparator-field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+    .comparator-field input {
+      width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit;
+    }
+    .comparator-field input:focus { outline: none; border-color: var(--accent); }
+    .comparator-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+    .comparator-stat { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+    .comparator-stat .comp-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .comparator-stat .comp-value { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .comparator-stat .comp-value.green { color: var(--green); }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 768px) {
+      .roa-grid { grid-template-columns: 1fr; }
+      .roa-results { grid-template-columns: 1fr 1fr; }
+      .reco-panel { width: 100vw; right: -100vw; padding: 20px; }
+      .comparator-row { grid-template-columns: 1fr; }
+      .comparator-results { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .roa-results { grid-template-columns: 1fr; }
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1064,6 +1153,7 @@
         <div class="pb-avatar" id="profileAvatar">?</div>
         <span id="profileName">—</span>
       </div>
+      <button class="btn btn-outline btn-sm" onclick="toggleRecoPanel()" data-tooltip="Niches tendance, SEO & comparateur">💡 Recommandations</button>
       <button class="btn btn-outline btn-sm" onclick="toggleDraftsPanel()" data-tooltip="Voir les fiches sauvegardées" style="position:relative;">📋 Mes fiches <span id="draftsBadge" class="drafts-badge" style="display:none;"></span></button>
       <button class="btn btn-outline btn-sm" onclick="openSettings()" data-tooltip="Configuration API et préférences">⚙ Settings</button>
     </div>
@@ -1193,6 +1283,57 @@
           <div class="big-price" id="calcSellPrice">$0.00</div>
           <div class="profit" id="calcProfit">Profit net: $0.00 par vente</div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="calcBreakdown"></div>
+        </div>
+
+        <div class="roa-section" id="roaSection">
+          <h4>📊 Calculateur ROA (Return On Ad Spend)</h4>
+          <div class="roa-grid">
+            <div class="roa-field">
+              <label>Budget pub mensuel (€)</label>
+              <input type="number" id="roaBudget" step="1" value="50" oninput="recalcROA()" />
+            </div>
+            <div class="roa-field">
+              <label>Coût par clic (€)</label>
+              <input type="number" id="roaCPC" step="0.01" value="0.15" oninput="recalcROA()" />
+            </div>
+            <div class="roa-field">
+              <label>Taux de conversion (%)</label>
+              <input type="number" id="roaConvRate" step="0.1" value="3" oninput="recalcROA()" />
+            </div>
+          </div>
+          <div class="roa-results">
+            <div class="roa-stat">
+              <div class="roa-label">Clics estimés</div>
+              <div class="roa-value" id="roaClicks">333</div>
+            </div>
+            <div class="roa-stat">
+              <div class="roa-label">Ventes estimées</div>
+              <div class="roa-value" id="roaSales">10</div>
+            </div>
+            <div class="roa-stat">
+              <div class="roa-label">CA estimé</div>
+              <div class="roa-value" id="roaRevenue">€0</div>
+            </div>
+            <div class="roa-stat">
+              <div class="roa-label">Profit après pub</div>
+              <div class="roa-value" id="roaProfit" style="color:var(--green);">€0</div>
+            </div>
+            <div class="roa-stat">
+              <div class="roa-label">ROA</div>
+              <div class="roa-value" id="roaValue" style="color:var(--accent);">0x</div>
+            </div>
+            <div class="roa-stat">
+              <div class="roa-label">Seuil rentabilité</div>
+              <div class="roa-value" id="roaBreakeven">0 ventes</div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <span class="roa-badge" id="roaBadge">—</span>
+          </div>
+          <div class="roa-tips" id="roaTips" style="display:none;">
+            <strong>💡 Conseils pour améliorer votre ROA :</strong>
+            <ul id="roaTipsList"></ul>
+          </div>
         </div>
       </div>
 
@@ -3823,7 +3964,7 @@ function debounce(fn, delay) {
 }
 const debouncedUpdateEtsyPreview = debounce(updateEtsyPreview, 250);
 const debouncedRenderDrafts = debounce(renderDrafts, 200);
-const debouncedRecalcPrice = debounce(recalcPrice, 150);
+const debouncedRecalcPrice = debounce(function() { recalcPrice(); if (typeof recalcROA === 'function') recalcROA(); }, 150);
 
 function showOnboarding() {
   document.getElementById('onboardingGuide').style.display = 'flex';
@@ -4376,7 +4517,250 @@ document.addEventListener('change', (e) => {
     savePixaCheckboxes();
   }
 });
+
+// ============================
+// ROA Calculator
+// ============================
+function recalcROA() {
+  const budget = parseFloat(document.getElementById('roaBudget').value) || 0;
+  const cpc = parseFloat(document.getElementById('roaCPC').value) || 0.01;
+  const convRate = parseFloat(document.getElementById('roaConvRate').value) || 0;
+
+  // Get sell price and cost from margin calculator
+  const sellPriceText = document.getElementById('calcSellPrice').textContent.replace('$','');
+  const sellPrice = parseFloat(sellPriceText) || 0;
+  const aliPrice = parseFloat(document.getElementById('calcAliPrice').value) || 0;
+  const shipping = parseFloat(document.getElementById('calcShipping').value) || 0;
+  const cost = aliPrice + shipping;
+
+  // Etsy fees
+  const etsyCommission = sellPrice * 0.065;
+  const processing = sellPrice * 0.03 + 0.25;
+  const listing = 0.20;
+  const totalFees = etsyCommission + processing + listing;
+  const profitPerSale = sellPrice - cost - totalFees;
+
+  const clicks = cpc > 0 ? Math.round(budget / cpc) : 0;
+  const sales = Math.round(clicks * (convRate / 100));
+  const revenue = sales * sellPrice;
+  const totalProfit = revenue - (cost * sales) - budget - (totalFees * sales);
+  const roa = budget > 0 ? revenue / budget : 0;
+  const breakeven = profitPerSale > 0 ? Math.ceil(budget / profitPerSale) : 0;
+
+  document.getElementById('roaClicks').textContent = clicks.toLocaleString('fr-FR');
+  document.getElementById('roaSales').textContent = sales;
+  document.getElementById('roaRevenue').textContent = '€' + revenue.toFixed(2);
+  document.getElementById('roaProfit').textContent = '€' + totalProfit.toFixed(2);
+  document.getElementById('roaProfit').style.color = totalProfit >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('roaValue').textContent = roa.toFixed(1) + 'x';
+  document.getElementById('roaBreakeven').textContent = breakeven + ' ventes';
+
+  const badge = document.getElementById('roaBadge');
+  const tips = document.getElementById('roaTips');
+  const tipsList = document.getElementById('roaTipsList');
+
+  if (roa >= 3) {
+    badge.textContent = '✅ Excellent ROA';
+    badge.className = 'roa-badge excellent';
+    tips.style.display = 'none';
+  } else if (roa >= 2) {
+    badge.textContent = '⚠️ ROA Correct';
+    badge.className = 'roa-badge correct';
+    tips.style.display = 'none';
+  } else {
+    badge.textContent = '❌ À optimiser';
+    badge.className = 'roa-badge low';
+    tips.style.display = 'block';
+    let html = '';
+    if (sellPrice > 0 && sellPrice < cost * 3) html += '<li>Augmentez votre prix de vente (visez ×3 minimum vs coût)</li>';
+    html += '<li>Réduisez le CPC en ciblant des mots-clés longue traîne</li>';
+    html += '<li>Améliorez vos tags SEO pour booster le taux de conversion</li>';
+    if (convRate < 3) html += '<li>Optimisez vos photos et descriptions pour augmenter le taux de conversion</li>';
+    tipsList.innerHTML = html;
+  }
+}
+
+// Trigger ROA recalc when margin calculator changes
+const origRecalcPrice = typeof recalcPrice === 'function' ? recalcPrice : null;
+if (origRecalcPrice) {
+  const _origRecalc = recalcPrice;
+  recalcPrice = function() {
+    _origRecalc.apply(this, arguments);
+    recalcROA();
+  };
+}
+
+// Initial ROA calc on page load
+document.addEventListener('DOMContentLoaded', () => { setTimeout(recalcROA, 500); });
+
+// ============================
+// Recommendations Panel
+// ============================
+function toggleRecoPanel() {
+  const panel = document.getElementById('recoPanel');
+  const overlay = document.getElementById('recoOverlay');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (!isOpen) recalcComparator();
+}
+
+function switchRecoTab(tab, btn) {
+  document.querySelectorAll('.reco-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.reco-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const map = { niches: 'recoNiches', seo: 'recoSeo', comparator: 'recoComparator' };
+  document.getElementById(map[tab]).classList.add('active');
+}
+
+function recalcComparator() {
+  const aliPrice = parseFloat(document.getElementById('compAliPrice').value) || 0;
+  const shipping = parseFloat(document.getElementById('compShipping').value) || 0;
+  const cost = aliPrice + shipping;
+  const etsyPrice = Math.ceil(cost * 3.5 * 100) / 100;
+  const etsyCommission = etsyPrice * 0.065;
+  const processing = etsyPrice * 0.03 + 0.25;
+  const listing = 0.20;
+  const totalFees = etsyCommission + processing + listing;
+  const margin = etsyPrice - cost - totalFees;
+  const marginPct = etsyPrice > 0 ? ((margin / etsyPrice) * 100) : 0;
+
+  document.getElementById('compCost').textContent = '€' + cost.toFixed(2);
+  document.getElementById('compEtsyPrice').textContent = '€' + etsyPrice.toFixed(2);
+  document.getElementById('compFees').textContent = '€' + totalFees.toFixed(2);
+  document.getElementById('compMargin').textContent = '€' + margin.toFixed(2);
+  document.getElementById('compMarginPct').textContent = marginPct.toFixed(0) + '%';
+}
 </script>
+
+<!-- Recommendations Panel -->
+<div class="reco-overlay" id="recoOverlay" onclick="toggleRecoPanel()"></div>
+<div class="reco-panel" id="recoPanel">
+  <h2>
+    <span>💡 Recommandations</span>
+    <button class="btn btn-outline btn-sm" onclick="toggleRecoPanel()">✕</button>
+  </h2>
+
+  <div class="reco-tabs">
+    <button class="reco-tab active" onclick="switchRecoTab('niches', this)">🔥 Niches tendance</button>
+    <button class="reco-tab" onclick="switchRecoTab('seo', this)">🏷 SEO Etsy</button>
+    <button class="reco-tab" onclick="switchRecoTab('comparator', this)">💰 Comparateur</button>
+  </div>
+
+  <!-- Tab: Niches -->
+  <div class="reco-content active" id="recoNiches">
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.05s both;">
+      <div class="niche-header"><span class="niche-title">🖼 Décoration murale minimaliste</span><span class="niche-diff easy">Facile</span></div>
+      <div class="niche-desc">Affiches, prints et tableaux au design épuré. Forte demande, production simple (print-on-demand).</div>
+      <div class="niche-margin">Marge estimée : 55-70%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.1s both;">
+      <div class="niche-header"><span class="niche-title">💍 Bijoux personnalisés</span><span class="niche-diff medium">Moyen</span></div>
+      <div class="niche-desc">Colliers, bracelets gravés avec prénoms. Forte valeur perçue, excellent panier moyen.</div>
+      <div class="niche-margin">Marge estimée : 45-65%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.15s both;">
+      <div class="niche-header"><span class="niche-title">🐾 Accessoires pour animaux</span><span class="niche-diff easy">Facile</span></div>
+      <div class="niche-desc">Colliers, gamelles, jouets personnalisés. Marché passionné, achats répétés.</div>
+      <div class="niche-margin">Marge estimée : 50-60%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.2s both;">
+      <div class="niche-header"><span class="niche-title">🕯 Bougies artisanales</span><span class="niche-diff medium">Moyen</span></div>
+      <div class="niche-desc">Bougies parfumées, formes originales. Idéal cadeaux, forte saisonnalité (Noël, fêtes).</div>
+      <div class="niche-margin">Marge estimée : 60-75%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.25s both;">
+      <div class="niche-header"><span class="niche-title">🎨 Stickers et autocollants</span><span class="niche-diff easy">Facile</span></div>
+      <div class="niche-desc">Stickers vinyle, planners, déco laptop. Coût de production très bas, volume élevé.</div>
+      <div class="niche-margin">Marge estimée : 70-85%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.3s both;">
+      <div class="niche-header"><span class="niche-title">📱 Coques de téléphone</span><span class="niche-diff easy">Facile</span></div>
+      <div class="niche-desc">Designs uniques, personnalisation. Marché massif, print-on-demand compatible.</div>
+      <div class="niche-margin">Marge estimée : 50-65%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.35s both;">
+      <div class="niche-header"><span class="niche-title">🗂 Organisateurs bureau</span><span class="niche-diff medium">Moyen</span></div>
+      <div class="niche-desc">Range-stylos, organisateurs en bois ou acrylique. Tendance home office durable.</div>
+      <div class="niche-margin">Marge estimée : 40-55%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.4s both;">
+      <div class="niche-header"><span class="niche-title">🎁 Cadeaux personnalisés</span><span class="niche-diff medium">Moyen</span></div>
+      <div class="niche-desc">Mugs, puzzles, coussins photo. Pics de vente aux fêtes, forte valeur émotionnelle.</div>
+      <div class="niche-margin">Marge estimée : 45-60%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.45s both;">
+      <div class="niche-header"><span class="niche-title">🖨 Art digital imprimable</span><span class="niche-diff easy">Facile</span></div>
+      <div class="niche-desc">Fichiers PDF/PNG téléchargeables. Zéro stock, zéro envoi, marge quasi totale.</div>
+      <div class="niche-margin">Marge estimée : 85-95%</div>
+    </div>
+    <div class="niche-card" style="animation:fadeInUp 0.3s ease 0.5s both;">
+      <div class="niche-header"><span class="niche-title">🍳 Accessoires cuisine tendance</span><span class="niche-diff hard">Difficile</span></div>
+      <div class="niche-desc">Ustensiles design, planches à découper gravées. Concurrence forte mais niches rentables.</div>
+      <div class="niche-margin">Marge estimée : 35-50%</div>
+    </div>
+  </div>
+
+  <!-- Tab: SEO -->
+  <div class="reco-content" id="recoSeo">
+    <div class="seo-card" style="animation:fadeInUp 0.3s ease 0.05s both;">
+      <h4>🔑 1. Titre riche en keywords</h4>
+      <p>Utilisez les 140 caractères au maximum. Placez les mots-clés les plus importants en premier. Exemple : "Collier Prénom Personnalisé Or, Bijou Minimaliste Femme, Cadeau Anniversaire".</p>
+    </div>
+    <div class="seo-card" style="animation:fadeInUp 0.3s ease 0.1s both;">
+      <h4>🏷 2. Utilisez les 13 tags</h4>
+      <p>Remplissez TOUJOURS les 13 tags. Mélangez mots-clés larges ("bijou femme") et longue traîne ("collier prénom gravé or rose"). Chaque tag = une chance d'être trouvé.</p>
+    </div>
+    <div class="seo-card" style="animation:fadeInUp 0.3s ease 0.15s both;">
+      <h4>📝 3. Description 200+ mots</h4>
+      <p>Etsy indexe les descriptions. Rédigez au moins 200 mots avec des mots-clés naturellement intégrés. Structurez avec des paragraphes clairs : description, matériaux, dimensions, livraison.</p>
+    </div>
+    <div class="seo-card" style="animation:fadeInUp 0.3s ease 0.2s both;">
+      <h4>📸 4. Photos de qualité</h4>
+      <p>10 photos minimum. Utilisez un fond blanc ou lifestyle. La première photo doit être accrocheuse (c'est celle qui apparaît dans la recherche). Ratio 4:3 ou carré.</p>
+    </div>
+    <div class="seo-card" style="animation:fadeInUp 0.3s ease 0.25s both;">
+      <h4>💲 5. Pricing compétitif</h4>
+      <p>Analysez les prix de la concurrence (top 10 résultats Etsy). Positionnez-vous dans la moyenne ou légèrement au-dessus avec une meilleure présentation. Offrez la livraison gratuite si possible (intégrée au prix).</p>
+    </div>
+  </div>
+
+  <!-- Tab: Comparator -->
+  <div class="reco-content" id="recoComparator">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Entrez le prix AliExpress pour calculer le prix Etsy optimal et la marge nette.</p>
+    <div class="comparator-row">
+      <div class="comparator-field">
+        <label>Prix AliExpress (€)</label>
+        <input type="number" id="compAliPrice" step="0.01" value="5" oninput="recalcComparator()" />
+      </div>
+      <div class="comparator-field">
+        <label>Shipping AliExpress (€)</label>
+        <input type="number" id="compShipping" step="0.01" value="2" oninput="recalcComparator()" />
+      </div>
+    </div>
+    <div class="comparator-results">
+      <div class="comparator-stat">
+        <div class="comp-label">Coût total</div>
+        <div class="comp-value" id="compCost">€7.00</div>
+      </div>
+      <div class="comparator-stat">
+        <div class="comp-label">Prix Etsy (×3.5)</div>
+        <div class="comp-value" id="compEtsyPrice">€24.50</div>
+      </div>
+      <div class="comparator-stat">
+        <div class="comp-label">Frais Etsy</div>
+        <div class="comp-value" id="compFees">€2.78</div>
+      </div>
+      <div class="comparator-stat">
+        <div class="comp-label">Marge nette</div>
+        <div class="comp-value green" id="compMargin">€14.72</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:12px;">
+      <span style="font-size:12px;color:var(--muted);">Marge nette : <strong id="compMarginPct" style="color:var(--green);">60%</strong></span>
+    </div>
+  </div>
+</div>
 
 <footer style="text-align:center;padding:24px 16px 18px;color:var(--muted);font-size:11px;letter-spacing:0.02em;border-top:1px solid var(--border);margin-top:40px;opacity:0.7;">
   Product Forge v3.0 — Créé par Louis Rivault
