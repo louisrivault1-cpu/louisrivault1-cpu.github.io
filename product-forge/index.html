@@ -955,7 +955,7 @@
       <div id="singleInputGroup">
         <div class="url-input-group">
           <input type="text" id="urlInput" placeholder="🔗 Collez un lien AliExpress ici..." />
-          <button class="btn btn-primary" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit via Apify">Scraper</button>
+          <button class="btn btn-primary" onclick="scrapeFromUrl()" data-tooltip="Récupère les données du produit via Apify ou bookmarklet">Forger</button>
         </div>
       </div>
 
@@ -2452,13 +2452,13 @@ function showBookmarkletFallback(url) {
     <div style="display:flex;align-items:flex-start;gap:12px;">
       <span style="font-size:28px;">🔖</span>
       <div style="flex:1;">
-        <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--accent);">Le scraping automatique a échoué</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Le token Apify est invalide ou l'Actor ne répond pas. <strong>Le bookmarklet est la méthode la plus fiable</strong> — il tourne dans ton navigateur, sans proxy ni API.</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px;color:var(--accent);">AliExpress bloque le scraping automatique</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">AliExpress détecte les robots et bloque Apify. <strong>Le bookmarklet est la solution fiable</strong> — il tourne dans ton navigateur avec ta session, impossible à bloquer.</div>
         <div style="font-size:13px;color:var(--muted);margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:8px;">
-          <strong>Comment faire :</strong><br>
-          1. Ouvre le lien AliExpress dans un onglet<br>
-          2. Clique sur le bookmarklet dans tes favoris<br>
-          3. Les données arrivent automatiquement ici
+          <strong>3 étapes :</strong><br>
+          1. Le lien AliExpress s'est ouvert dans un nouvel onglet<br>
+          2. Clique sur <strong>Product Forge</strong> dans tes favoris (bookmarklet)<br>
+          3. Les données arrivent automatiquement ici ✨
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <a href="https://louisrivault1-cpu.github.io/" target="_blank" class="btn btn-sm btn-primary" style="text-decoration:none;">Installer le bookmarklet</a>
@@ -2474,11 +2474,10 @@ function showBookmarkletFallback(url) {
 }
 
 const PROGRESS_MESSAGES = [
-  { delay: 0, msg: 'Connexion à AliExpress...' },
+  { delay: 0, msg: 'Connexion à AliExpress via Apify...' },
   { delay: 5000, msg: 'Chargement de la page produit...' },
   { delay: 12000, msg: 'Extraction des données...' },
-  { delay: 20000, msg: 'Presque terminé...' },
-  { delay: 30000, msg: 'AliExpress est lent, patience...' }
+  { delay: 18000, msg: 'Si ça prend trop longtemps, le bookmarklet prendra le relais...' }
 ];
 
 async function doScrape(url) {
@@ -2487,9 +2486,10 @@ async function doScrape(url) {
 
   const s = getSettings();
   if (!s.apifyToken) {
-    // No token at all → skip Apify entirely, go straight to bookmarklet fallback
-    toast('Pas de token Apify configuré. Utilise le bookmarklet pour scraper ce produit.', 5000, 'warning');
+    // No token at all → skip Apify entirely, open URL for bookmarklet
+    toast('Pas de token Apify — ouverture du lien pour le bookmarklet.', 4000, 'warning');
     showBookmarkletFallback(url);
+    window.open(url, '_blank');
     return;
   }
 
@@ -2513,8 +2513,8 @@ async function doScrape(url) {
   const prevFallback = document.getElementById('scrapeBookmarkletFallback');
   if (prevFallback) prevFallback.classList.add('hidden');
 
-  const MAX_RETRIES = 3;
-  const TIMEOUTS = [30000, 45000, 60000]; // Progressive timeouts: 30s → 45s → 60s
+  const MAX_RETRIES = 2;
+  const TIMEOUTS = [25000, 35000]; // Reduced: AliExpress blocks fast or not at all
   const actorPath = (s.apifyActorId||'painless_rachis/product-forge-scraper').replace(/\//g,'~');
 
   setStatus('Scraping via Apify...','orange');
@@ -2598,6 +2598,20 @@ async function doScrape(url) {
       }
 
       const item = items[0];
+
+      // Detect blocked/empty responses from Apify (AliExpress anti-bot)
+      const isBlocked = item.blocked === true || item.error;
+      const titleLooksBlocked = !item.title || /^aliexpress$/i.test((item.title||'').trim());
+      const priceIsEmpty = !item.price || item.price === '0' || item.price === '';
+      const imagesAreBogus = !item.images || item.images.length < 2 ||
+        (item.images.length > 0 && item.images.every(u => /\/(\d+)x(\d+)\./.test(u) &&
+          parseInt(u.match(/\/(\d+)x(\d+)\./)?.[1]||'999') < 100));
+
+      if (isBlocked || (titleLooksBlocked && priceIsEmpty && imagesAreBogus)) {
+        console.warn('[PF] Apify returned blocked/empty data:', {title: item.title, price: item.price, images: item.images?.length});
+        throw { message: 'AliExpress a bloqué le scraping automatique. Redirection vers le bookmarklet...', useBookmarklet: true };
+      }
+
       // Robust mapping: handle both old format (specifications/skuOptions) and new format (specs object/variants array)
       const mappedSpecs = item.specs ? Object.entries(item.specs).map(([k,v]) => ({name:k, value:v})) : (item.specifications||item.attributes||[]).map(sp=>({name:sp.name||sp.attrName||'',value:sp.value||sp.attrValue||''}));
       const data = {
@@ -2614,8 +2628,9 @@ async function doScrape(url) {
       };
       data.stats = {images:data.images.length,specs:data.specs.length,variants:data.variants.length};
 
+      // Second validation: even if not flagged as blocked, check data quality
       if (!data.title && !data.images.length) {
-        throw new Error('Le produit a été trouvé mais les données sont vides. Il est peut-être supprimé d\'AliExpress.');
+        throw { message: 'Le produit a été trouvé mais les données sont vides. Redirection vers le bookmarklet...', useBookmarklet: true };
       }
 
       updateLoadingStep(2, 'done');
@@ -2629,8 +2644,8 @@ async function doScrape(url) {
       lastError = err;
       console.error('[PF] Scrape attempt '+attempt+' error:', err);
 
-      // Don't retry on non-retryable errors (auth, quota)
-      if (err.noRetry) break;
+      // Don't retry on non-retryable errors (auth, quota, blocked)
+      if (err.noRetry || err.useBookmarklet) break;
 
       if (attempt < MAX_RETRIES) {
         toast('Tentative ' + attempt + '/' + MAX_RETRIES + ' échouée, nouvel essai...', 2500, 'warning');
@@ -2641,7 +2656,18 @@ async function doScrape(url) {
   }
 
   hideLoading();
-  const errorMsg = lastError.message || 'Erreur inconnue lors du scraping.';
+
+  // If AliExpress blocked → auto-open URL and show bookmarklet instructions
+  if (lastError && lastError.useBookmarklet) {
+    toast('AliExpress bloque le scraping automatique — ouvre le lien et utilise le bookmarklet.', 6000, 'warning');
+    setStatus('Utilise le bookmarklet','orange');
+    showBookmarkletFallback(url);
+    // Auto-open the AliExpress URL so user can immediately use the bookmarklet
+    window.open(url, '_blank');
+    return;
+  }
+
+  const errorMsg = lastError?.message || 'Erreur inconnue lors du scraping.';
   toast(errorMsg, 6000, 'error');
   setStatus('Erreur scraping','red');
 
