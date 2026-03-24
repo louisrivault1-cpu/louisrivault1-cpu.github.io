@@ -1752,6 +1752,11 @@
       <h2>⚙ Configuration</h2>
       <label>Mode de génération</label>
       <div class="mode-selector">
+        <div class="mode-option" id="modeOptAuto" onclick="selectMode('auto')">
+          <div class="mode-icon">🧠</div>
+          <div class="mode-name">Auto</div>
+          <div class="mode-desc">Détecte la clé API</div>
+        </div>
         <div class="mode-option" id="modeOptFree" onclick="selectMode('free')">
           <div class="mode-icon">🆓</div>
           <div class="mode-name">Mon compte Claude</div>
@@ -2386,7 +2391,7 @@ function getSettings() {
     return localStorage.getItem('pf_' + key) || fallback;
   }
   return {
-    mode: get('mode', 'free'),
+    mode: get('mode', 'auto'),
     claudeKey: get('claude_key', ''),
     scraperApiKey: get('scraperapi_key', ''),
     apifyToken: get('apify_token', ''),
@@ -2396,19 +2401,21 @@ function getSettings() {
 }
 
 function getActiveMode() {
-  const s = getSettings();
-  if (s.mode === 'api') return 'api';
-  if (s.mode === 'free') return 'free';
-  return s.claudeKey ? 'api' : 'free';
+const s = getSettings();
+if (s.mode === 'auto' || (s.mode !== 'free' && s.mode !== 'api')) {
+  return (s.claudeKey && s.claudeKey.length >= 5) ? 'api' : 'free';
+}
+if (s.mode === 'api') return 'api';
+return 'free';
 }
 
 function updateModeBadge() {
-  const mode = getActiveMode();
-  const badge = document.getElementById('modeBadge');
-  if (mode === 'api') { badge.textContent = 'API'; badge.className = 'mode-badge api'; }
-  else { badge.textContent = 'GRATUIT'; badge.className = 'mode-badge free'; }
-  updateWelcomeForTokens();
-}
+const rawMode = getSettings().mode;
+const mode = getActiveMode();
+const badge = document.getElementById('modeBadge');
+if (rawMode === 'auto') { badge.textContent = mode === 'api' ? 'AUTO·API' : 'AUTO·FREE'; badge.className = 'mode-badge ' + mode; }
+else if (mode === 'api') { badge.textContent = 'API'; badge.className = 'mode-badge api'; }
+else { badge.textContent = 'GRATUIT'; badge.className = 'mode-badge free'; }
 
 // Adapte l'UI en fonction des tokens configurés
 function updateWelcomeForTokens() {
@@ -2448,9 +2455,10 @@ function openSettings() {
 function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
 
 function selectMode(mode, uiOnly) {
-  document.getElementById('modeOptFree').classList.toggle('active', mode === 'free');
+  if(document.getElementById('modeOptAuto')) document.getElementById('modeOptAuto').classList.toggle('active', mode === 'auto');
+      document.getElementById('modeOptFree').classList.toggle('active', mode === 'free');
   document.getElementById('modeOptApi').classList.toggle('active', mode === 'api');
-  document.getElementById('apiSettingsGroup').style.display = mode === 'api' ? 'block' : 'none';
+  document.getElementById('apiSettingsGroup').style.display = (mode === 'api' || mode === 'auto') ? 'block' : 'none';
   document.getElementById('settingsModal')._selectedMode = mode;
 }
 
